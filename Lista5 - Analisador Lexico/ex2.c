@@ -10,7 +10,9 @@ char symbols[] = {'0','1','2','3','4','5','6','7','8',
                   'i','j','k','l','m','n','o','p','q',
                   'r','s','t','u','v','w','x','y','z',
                   '.',' ','-','\n'
-                };               
+                };    
+
+int TOKENS_IDENTIFICADOS=0;            
 
 int edges[14][41]={/*0,1,2,3,4,5,6,7,8,9,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,., ,-,\n,other*/
        /*state 0*/  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -76,48 +78,50 @@ int analyze(char * info){
         }
         token[indexToken]='\0';
         if(strlen(token)>0){
+            if(TOKENS_IDENTIFICADOS!=0)printf("\n");
             switch (lastFinal){
                 case 2:
-                    printf("%s ID\n",token);
+                    printf("%s ID",token);
                     break;
                 case 3:
-                    printf("%s IF\n",token);
+                    printf("%s IF",token);
                     break;
                 case 4:
-                    printf("%s ID\n",token);
+                    printf("%s ID",token);
                     break;
                 case 5:
-                    printf("%s error\n",token);
+                    printf("%s error",token);
                     break;
                 case 6:
-                    printf("%s REAL\n",token);
+                    printf("%s REAL",token);
                     break;
                 case 7:
-                    printf("%s NUM\n",token);
+                    printf("%s NUM",token);
                     break;
                 case 8:
-                    printf("%s REAL\n",token);
+                    printf("%s REAL",token);
                     break;
                 case 9:
-                    printf("%s error\n",token);
+                    printf("%s error",token);
                     break;
                 case 11:
-                    printf("%s comment\n",token);
+                    printf("%s comment",token);
                     break;
                 case 12:
-                    printf("white space\n");
+                    printf("white space");
                     break;
                 case 13:
-                    printf("%s error\n",token);
+                    printf("%s error",token);
                     break;
             }
-        
+            TOKENS_IDENTIFICADOS++;
         }else bottomCursor++;
         verticalCursor=bottomCursor; 
     }
 }
 
 int main(){
-    analyze("@josodsaso if abc teste 64548 58.8\n--commenttest\n");
+    char linha[2048];
+    while(fgets(linha,2048,stdin)!=NULL)
+        analyze(linha);
 }
-

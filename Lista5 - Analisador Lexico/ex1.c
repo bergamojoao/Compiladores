@@ -9,7 +9,9 @@ char symbols[38] = {'0','1','2','3','4','5','6','7','8',
                     '9','+','-','a','b','c','d','e','f',
                     'g','h','i','j','k','l','m','n','o',
                     'p','q','r','s','t','u','v','w','x','y','z'
-                };               
+                };       
+
+int TOKENS_IDENTIFICADOS=0;        
 
 int edges[8][38]={/*0,1,2,3,4,5,6,7,8,9,+,-,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z*/
        /*state 0*/ {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -65,18 +67,27 @@ int analyze(char * info){
             }  
         }
         token[indexToken]='\0';
-        if(strlen(token)>0)
-            printf("%s\n",token);
-        else{
-            if(info[bottomCursor]!='\n')
-                printf("ERRO\n");
+        if(strlen(token)>0){
+            if(TOKENS_IDENTIFICADOS!=0)printf("\n");
+            printf("%s",token);
+            TOKENS_IDENTIFICADOS++;
+        }else{
+            if(info[bottomCursor]!='\n'){
+                if(TOKENS_IDENTIFICADOS!=0){
+                    printf("\n");
+                }
+                printf("ERRO");
+            }
             bottomCursor++;
+            TOKENS_IDENTIFICADOS++;
         }       
         verticalCursor=bottomCursor; 
     }
 }
 
 int main(){
-    analyze("+-abcabc@\nabc");
+    char linha[2048];
+    while(fgets(linha,2048,stdin)!=NULL)
+        analyze(linha);
 }
 
