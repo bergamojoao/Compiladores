@@ -4,7 +4,7 @@ CC=gcc
 CFLAGS=c99
 LIBS=
 
-PROGRAMA = programa
+PROGRAMA = cstats
 LEXICO = lexico.l
 
 $(PROGRAMA): $(LEXICO)
@@ -13,4 +13,4 @@ $(PROGRAMA): $(LEXICO)
 
 clean:
 	rm -f lex.yy.c
-	rm -f programa.exe
+	rm -f cstats.exe

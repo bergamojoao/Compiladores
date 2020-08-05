@@ -40,12 +40,29 @@
 
 int main(int argc, char **argv)
 {
-	yylex();
-	printf("diretivas: %d\n",directives);
-	printf("comentarios: %d\n",commentLines);
-	printf("linhas: %d\n",lines);
-	printf("blanklines: %d\n",blankLines);
-	printf("semiColons: %d\n",semiColons);
-	printf("nbnc: %d\n",nbncLines);
+	int i,totalLines=0,totalBlankLines=0,totalCommentLines=0;
+	int totalNbnbLines=0,totalSemiColons=0,totalDirectives=0;
+	printf(" total    blank lines w/   nb, nc   semi- preproc. file\n");
+	printf(" lines    lines comments    lines  colons  direct.\n");
+	printf("------+--------+--------+--------+-------+--------+----\n");
+	for(i=1;i<argc;i++){
+		yyin = fopen(argv[i],"r");
+		yylex();
+		printf("%6d%9d%9d%9d%8d%9d %s\n",lines,blankLines,commentLines,nbncLines,semiColons,directives,argv[i]);
+		totalLines+=lines;
+		totalBlankLines+=blankLines;
+		totalCommentLines+=commentLines;
+		totalNbnbLines+=nbncLines;
+		totalSemiColons+=semiColons;
+		totalDirectives+=directives;
+		lines=1;
+		blankLines=0;
+		commentLines=0;
+		nbncLines=0;
+		semiColons=0;
+		directives=0;
+		aux=0;
+	}
+	printf("%6d%9d%9d%9d%8d%9d total",totalLines,totalBlankLines,totalCommentLines,totalNbnbLines,totalSemiColons,totalDirectives);
 	return 0;
 }
