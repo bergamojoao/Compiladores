@@ -107,7 +107,6 @@ int edges[28][28]={/* 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, +, -, =, ;, b, d, e, f, g, h
 
 int TOKENS_IDENTIFICADOS=0;
 
-
 int getIndex(char symbol){
     int i;
     for(i=0;i<sizeof(symbols);i++){
@@ -121,7 +120,7 @@ int isFinalState(int state){
     return states[state];
 }
 
-int analyze(char * info,Fila* fila){
+int lexico(char * info,Fila* fila){
     int lastFinal = 0;
     int currentState = 1;
     int verticalCursor=0, bottomCursor=0, topCursor=0,indexToken=0;
@@ -177,16 +176,56 @@ int analyze(char * info,Fila* fila){
     }
 }
 
+void error(){
+    printf("ERRO SINTATICO");
+    exit(1);
+}
+
+void S(int token, Fila* tokens);
+void L(int token, Fila* tokens);
+void E(int token, Fila* tokens);
+
+void eat(int t,int token,Fila* tokens){
+    if (token==t){
+        printf("%d",t);
+        token = pull(tokens);
+    }else{
+        error();
+    }
+
+}
+
+void S(int token, Fila* tokens){
+    switch(token) {
+        case IF: eat(IF,token,tokens); E(token,tokens); eat(THEN,token,tokens); S(token,tokens); eat(ELSE,token,tokens); S(token,tokens); break;
+        case BEGIN: eat(BEGIN,token,tokens); S(token,tokens); L(token,tokens); break;
+        case PRINT: eat(PRINT,token,tokens); E(token,tokens); break;
+        default: error(); 
+    }
+}
+
+void L(int token, Fila* tokens){
+    switch(token) {
+        case END: eat(END,token,tokens); break;
+        case SEMI: eat(SEMI,token,tokens); S(token,tokens); L(token,tokens); break;
+        default: error(); 
+    }
+}
+
+void E(int token, Fila* tokens){ eat(NUM,token,tokens); eat(EQ,token,tokens); eat(NUM,token,tokens); }
+
+
+void sintatico(Fila* tokens){
+    int token = pull(tokens);
+    S(token,tokens);
+}
+
 int main(){
     char linha[2048];
-    Fila* fila;
-    iniciaFila(fila);
+    Fila* tokens;
+    iniciaFila(tokens);
     while(fgets(linha,2048,stdin)!=NULL){
-        analyze(linha,fila);
-        int token = pull(fila);
-        while(token!=-1){
-            printf("%d | ", token);
-            token = pull(fila);
-        }
+        lexico(linha,tokens);
+        sintatico(tokens);
     }
 }
