@@ -178,25 +178,25 @@ int lexico(char * info,Fila* fila){
 
 void error(){
     printf("ERRO SINTATICO");
-    exit(1);
 }
 
-void S(int token, Fila* tokens);
-void L(int token, Fila* tokens);
-void E(int token, Fila* tokens);
+void S(int* token, Fila* tokens);
+void L(int* token, Fila* tokens);
+void E(int* token, Fila* tokens);
 
-void eat(int t,int token,Fila* tokens){
-    if (token==t){
-        printf("%d",t);
-        token = pull(tokens);
+
+void eat(int t,int* token,Fila* tokens){
+    if (*token==t){
+        printf("%d ",t);
+        *token = pull(tokens);
     }else{
         error();
     }
 
 }
 
-void S(int token, Fila* tokens){
-    switch(token) {
+void S(int* token, Fila* tokens){
+    switch(*token) {
         case IF: eat(IF,token,tokens); E(token,tokens); eat(THEN,token,tokens); S(token,tokens); eat(ELSE,token,tokens); S(token,tokens); break;
         case BEGIN: eat(BEGIN,token,tokens); S(token,tokens); L(token,tokens); break;
         case PRINT: eat(PRINT,token,tokens); E(token,tokens); break;
@@ -204,19 +204,20 @@ void S(int token, Fila* tokens){
     }
 }
 
-void L(int token, Fila* tokens){
-    switch(token) {
+void L(int* token, Fila* tokens){
+    switch(*token) {
         case END: eat(END,token,tokens); break;
         case SEMI: eat(SEMI,token,tokens); S(token,tokens); L(token,tokens); break;
         default: error(); 
     }
 }
 
-void E(int token, Fila* tokens){ eat(NUM,token,tokens); eat(EQ,token,tokens); eat(NUM,token,tokens); }
+void E(int* token, Fila* tokens){eat(NUM,token,tokens); eat(EQ,token,tokens); eat(NUM,token,tokens); }
 
 
 void sintatico(Fila* tokens){
-    int token = pull(tokens);
+    int* token = malloc(sizeof(int));
+    *token = pull(tokens);
     S(token,tokens);
 }
 
