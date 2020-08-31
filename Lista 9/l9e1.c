@@ -177,7 +177,7 @@ int lexico(char * info,Fila* fila){
 }
 
 void error(){
-    printf("ERRO SINTATICO");
+    printf("ERRO SINTATICOo");
 }
 
 void S(int* token, Fila* tokens);
