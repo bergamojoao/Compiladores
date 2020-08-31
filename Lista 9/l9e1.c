@@ -12,6 +12,7 @@
 #define SEMI 24
 #define EQ 25
 #define NUM 27
+#define SAIR -1
 
 typedef struct elemento{
     int token;
@@ -106,6 +107,7 @@ int edges[28][28]={/* 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, +, -, =, ;, b, d, e, f, g, h
     }; 
 
 int TOKENS_IDENTIFICADOS=0;
+bool ERRO_SINTATICO=false;
 
 int getIndex(char symbol){
     int i;
@@ -168,6 +170,8 @@ int lexico(char * info,Fila* fila){
             if(info[bottomCursor]!=' ' && info[bottomCursor]!='\n'){
                 if(TOKENS_IDENTIFICADOS!=0)printf("\n");
                 printf("ERRO");
+                printf("teste:%c",info[bottomCursor]);
+                getc(stdin);
                 bottomCursor++;
                 TOKENS_IDENTIFICADOS++;
             }else bottomCursor++;
@@ -176,8 +180,87 @@ int lexico(char * info,Fila* fila){
     }
 }
 
-void error(){
-    printf("ERRO SINTATICOo");
+void errorS(int* token){
+    printf("errro S");
+    switch (*token){
+        case NUM:
+            printf("ERRO SINTATICO EM: num ESPERADO: if, begin, print");
+            break;
+        case END:
+            printf("ERRO SINTATICO EM: end ESPERADO: if, begin, print");
+            break;
+        case SEMI:
+            printf("ERRO SINTATICO EM: ; ESPERADO: if, begin, print");
+            break;
+        case THEN:
+            printf("ERRO SINTATICO EM: then ESPERADO: if, begin, print");
+            break;
+        case ELSE:
+            printf("ERRO SINTATICO EM: else ESPERADO: if, begin, print");
+            break;
+        case EQ:
+            printf("ERRO SINTATICO EM: = ESPERADO: if, begin, print");
+            break;
+    }
+    ERRO_SINTATICO=true;
+}
+
+void errorL(int* token){
+    printf("errro L");
+    switch (*token){
+        case NUM:
+            printf("ERRO SINTATICO EM: num ESPERADO: end, ;");
+            break;
+        case IF:
+            printf("ERRO SINTATICO EM: if ESPERADO: end, ;");
+            break;
+        case BEGIN:
+            printf("ERRO SINTATICO EM: begin ESPERADO: end, ;");
+            break;
+        case THEN:
+            printf("ERRO SINTATICO EM: then ESPERADO: end, ;");
+            break;
+        case ELSE:
+            printf("ERRO SINTATICO EM: else ESPERADO: end, ;");
+            break;
+        case EQ:
+            printf("ERRO SINTATICO EM: = ESPERADO: end, ;");
+            break;
+        case PRINT:
+            printf("ERRO SINTATICO EM: print ESPERADO: end, ;");
+            break;
+    }
+    ERRO_SINTATICO=true;
+}
+
+void erroE(int* token){
+    switch (*token){
+        case END:
+            printf("ERRO SINTATICO EM: end ESPERADO: num");
+            break;
+        case SEMI:
+            printf("ERRO SINTATICO EM: semi ESPERADO: num");
+            break;
+        case IF:
+            printf("ERRO SINTATICO EM: if ESPERADO: num");
+            break;
+        case BEGIN:
+            printf("ERRO SINTATICO EM: begin ESPERADO: num");
+            break;
+        case THEN:
+            printf("ERRO SINTATICO EM: then ESPERADO: num");
+            break;
+        case ELSE:
+            printf("ERRO SINTATICO EM: else ESPERADO: num");
+            break;
+        case EQ:
+            printf("ERRO SINTATICO EM: = ESPERADO: num");
+            break;
+        case PRINT:
+            printf("ERRO SINTATICO EM: print ESPERADO: num");
+            break;
+    }
+    ERRO_SINTATICO=true;
 }
 
 void S(int* token, Fila* tokens);
@@ -185,45 +268,96 @@ void L(int* token, Fila* tokens);
 void E(int* token, Fila* tokens);
 
 
-void eat(int t,int* token,Fila* tokens){
+void eat(int t, int* token,Fila* tokens){
     if (*token==t){
-        printf("%d ",t);
         *token = pull(tokens);
-    }else{
-        error();
+    }else{       
+        printf("ERRO SINTATICO: CADEIA INCOMPLETA");
+        ERRO_SINTATICO=true;
     }
 
 }
 
 void S(int* token, Fila* tokens){
     switch(*token) {
-        case IF: eat(IF,token,tokens); E(token,tokens); eat(THEN,token,tokens); S(token,tokens); eat(ELSE,token,tokens); S(token,tokens); break;
-        case BEGIN: eat(BEGIN,token,tokens); S(token,tokens); L(token,tokens); break;
-        case PRINT: eat(PRINT,token,tokens); E(token,tokens); break;
-        default: error(); 
+        case IF: 
+            eat(IF,token,tokens);
+            if(ERRO_SINTATICO) break; 
+            E(token,tokens);
+            if(ERRO_SINTATICO) break; 
+            eat(THEN,token,tokens); 
+            if(ERRO_SINTATICO) break; 
+            S(token,tokens); 
+            if(ERRO_SINTATICO) break; 
+            eat(ELSE,token,tokens); 
+            if(ERRO_SINTATICO) break; 
+            S(token,tokens); 
+            break;
+        case BEGIN: 
+            eat(BEGIN,token,tokens); 
+            if(ERRO_SINTATICO) break; 
+            S(token,tokens); 
+            if(ERRO_SINTATICO) break; 
+            L(token,tokens); 
+            break;
+        case PRINT: 
+            eat(PRINT,token,tokens);
+            if(ERRO_SINTATICO) break; 
+            E(token,tokens); break;
+        case SAIR:
+            break;
+        default: errorS(token); 
     }
 }
 
 void L(int* token, Fila* tokens){
     switch(*token) {
-        case END: eat(END,token,tokens); break;
-        case SEMI: eat(SEMI,token,tokens); S(token,tokens); L(token,tokens); break;
-        default: error(); 
+        case END: 
+            eat(END,token,tokens);
+            break;
+        case SEMI: 
+            eat(SEMI,token,tokens); 
+            if(ERRO_SINTATICO) break; 
+            S(token,tokens); 
+            if(ERRO_SINTATICO) break; 
+            L(token,tokens); 
+            break;
+        case SAIR:
+            break;
+        default: errorL(token);
     }
 }
 
-void E(int* token, Fila* tokens){eat(NUM,token,tokens); eat(EQ,token,tokens); eat(NUM,token,tokens); }
+void E(int* token, Fila* tokens){
+    switch (*token){
+        case NUM:
+            eat(NUM,token,tokens);
+            if(ERRO_SINTATICO) break; 
+            eat(EQ,token,tokens); 
+            if(ERRO_SINTATICO) break; 
+            eat(NUM,token,tokens);
+        case SAIR:
+            break;
+        default:
+            erroE(token);
+            break;
+    }
+
+}
 
 
 void sintatico(Fila* tokens){
     int* token = malloc(sizeof(int));
     *token = pull(tokens);
+    ERRO_SINTATICO=false;
     S(token,tokens);
+    if(ERRO_SINTATICO==false)
+        printf("CADEIA ACEITA");
 }
 
 int main(){
     char linha[2048];
-    Fila* tokens;
+    Fila* tokens = malloc(sizeof(Fila));
     iniciaFila(tokens);
     while(fgets(linha,2048,stdin)!=NULL){
         lexico(linha,tokens);
