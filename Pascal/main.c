@@ -41,6 +41,7 @@
 #define MAIOR 83
 #define MAIOR_IGUAL 84
 #define ASTERISCO 85
+#define FIM 99
 
 
 
@@ -106,6 +107,8 @@ int getToken(No* no){
 int getLinha(No* no){
     return no->linha;
 }
+
+No* token;
 
 
 bool states[]={false,false,false,false,true,false,false,false,
@@ -296,9 +299,1034 @@ int lexico(char * info,Fila* fila,int count){
     }
 }
 
+void eat(Fila* tokens, int validation, int* err){
+    if(*err==1)
+        return;
+    
+    if(getToken(token)==validation)
+        token=pull(tokens);
+    else{
+        *err = 1;
+        printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+    }
+}
+
+
+void S(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case PROGRAM :
+			PROGRAMA(tokens,err);
+			eat(tokens,FIM,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void PROGRAMA(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case PROGRAM :
+			eat(tokens,PROGRAM,err);
+            eat(tokens,ID,err);
+            eat(tokens,PONTO_VIRGULA,err);
+            BLOCO(tokens,err);
+            eat(tokens,PONTO,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void BLOCO(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case VAR :
+			eat(tokens,VAR, err);
+			B1(tokens, err);
+			break;
+		case PROCEDURE :
+			BLOCO1(tokens,err);
+			break;
+		case FUNCTION :
+			BLOCO1(tokens,err);
+			break;
+		case BEGIN :
+			BLOCO1(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void B1(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case ID :
+			eat(tokens, ID, err);
+			B1LINHA(tokens, err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void B1LINHA(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case VIRGULA :
+			eat(tokens,VIRGULA,err);
+			B1(tokens,err);
+			break;
+		case DOIS_PONTOS :
+			eat(tokens,DOIS_PONTOS,err);
+			TIPO(tokens,err);
+			eat(tokens,PONTO_VIRGULA,err);
+			B1DUASLINHA(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void B1DUASLINHA(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case ID :
+			B1(tokens,err);
+			break;
+		case PROCEDURE :
+			BLOCO1(tokens,err);
+			break;
+		case FUNCTION :
+			BLOCO1(tokens,err);
+			break;
+		case BEGIN :
+			BLOCO1(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void BLOCO1(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case PROCEDURE :
+			eat(tokens,PROCEDURE,err);
+			eat(tokens,ID,err);
+			FP(tokens, err); //PF
+			eat(tokens,PONTO_VIRGULA,err);
+			BLOCO(tokens,err);
+			eat(tokens,PONTO_VIRGULA,err);
+			BLOCO1(tokens,err);
+			break;
+		case FUNCTION :
+			eat(tokens,FUNCTION,err);
+			eat(tokens,ID,err);
+			PF(tokens,err);
+			eat(tokens,DOIS_PONTOS,err);
+			eat(tokens,ID,err);
+			eat(tokens,PONTO_VIRGULA,err);
+			BLOCO(tokens,err);
+			eat(tokens,PONTO_VIRGULA,err);
+			BLOCO1(tokens,err);
+			break;
+		case BEGIN :
+			eat(tokens,BEGIN,err);
+			B2(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void B2(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case ID :
+			CMD(tokens,err);
+			B2LINHA(tokens,err);
+			break;
+		case PONTO_VIRGULA :
+			CMD(tokens,err);
+			B2LINHA(tokens,err);
+			break;
+		case PONTO :
+			CMD(tokens,err);
+			B2LINHA(tokens,err);
+			break;
+		case BEGIN :
+			CMD(tokens,err);
+			B2LINHA(tokens,err);
+			break;
+		case END :
+			CMD(tokens,err);
+			B2LINHA(tokens,err);
+			break;
+		case IF :
+			CMD(tokens,err);
+			B2LINHA(tokens,err);
+			break;
+		case WHILE :
+			CMD(tokens,err);
+			B2LINHA(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void B2LINHA(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case PONTO_VIRGULA :
+			eat(tokens,PONTO_VIRGULA,err);
+			B2(tokens,err);
+			break;
+		case END :
+			eat(tokens,END,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void TIPO(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case ID :
+			eat(tokens,ID,err);
+			TIPOLINHA(tokens,err);
+			break;
+		case NUM :
+			eat(tokens,NUM,err);
+			eat(tokens,PONTO_PONTO,err);
+			CONSTANTE(tokens,err);
+			break;
+		case MAIS :
+			eat(tokens,MAIS,err);
+			eat(tokens,NUM,err);
+			eat(tokens,PONTO_PONTO,err);
+			CONSTANTE(tokens,err);
+			break;
+		case MENOS :
+			eat(tokens,MENOS,err);
+			eat(tokens,NUM,err);
+			eat(tokens,PONTO_PONTO,err);
+			CONSTANTE(tokens,err);
+			break;
+		case ARRAY :
+			eat(tokens, ARRAY,err);
+			eat(tokens, FECHA_COLCHETES,err);
+			T1(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void TIPOLINHA(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case VIRGULA :
+		case FECHA_COLCHETES :
+        case PONTO_VIRGULA :
+			break;
+		case PONTO_PONTO :
+			eat(tokens,PONTO_PONTO,err);
+			CONSTANTE(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void T1(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case ID :
+			TIPO(tokens,err);
+			T1LINHA(tokens,err);
+			break;
+		case NUM :
+			TIPO(tokens,err);
+			T1LINHA(tokens,err);
+			break;
+		case MAIS :
+			TIPO(tokens,err);
+			T1LINHA(tokens,err);
+			break;
+		case MENOS :
+			TIPO(tokens,err);
+			T1LINHA(tokens,err);
+			break;
+		case ARRAY :
+			TIPO(tokens,err);
+			T1LINHA(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void T1LINHA(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case VIRGULA :
+			eat(tokens,VIRGULA,err);
+			T1(tokens,err);
+			break;
+		case FECHA_COLCHETES :
+			eat(tokens,FECHA_COLCHETES,err);
+			eat(tokens, OF,err);
+			TIPO(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void FP(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case ABRE_PARENTESES :
+			eat(tokens,ABRE_PARENTESES,err);
+			FP1(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void FP1(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case ID :
+			FP2(tokens,err);
+			break;
+		case VAR :
+			eat(tokens,VAR,err);
+			FP2(tokens,err);
+			break;
+		case FECHA_PARENTESES :
+			eat(tokens,FECHA_PARENTESES,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void FP2(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case ID :
+			eat(tokens,ID,err);
+			FP2LINHA(tokens, err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void FP2LINHA(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case ID :
+			eat(tokens,ID,err);
+			eat(tokens,DOIS_PONTOS,err);
+			eat(tokens,ID,err);
+			FP2DUASLINHA(tokens,err);
+			break; 
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void FP2DUASLINHA(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case PONTO_VIRGULA :
+			eat(tokens,PONTO_VIRGULA,err);
+			FP2(tokens,err);
+			break; 
+		case FECHA_PARENTESES :
+			eat(tokens,FECHA_PARENTESES,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void V(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case ID :
+			eat(tokens,ID,err);
+			V1(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void V1(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case PONTO_VIRGULA :
+		case VIRGULA :
+		case END :
+		case MAIS :
+		case MENOS :
+		case FECHA_COLCHETES :
+		case FECHA_PARENTESES :
+		case DOIS_PONTOS_IGUAL :
+		case THEN :
+		case DO :
+		case IGUAL :
+		case DIFERENTE :
+		case MENOR :
+		case MENOR_IGUAL :
+		case MAIOR_IGUAL :
+		case MAIOR :
+		case OR :
+		case ASTERISCO :
+		case DIV :
+		case AND :
+			break;
+		case ABRE_COLCHETES :
+			V2(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void V2(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case ABRE_COLCHETES :
+			eat(tokens, ABRE_COLCHETES,err);
+			V3(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void V3(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case ID :
+			EXPRESSAO(tokens,err);
+			V3LINHA(tokens,err);
+			break;
+		case NUM :
+			EXPRESSAO(tokens,err);
+			V3LINHA(tokens,err);
+			break;
+		case MAIS :
+			EXPRESSAO(tokens,err);
+			V3LINHA(tokens,err);
+			break;
+		case MENOS :
+			EXPRESSAO(tokens,err);
+			V3LINHA(tokens,err);
+			break;
+		case ABRE_PARENTESES :
+			EXPRESSAO(tokens,err);
+			V3LINHA(tokens,err);
+			break;
+		case NOT :
+			EXPRESSAO(tokens,err);
+			V3LINHA(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void V3LINHA(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+
+	switch(getToken(token)){
+		case VIRGULA :
+			eat(tokens, VIRGULA,err);
+			V3(tokens,err);
+			break;
+		case FECHA_COLCHETES :
+			eat(tokens, FECHA_COLCHETES,err);
+			V3DUASLINHA(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void V3DUASLINHA(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case VIRGULA :
+		case PONTO_VIRGULA :
+		case END :
+		case MAIS :
+		case MENOS :
+		case FECHA_COLCHETES :
+		case FECHA_PARENTESES :
+		case DOIS_PONTOS_IGUAL :
+		case THEN :
+		case DO :
+		case IGUAL :
+		case DIFERENTE :
+		case MENOR :
+		case MENOR_IGUAL :
+		case MAIOR_IGUAL :
+		case MAIOR :
+		case OR :
+		case ASTERISCO :
+		case DIV :
+		case AND :
+			break;
+		case ABRE_COLCHETES :
+			V2(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void CMD(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case ID :
+			eat(tokens,ID,err);
+			CMDLINHA(tokens,err);
+			break;
+		case PONTO_VIRGULA :
+		case END :	
+			break;
+		case BEGIN :
+			eat(tokens,BEGIN,err);
+			C3LINHA(tokens,err);
+			break;
+		case IF :
+			eat(tokens,IF,err);
+			EXPRESSAO(tokens,err);
+			eat(tokens,THEN,err);
+			eat(tokens,BEGIN,err);
+			CMD(tokens,err);
+			eat(tokens,END,err);
+			C4(tokens,err);
+			break;
+		case WHILE :
+			eat(tokens,WHILE,err);
+			EXPRESSAO(tokens,err);
+			eat(tokens,DO,err);
+			CMD(tokens,err);
+			break; 
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void CMDLINHA(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case PONTO_VIRGULA :
+			V1(tokens,err);
+			eat(tokens, DOIS_PONTOS_IGUAL,err);
+			EXPRESSAO(tokens,err);
+			break;
+		case END :
+			V1(tokens,err);
+			eat(tokens, DOIS_PONTOS_IGUAL,err);
+			EXPRESSAO(tokens,err);
+			break;
+		case ABRE_COLCHETES :
+			V1(tokens,err);
+			eat(tokens, DOIS_PONTOS_IGUAL,err);
+			EXPRESSAO(tokens,err);
+			break;
+		case ABRE_PARENTESES :
+			eat(tokens, ABRE_PARENTESES,err);
+			C1(tokens,err);
+			break;
+		case DOIS_PONTOS_IGUAL :
+			V1(tokens,err);
+			eat(tokens, DOIS_PONTOS_IGUAL,err);
+			EXPRESSAO(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void C1(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case ID :
+			C2(tokens,err);
+			break;
+		case NUM :
+			C2(tokens,err);
+			break;
+		case MAIS :
+			C2(tokens,err);
+			break;
+		case MENOS :
+			C2(tokens,err);
+			break;
+		case ABRE_PARENTESES :
+			C2(tokens,err);
+			break;
+		case FECHA_PARENTESES :
+			eat(tokens,FECHA_PARENTESES,err);
+			break;
+		case NOT :
+			C2(tokens,err);
+			break;		
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void C2(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case ID :
+			EXPRESSAO(tokens,err);
+			C2LINHA(tokens,err);
+			break;
+		case NUM :
+			EXPRESSAO(tokens,err);
+			C2LINHA(tokens,err);
+			break;	
+		case MAIS :
+			EXPRESSAO(tokens,err);
+			C2LINHA(tokens,err);
+			break;	
+		case MENOS :
+			EXPRESSAO(tokens,err);
+			C2LINHA(tokens,err);
+			break;
+		case ABRE_PARENTESES :
+			EXPRESSAO(tokens,err);
+			C2LINHA(tokens,err);
+			break;
+		case NOT :
+			EXPRESSAO(tokens,err);
+			C2LINHA(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void C2LINHA(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case VIRGULA :
+			eat(tokens,VIRGULA,err);
+			C2(tokens,err);
+			break;
+		case FECHA_PARENTESES :
+			eat(tokens,FECHA_PARENTESES,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void C3(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case ID :
+			COMANDO(tokens,err);
+			C3LINHA(tokens,err);
+			break;
+		case PONTO_VIRGULA :
+			COMANDO(tokens,err);
+			C3LINHA(tokens,err);
+			break;
+		case BEGIN :
+			COMANDO(tokens,err);
+			C3LINHA(tokens,err);
+			break;	
+		case END :
+			COMANDO(tokens,err);
+			C3LINHA(tokens,err);	
+			break;
+		case IF :
+			COMANDO(tokens,err);
+			C3LINHA(tokens,err);
+			break;
+		case WHILE :
+			COMANDO(tokens,err);
+			C3LINHA(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void C3LINHA(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case PONTO_VIRGULA :
+			eat(tokens,PONTO_VIRGULA,err);
+			C3(tokens,err);
+			break;
+		case END :
+			eat(tokens,END,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void C4(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case PONTO_VIRGULA :
+		case END :
+			break;
+		case ELSE :
+			eat(tokens,ELSE,err);
+			eat(tokens,BEGIN,err);
+			CMD(tokens,err);
+			eat(tokens,END,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void EXPRESSAO(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case ID :
+			ES(tokens,err);
+			E1(tokens,err);
+			break;
+		case NUM :
+			ES(tokens,err);
+			E1(tokens,err);
+			break;
+		case MAIS :
+			ES(tokens,err);
+			E1(tokens,err);
+			break;
+		case MENOS :
+			ES(tokens,err);
+			E1(tokens,err);
+			break;
+		case ABRE_PARENTESES :
+			ES(tokens,err);
+			E1(tokens,err);
+			break;
+		case NOT :
+			ES(tokens,err);
+			E1(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void E1(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case PONTO_VIRGULA :
+		case VIRGULA :
+		case END :
+		case FECHA_COLCHETES :
+		case FECHA_PARENTESES :
+		case THEN :
+		case DO :
+			break;
+		case IGUAL :
+			eat(tokens,IGUAL,err);
+			ES(tokens,err);
+			break;
+		case DIFERENTE :
+			eat(tokens,DIFERENTE,err);
+			ES(tokens,err);
+			break;
+		case MENOR :
+			eat(tokens,MENOR,err);
+			ES(tokens,err);
+			break;
+		case MENOR_IGUAL :
+			eat(tokens, MENOR_IGUAL,err);
+			ES(tokens,err);
+			break;
+		case MAIOR_IGUAL :
+			eat(tokens,MAIOR_IGUAL,err);
+			ES(tokens,err);
+			break;
+		case MAIOR :
+			eat(tokens,MAIOR,err);
+			ES(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void ES(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case ID :
+			TERMO(tokens,err);
+			ES1(tokens,err);
+			break;
+		case NUM :
+			TERMO(tokens,err);
+			ES1(tokens,err);
+			break;
+		case MAIS :
+			eat(tokens, MAIS,err);
+			TERMO(tokens,err);
+			ES1(tokens,err);
+			break;
+		case MENOS :
+			eat(tokens, MENOS,err);
+			TERMO(tokens,err);
+			ES1(tokens,err);
+			break;
+		case ABRE_PARENTESES :
+			TERMO(tokens,err);
+			ES1(tokens,err);
+			break;
+		case NOT :
+			TERMO(tokens,err);
+			ES1(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+void ES1(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case PONTO_VIRGULA :
+		case VIRGULA :
+		case END :
+		case FECHA_COLCHETES :
+		case FECHA_PARENTESES :
+		case THEN :
+		case DO :
+		case IGUAL :
+		case DIFERENTE :
+		case MENOR :
+		case MENOR_IGUAL :
+		case MAIOR_IGUAL :
+		case MAIOR :
+			break;
+		case MAIS :
+			eat(tokens, MAIS,err);
+			TERMO(tokens,err);
+			ES1(tokens,err);
+			break;
+		case MENOS :
+			eat(tokens, MENOS,err);
+			TERMO(tokens,err);
+			ES1(tokens,err);
+			break;
+		case OR :
+			eat(tokens, OR,err);
+			TERMO(tokens,err);
+			ES1(tokens,err);
+			break;
+		default :
+			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			*err = 1;
+	}
+}
+
+
+// V 1 = v1
+
+
+
+
+
+
+
+
+
+
 
 void sintatico(Fila *tokens){
-    
+    int err = 0;
+
 }
 
 
