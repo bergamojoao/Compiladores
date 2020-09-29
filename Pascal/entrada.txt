@@ -1,2 +1,5 @@
-program end
-begin else if
+program tc02;
+var a:cacau;
+begin
+    a:=1;
+end.

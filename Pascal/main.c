@@ -50,6 +50,7 @@
 typedef struct elemento{
     int token;
     int linha;
+	char str[100];
     struct elemento *prox;
 }No;
 
@@ -65,11 +66,12 @@ void iniciaFila(Fila* fila){
     fila->ultimo = NULL;
 }
 
-void push(Fila* fila, int token,int linha) {
+void push(Fila* fila, int token,int linha,char* str) {
     if (fila->tamanho == 0) {
         fila->primeiro = (No*)malloc(sizeof(No));
         fila->primeiro->token = token;
         fila->primeiro->linha = linha; 
+		strcpy(fila->primeiro->str,str);
         fila->ultimo = fila->primeiro;
         fila->tamanho++;
     }
@@ -77,6 +79,7 @@ void push(Fila* fila, int token,int linha) {
         fila->ultimo->prox = (No*)malloc(sizeof(No));
         fila->ultimo->prox->token = token;
         fila->ultimo->prox->linha = linha;
+		strcpy(fila->ultimo->prox->str,str);
         fila->ultimo->prox->prox = NULL;
         fila->ultimo = fila->ultimo->prox;
         fila->tamanho++;
@@ -108,10 +111,14 @@ int getLinha(No* no){
     return no->linha;
 }
 
+char* getStr(No* no){
+	return no->str;
+}
+
 No* token;
 
 
-bool states[]={false,false,false,false,true,false,false,false,
+bool states[]={false,false,true,false,true,false,false,false,
                true,false,false,false,false,true,false,true,
                false,true,false,false,true,false,false,true,
                false,false,false,false,false,false,false,true,
@@ -283,8 +290,9 @@ int lexico(char * info,Fila* fila,int count){
         if(strlen(token)>0){
             if(strlen(substr)>strlen(token))bottomCursor=topCursor;
             if(strcmp(token," ")!=0){
+				printf("%s ",token);
                 if(lastFinal>=AND && lastFinal<=ASTERISCO)
-                    push(fila,lastFinal,count);
+                    push(fila,lastFinal,count,token);
                 else printf("ignora");
             }
             
@@ -299,6 +307,60 @@ int lexico(char * info,Fila* fila,int count){
     }
 }
 
+
+
+
+void S(Fila* tokens, int *err);
+void PROGRAMA(Fila* tokens, int *err);
+void BLOCO(Fila* tokens, int *err);
+void B1(Fila* tokens, int *err);
+void B1LINHA(Fila* tokens, int *err);
+void B1DUASLINHA(Fila* tokens, int *err);
+void BLOCO1(Fila* tokens, int *err);
+void B2(Fila* tokens, int *err);
+void B2LINHA(Fila* tokens, int *err);
+void TIPO(Fila* tokens, int *err);
+void TIPOLINHA(Fila* tokens, int *err);
+void T1(Fila* tokens, int *err);
+void T1LINHA(Fila* tokens, int *err);
+void FP(Fila* tokens, int *err);
+void FP1(Fila* tokens, int *err);
+void FP2(Fila* tokens, int *err);
+void FP2LINHA(Fila* tokens, int *err);
+void FP2DUASLINHA(Fila* tokens, int *err);
+void V(Fila* tokens, int *err);
+void V1(Fila* tokens, int *err);
+void V2(Fila* tokens, int *err);
+void V3(Fila* tokens, int *err);
+void V3LINHA(Fila* tokens, int *err);
+void V3DUASLINHA(Fila* tokens, int *err);
+void CMD(Fila* tokens, int *err);
+void CMDLINHA(Fila* tokens, int *err);
+void C1(Fila* tokens, int *err);
+void C2(Fila* tokens, int *err);
+void C2LINHA(Fila* tokens, int *err);
+void C3(Fila* tokens, int *err);
+void C3LINHA(Fila* tokens, int *err);
+void C4(Fila* tokens, int *err);
+void EXPRESSAO(Fila* tokens, int *err);
+void E1(Fila* tokens, int *err);
+void ES(Fila* tokens, int *err);
+void ES1(Fila* tokens, int *err);
+void TERMO(Fila* tokens, int *err);
+void TERMO1(Fila* tokens, int *err);
+void FATOR(Fila* tokens, int *err);
+void FATORLINHA(Fila* tokens, int *err);
+void F1(Fila* tokens, int *err);
+void F2(Fila* tokens, int *err);
+void F2LINHA(Fila* tokens, int *err);
+void CONSTANTE(Fila* tokens, int *err); 
+
+
+
+
+
+
+
 void eat(Fila* tokens, int validation, int* err){
     if(*err==1)
         return;
@@ -307,7 +369,7 @@ void eat(Fila* tokens, int validation, int* err){
         token=pull(tokens);
     else{
         *err = 1;
-        printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+        printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
     }
 }
 
@@ -324,7 +386,7 @@ void S(Fila* tokens, int *err){
 			eat(tokens,FIM,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -344,7 +406,7 @@ void PROGRAMA(Fila* tokens, int *err){
             eat(tokens,PONTO,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -370,7 +432,7 @@ void BLOCO(Fila* tokens, int *err){
 			BLOCO1(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -387,7 +449,7 @@ void B1(Fila* tokens, int *err){
 			B1LINHA(tokens, err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -410,7 +472,7 @@ void B1LINHA(Fila* tokens, int *err){
 			B1DUASLINHA(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -435,7 +497,7 @@ void B1DUASLINHA(Fila* tokens, int *err){
 			BLOCO1(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -459,7 +521,7 @@ void BLOCO1(Fila* tokens, int *err){
 		case FUNCTION :
 			eat(tokens,FUNCTION,err);
 			eat(tokens,ID,err);
-			PF(tokens,err);
+			FP(tokens,err);
 			eat(tokens,DOIS_PONTOS,err);
 			eat(tokens,ID,err);
 			eat(tokens,PONTO_VIRGULA,err);
@@ -472,7 +534,7 @@ void BLOCO1(Fila* tokens, int *err){
 			B2(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -513,7 +575,7 @@ void B2(Fila* tokens, int *err){
 			B2LINHA(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -533,7 +595,7 @@ void B2LINHA(Fila* tokens, int *err){
 			eat(tokens,END,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -572,7 +634,7 @@ void TIPO(Fila* tokens, int *err){
 			T1(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -593,7 +655,7 @@ void TIPOLINHA(Fila* tokens, int *err){
 			CONSTANTE(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -626,7 +688,7 @@ void T1(Fila* tokens, int *err){
 			T1LINHA(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -648,7 +710,7 @@ void T1LINHA(Fila* tokens, int *err){
 			TIPO(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -665,7 +727,7 @@ void FP(Fila* tokens, int *err){
 			FP1(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -688,7 +750,7 @@ void FP1(Fila* tokens, int *err){
 			eat(tokens,FECHA_PARENTESES,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -705,7 +767,7 @@ void FP2(Fila* tokens, int *err){
 			FP2LINHA(tokens, err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -724,7 +786,7 @@ void FP2LINHA(Fila* tokens, int *err){
 			FP2DUASLINHA(tokens,err);
 			break; 
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -744,7 +806,7 @@ void FP2DUASLINHA(Fila* tokens, int *err){
 			eat(tokens,FECHA_PARENTESES,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -761,7 +823,7 @@ void V(Fila* tokens, int *err){
 			V1(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -798,7 +860,7 @@ void V1(Fila* tokens, int *err){
 			V2(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -815,7 +877,7 @@ void V2(Fila* tokens, int *err){
 			V3(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -852,7 +914,7 @@ void V3(Fila* tokens, int *err){
 			V3LINHA(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -873,7 +935,7 @@ void V3LINHA(Fila* tokens, int *err){
 			V3DUASLINHA(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -909,7 +971,7 @@ void V3DUASLINHA(Fila* tokens, int *err){
 			V2(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -947,7 +1009,7 @@ void CMD(Fila* tokens, int *err){
 			CMD(tokens,err);
 			break; 
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -983,7 +1045,7 @@ void CMDLINHA(Fila* tokens, int *err){
 			EXPRESSAO(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -1016,7 +1078,7 @@ void C1(Fila* tokens, int *err){
 			C2(tokens,err);
 			break;		
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -1052,7 +1114,7 @@ void C2(Fila* tokens, int *err){
 			C2LINHA(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -1071,7 +1133,7 @@ void C2LINHA(Fila* tokens, int *err){
 			eat(tokens,FECHA_PARENTESES,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -1083,31 +1145,31 @@ void C3(Fila* tokens, int *err){
 
 	switch(getToken(token)){
 		case ID :
-			COMANDO(tokens,err);
+			CMD(tokens,err);
 			C3LINHA(tokens,err);
 			break;
 		case PONTO_VIRGULA :
-			COMANDO(tokens,err);
+			CMD(tokens,err);
 			C3LINHA(tokens,err);
 			break;
 		case BEGIN :
-			COMANDO(tokens,err);
+			CMD(tokens,err);
 			C3LINHA(tokens,err);
 			break;	
 		case END :
-			COMANDO(tokens,err);
+			CMD(tokens,err);
 			C3LINHA(tokens,err);	
 			break;
 		case IF :
-			COMANDO(tokens,err);
+			CMD(tokens,err);
 			C3LINHA(tokens,err);
 			break;
 		case WHILE :
-			COMANDO(tokens,err);
+			CMD(tokens,err);
 			C3LINHA(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -1126,7 +1188,7 @@ void C3LINHA(Fila* tokens, int *err){
 			eat(tokens,END,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -1147,7 +1209,7 @@ void C4(Fila* tokens, int *err){
 			eat(tokens,END,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -1183,7 +1245,7 @@ void EXPRESSAO(Fila* tokens, int *err){
 			E1(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -1227,7 +1289,7 @@ void E1(Fila* tokens, int *err){
 			ES(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -1265,7 +1327,7 @@ void ES(Fila* tokens, int *err){
 			ES1(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
@@ -1306,27 +1368,309 @@ void ES1(Fila* tokens, int *err){
 			ES1(tokens,err);
 			break;
 		default :
-			printf("Erro de Sintaxe. Linha %d Token %d",getLinha(token),getToken(token));
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
 	}
 }
 
+void TERMO(Fila* tokens, int *err){
 
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case ID :
+			FATOR(tokens,err);
+			TERMO1(tokens,err);
+			break;
+		case NUM :
+			FATOR(tokens,err);
+			TERMO1(tokens,err);
+			break; 
+		case ABRE_PARENTESES :
+			FATOR(tokens,err);
+			TERMO1(tokens,err);
+			break;
+		case NOT :
+			FATOR(tokens,err);
+			TERMO1(tokens,err);
+			break;
+		default :
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
+			*err = 1;
+	}
+}
+
+void TERMO1(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case PONTO_VIRGULA :
+		case VIRGULA :
+		case END :
+		case MAIS :
+		case MENOS :
+		case FECHA_COLCHETES :
+		case FECHA_PARENTESES :
+		case THEN :
+		case IGUAL :
+		case DIFERENTE :
+		case MENOR :
+		case MENOR_IGUAL :
+		case MAIOR_IGUAL :
+		case MAIOR :
+		case OR :
+		case DO :
+			break;
+		case ASTERISCO :
+			eat(tokens,ASTERISCO,err);
+			FATOR(tokens,err);
+			TERMO1(tokens,err);
+			break;	
+		case DIV :
+			eat(tokens,DIV,err);
+			FATOR(tokens,err);
+			TERMO1(tokens,err);
+			break;
+		case AND :
+			eat(tokens,AND,err);
+			FATOR(tokens,err);
+			TERMO1(tokens,err);
+			break;
+		default :
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
+			*err = 1;
+	}
+}
+
+void FATOR(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case ID :
+			eat(tokens,ID,err);
+			FATORLINHA(tokens,err);
+			break;
+		case NUM :
+			eat(tokens,NUM,err);
+			break;
+		case ABRE_PARENTESES :
+			eat(tokens,ABRE_PARENTESES,err);
+			EXPRESSAO(tokens,err);
+			eat(tokens,FECHA_PARENTESES,err);
+			break;
+		case NOT :
+			eat(tokens,NOT,err);
+			FATOR(tokens,err);
+			break;
+		default :
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
+			*err = 1;
+	}
+}
+
+void FATORLINHA(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case PONTO_VIRGULA :
+			V1(tokens,err);
+			break;
+		case VIRGULA :
+			V1(tokens,err);
+			break;
+		case END :
+			V1(tokens,err);
+			break;
+		case MAIS :
+			V1(tokens,err);
+			break;
+		case MENOS :
+			V1(tokens,err);
+			break;
+		case ABRE_COLCHETES :
+			V1(tokens,err);
+			break;
+		case FECHA_COLCHETES :
+			V1(tokens,err);
+			break;
+		case ABRE_PARENTESES :
+			eat(tokens, ABRE_PARENTESES,err);
+			F1(tokens,err);
+			break;
+		case FECHA_PARENTESES :
+			V1(tokens,err);
+			break;
+		case THEN :
+			V1(tokens,err);
+			break;
+		case DO :
+			V1(tokens,err);
+			break;
+		case IGUAL :
+			V1(tokens,err);
+			break;
+		case DIFERENTE :
+			V1(tokens,err);
+			break;
+		case MENOR :
+			V1(tokens,err);
+			break;
+		case MENOR_IGUAL :
+			V1(tokens,err);
+			break;
+		case MAIOR_IGUAL :
+			V1(tokens,err);
+			break;
+		case MAIOR :
+			V1(tokens,err);
+			break;
+		case OR :
+			V1(tokens,err);
+			break;
+		case ASTERISCO :
+			V1(tokens,err);
+			break;
+		case DIV :
+			V1(tokens,err);
+			break;
+		case AND :
+			V1(tokens,err);
+			break;
+		default :
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
+			*err = 1;
+	}
+}
+
+void F1(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case ID :
+			F2(tokens,err);
+			break;
+		case NUM :
+			F2(tokens,err);
+			break;
+		case MAIS :
+			F2(tokens,err);
+			break;
+		case MENOS :
+			F2(tokens,err);
+			break;
+		case ABRE_PARENTESES :
+			F2(tokens,err);
+			break;
+		case FECHA_PARENTESES :
+			eat(tokens,FECHA_PARENTESES,err);
+			break;
+		case NOT :
+			F2(tokens,err);
+			break;
+		default :
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
+			*err = 1;
+	}
+}
+
+void F2(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case ID :
+			EXPRESSAO(tokens,err);
+			F2LINHA(tokens,err);
+			break;
+		case NUM :
+			EXPRESSAO(tokens,err);
+			F2LINHA(tokens,err);
+			break;
+		case MAIS :
+			EXPRESSAO(tokens,err);
+			F2LINHA(tokens,err);
+			break;
+		case MENOS :
+			EXPRESSAO(tokens,err);
+			F2LINHA(tokens,err);
+			break;
+		case ABRE_PARENTESES :
+			EXPRESSAO(tokens,err);
+			F2LINHA(tokens,err);
+			break;
+		case NOT :
+			EXPRESSAO(tokens,err);
+			F2LINHA(tokens,err);
+			break;
+		default :
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
+			*err = 1;
+	}
+}
+
+void F2LINHA(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case VIRGULA :
+			eat(tokens, VIRGULA,err);
+			F2(tokens,err);
+			break;
+		case FECHA_PARENTESES :
+			eat(tokens, FECHA_PARENTESES,err);
+			break;
+		default :
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
+			*err = 1;
+	}
+}
+
+void CONSTANTE(Fila* tokens, int *err){
+
+	if(*err == 1)
+		return;
+
+	switch(getToken(token)){
+		case ID :
+			eat(tokens, ID,err);
+			break;
+		case NUM :
+			eat(tokens, NUM,err);
+			break;
+		case MAIS :
+			eat(tokens, MAIS,err);
+			eat(tokens, NUM,err);
+			break;
+		case MENOS :
+			eat(tokens, MENOS,err);
+			eat(tokens, NUM,err);
+			break;
+		default :
+			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
+			*err = 1;
+	}
+}
 // V 1 = v1
-
-
-
-
-
-
-
-
-
 
 
 void sintatico(Fila *tokens){
     int err = 0;
-
+	token = pull(tokens);
+	S(tokens,&err);
+	if(err==0)
+		printf("PROGRAMA CORRETO.");
 }
 
 
@@ -1340,4 +1684,6 @@ int main(){
         lexico(linha,tokens,count);
         count++;
     }
+	push(tokens,FIM,count-1,"$");
+	sintatico(tokens);
 }
