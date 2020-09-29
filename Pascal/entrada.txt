@@ -1,5 +1,5 @@
-program tc02;
-var a:cacau;
+program teste;
 begin
-    a:=1;
+  k:=a*(b+(-c));
+  k:=a*(b+(-c));
 end.

@@ -117,15 +117,27 @@ char* getStr(No* no){
 
 No* token;
 
+int ids[] = {2,3,5,6,7,9,10,11,12,14,16,18,19,21,22,24,25,26,27,28,29,30,32,34,35,37,40,41,42,43,44,45,46,47,49,50,51,53,54,55,57,58,60,61,62,63};
 
-bool states[]={false,false,true,false,true,false,false,false,
-               true,false,false,false,false,true,false,true,
-               false,true,false,false,true,false,false,true,
-               false,false,false,false,false,false,false,true,
-               false,true,false,false,true,false,false,true,
-               false,false,false,false,false,false,false,false,
-               true,false,false,false,true,false,false,false,
-               true,false,false,true,false,false,false,false,
+bool verifyIds(int state){
+	int i;
+	for (i = 0; i < 46; i++){
+		if(state==ids[i])
+			return true;
+		else if(ids[i]>state)
+			return false;
+	}
+	return false;	
+}
+
+bool states[]={false,false,true,true,true,true,true,true,
+               true,true,true,true,true,true,true,true,
+               true,true,true,true,true,true,true,true,
+               true,true,true,true,true,true,true,true,
+               true,true,true,true,true,true,true,true,
+               true,true,true,true,true,true,true,true,
+               true,true,true,true,true,true,true,true,
+               true,true,true,true,true,true,true,true,
                true,true,true,true,true,true,true,true,
                true,true,true,true,true,true,true,true,
                true,true,true,true,true,true,false,false,true,false
@@ -290,17 +302,17 @@ int lexico(char * info,Fila* fila,int count){
         if(strlen(token)>0){
             if(strlen(substr)>strlen(token))bottomCursor=topCursor;
             if(strcmp(token," ")!=0){
-				printf("%s ",token);
+				if(verifyIds(lastFinal))
+					lastFinal=ID;
                 if(lastFinal>=AND && lastFinal<=ASTERISCO)
                     push(fila,lastFinal,count,token);
-                else printf("ignora");
             }
             
             TOKENS_IDENTIFICADOS++;
         }else{
             if(info[bottomCursor]!=' ' && info[bottomCursor]!='\n'){
-                bottomCursor++;
-                TOKENS_IDENTIFICADOS++;
+				printf("ERRO LEXICO. Linha: %d Coluna: %d -> %c",count,bottomCursor+1,info[bottomCursor]);
+				exit(1);
             }else bottomCursor++;
         } 
         verticalCursor=bottomCursor; 
@@ -1677,6 +1689,7 @@ void sintatico(Fila *tokens){
 
 int main(){
     char linha[2048];
+	
     Fila* tokens = malloc(sizeof(Fila));
     iniciaFila(tokens);
     int count = 1;
