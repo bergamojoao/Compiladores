@@ -642,7 +642,7 @@ void TIPO(Fila* tokens, int *err){
 			break;
 		case ARRAY :
 			eat(tokens, ARRAY,err);
-			eat(tokens, FECHA_COLCHETES,err);
+			eat(tokens, ABRE_COLCHETES,err);
 			T1(tokens,err);
 			break;
 		default :
@@ -1675,7 +1675,6 @@ void CONSTANTE(Fila* tokens, int *err){
 			*err = 1;
 	}
 }
-// V 1 = v1
 
 
 void sintatico(Fila *tokens){
@@ -1685,8 +1684,6 @@ void sintatico(Fila *tokens){
 	if(err==0)
 		printf("PROGRAMA CORRETO.");
 }
-
-
 
 int main(){
     char linha[2048];
