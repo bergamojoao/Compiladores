@@ -1003,6 +1003,7 @@ void CMD(Fila* tokens, int *err){
 			break;
 		case BEGIN :
 			eat(tokens,BEGIN,err);
+			CMD(tokens,err);
 			C3LINHA(tokens,err);
 			break;
 		case IF :
