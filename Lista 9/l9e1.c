@@ -108,6 +108,7 @@ int edges[28][28]={/* 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, +, -, =, ;, b, d, e, f, g, h
 
 int TOKENS_IDENTIFICADOS=0;
 bool ERRO_SINTATICO=false;
+int linhas=1;
 
 int getIndex(char symbol){
     int i;
@@ -169,9 +170,6 @@ int lexico(char * info,Fila* fila){
             TOKENS_IDENTIFICADOS++;
         }else{
             if(info[bottomCursor]!=' ' && info[bottomCursor]!='\n'){
-                if(TOKENS_IDENTIFICADOS!=0)printf("\n");
-                printf("ERRO");
-                printf("teste:%c",info[bottomCursor]);
                 bottomCursor++;
                 TOKENS_IDENTIFICADOS++;
             }else bottomCursor++;
@@ -181,7 +179,7 @@ int lexico(char * info,Fila* fila){
 }
 
 void errorS(int* token){
-    printf("\n");
+    if(linhas!=1) printf("\n");
     switch (*token){
         case NUM:
             printf("ERRO SINTATICO EM: num ESPERADO: if, begin, print");
@@ -208,7 +206,7 @@ void errorS(int* token){
 }
 
 void errorL(int* token){
-    printf("\n");
+    if(linhas!=1) printf("\n");
     switch (*token){
         case NUM:
             printf("ERRO SINTATICO EM: num ESPERADO: end, ;");
@@ -238,7 +236,7 @@ void errorL(int* token){
 }
 
 void erroE(int* token){
-    printf("\n");
+    if(linhas!=1) printf("\n");
     switch (*token){
         case END:
             printf("ERRO SINTATICO EM: end ESPERADO: num");
@@ -281,9 +279,13 @@ void eat(int t, int* token,Fila* tokens,char g){
     }else{    
         switch (g){
         case 'S':
-            /* code */
+            errorS(token);
             break;
         case 'L':
+            errorL(token);
+            break;
+        case 'E':
+            erroE(token);
             break;
         }   
         ERRO_SINTATICO=true;
@@ -298,27 +300,27 @@ void S(int* token, Fila* tokens){
 
     switch(*token) {
         case IF: 
-            eat(IF,token,tokens);
+            eat(IF,token,tokens,'S');
             if(ERRO_SINTATICO) break; 
             E(token,tokens);
             if(ERRO_SINTATICO) break; 
-            eat(THEN,token,tokens); 
+            eat(THEN,token,tokens,'S'); 
             if(ERRO_SINTATICO) break; 
             S(token,tokens); 
             if(ERRO_SINTATICO) break; 
-            eat(ELSE,token,tokens); 
+            eat(ELSE,token,tokens,'S'); 
             if(ERRO_SINTATICO) break; 
             S(token,tokens); 
             break;
         case BEGIN: 
-            eat(BEGIN,token,tokens); 
+            eat(BEGIN,token,tokens,'S'); 
             if(ERRO_SINTATICO) break; 
             S(token,tokens); 
             if(ERRO_SINTATICO) break; 
             L(token,tokens); 
             break;
         case PRINT: 
-            eat(PRINT,token,tokens);
+            eat(PRINT,token,tokens,'S');
             if(ERRO_SINTATICO) break; 
             E(token,tokens); break;
         case SAIR:
@@ -334,10 +336,10 @@ void L(int* token, Fila* tokens){
 
     switch(*token) {
         case END: 
-            eat(END,token,tokens);
+            eat(END,token,tokens,'L');
             break;
         case SEMI: 
-            eat(SEMI,token,tokens); 
+            eat(SEMI,token,tokens,'L'); 
             if(ERRO_SINTATICO) break; 
             S(token,tokens); 
             if(ERRO_SINTATICO) break; 
@@ -356,11 +358,11 @@ void E(int* token, Fila* tokens){
 
     switch (*token){
         case NUM:
-            eat(NUM,token,tokens);
+            eat(NUM,token,tokens,'E');
             if(ERRO_SINTATICO) break; 
-            eat(EQ,token,tokens); 
+            eat(EQ,token,tokens,'E'); 
             if(ERRO_SINTATICO) break; 
-            eat(NUM,token,tokens);
+            eat(NUM,token,tokens,'E');
             break;
         case SAIR:
             break;
@@ -377,8 +379,13 @@ void sintatico(Fila* tokens){
     *token = pull(tokens);
     ERRO_SINTATICO=false;
     S(token,tokens);
-    if(ERRO_SINTATICO==false)
-        printf("CADEIA ACEITA\n");
+    while(pull(tokens)!=-1){
+        pull(tokens);
+    }
+    if(ERRO_SINTATICO==false){
+        if(linhas!=1) printf("\n");
+        printf("CADEIA ACEITA");
+    }
 }
 
 int main(){
@@ -388,5 +395,6 @@ int main(){
     while(fgets(linha,5000,stdin)!=NULL){
         lexico(linha,tokens);
         sintatico(tokens);
+        linhas++;
     }
 }
