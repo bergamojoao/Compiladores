@@ -160,6 +160,7 @@ int lexico(char * info,Fila* fila){
             i++;
             bottomCursor++;
         }
+
         token[indexToken]='\0';
         substr[i]='\0';
         if(strlen(token)>0){
@@ -171,7 +172,6 @@ int lexico(char * info,Fila* fila){
                 if(TOKENS_IDENTIFICADOS!=0)printf("\n");
                 printf("ERRO");
                 printf("teste:%c",info[bottomCursor]);
-                getc(stdin);
                 bottomCursor++;
                 TOKENS_IDENTIFICADOS++;
             }else bottomCursor++;
@@ -181,7 +181,7 @@ int lexico(char * info,Fila* fila){
 }
 
 void errorS(int* token){
-    printf("errro S");
+    printf("\n");
     switch (*token){
         case NUM:
             printf("ERRO SINTATICO EM: num ESPERADO: if, begin, print");
@@ -201,11 +201,14 @@ void errorS(int* token){
         case EQ:
             printf("ERRO SINTATICO EM: = ESPERADO: if, begin, print");
             break;
+        default:
+            printf("ERRO SINTATICO: CADEIA INCOMPLETA");
     }
     ERRO_SINTATICO=true;
 }
 
 void errorL(int* token){
+    printf("\n");
     switch (*token){
         case NUM:
             printf("ERRO SINTATICO EM: num ESPERADO: end, ;");
@@ -228,11 +231,14 @@ void errorL(int* token){
         case PRINT:
             printf("ERRO SINTATICO EM: print ESPERADO: end, ;");
             break;
+        default:
+            printf("ERRO SINTATICO: CADEIA INCOMPLETA");
     }
     ERRO_SINTATICO=true;
 }
 
 void erroE(int* token){
+    printf("\n");
     switch (*token){
         case END:
             printf("ERRO SINTATICO EM: end ESPERADO: num");
@@ -258,6 +264,8 @@ void erroE(int* token){
         case PRINT:
             printf("ERRO SINTATICO EM: print ESPERADO: num");
             break;
+        default:
+            printf("ERRO SINTATICO: CADEIA INCOMPLETA");
     }
     ERRO_SINTATICO=true;
 }
@@ -267,17 +275,27 @@ void L(int* token, Fila* tokens);
 void E(int* token, Fila* tokens);
 
 
-void eat(int t, int* token,Fila* tokens){
+void eat(int t, int* token,Fila* tokens,char g){
     if (*token==t){
         *token = pull(tokens);
-    }else{       
-        printf("ERRO SINTATICO: CADEIA INCOMPLETA");
+    }else{    
+        switch (g){
+        case 'S':
+            /* code */
+            break;
+        case 'L':
+            break;
+        }   
         ERRO_SINTATICO=true;
     }
 
 }
 
 void S(int* token, Fila* tokens){
+
+    if(ERRO_SINTATICO)
+        return;
+
     switch(*token) {
         case IF: 
             eat(IF,token,tokens);
@@ -310,6 +328,10 @@ void S(int* token, Fila* tokens){
 }
 
 void L(int* token, Fila* tokens){
+
+    if(ERRO_SINTATICO)
+        return;
+
     switch(*token) {
         case END: 
             eat(END,token,tokens);
@@ -328,6 +350,10 @@ void L(int* token, Fila* tokens){
 }
 
 void E(int* token, Fila* tokens){
+
+    if(ERRO_SINTATICO)
+        return;
+
     switch (*token){
         case NUM:
             eat(NUM,token,tokens);
@@ -335,6 +361,7 @@ void E(int* token, Fila* tokens){
             eat(EQ,token,tokens); 
             if(ERRO_SINTATICO) break; 
             eat(NUM,token,tokens);
+            break;
         case SAIR:
             break;
         default:
@@ -351,14 +378,14 @@ void sintatico(Fila* tokens){
     ERRO_SINTATICO=false;
     S(token,tokens);
     if(ERRO_SINTATICO==false)
-        printf("CADEIA ACEITA");
+        printf("CADEIA ACEITA\n");
 }
 
 int main(){
-    char linha[2048];
+    char linha[5000];
     Fila* tokens = malloc(sizeof(Fila));
     iniciaFila(tokens);
-    while(fgets(linha,2048,stdin)!=NULL){
+    while(fgets(linha,5000,stdin)!=NULL){
         lexico(linha,tokens);
         sintatico(tokens);
     }
