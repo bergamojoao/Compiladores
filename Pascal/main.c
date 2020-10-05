@@ -326,33 +326,33 @@ void S(Fila* tokens, int *err);
 void PROGRAMA(Fila* tokens, int *err);
 void BLOCO(Fila* tokens, int *err);
 void B1(Fila* tokens, int *err);
-void B1LINHA(Fila* tokens, int *err);
-void B1DUASLINHA(Fila* tokens, int *err);
+void B1L(Fila* tokens, int *err);
+void B1DL(Fila* tokens, int *err);
 void BLOCO1(Fila* tokens, int *err);
 void B2(Fila* tokens, int *err);
-void B2LINHA(Fila* tokens, int *err);
+void B2L(Fila* tokens, int *err);
 void TIPO(Fila* tokens, int *err);
-void TIPOLINHA(Fila* tokens, int *err);
+void TIPOL(Fila* tokens, int *err);
 void T1(Fila* tokens, int *err);
-void T1LINHA(Fila* tokens, int *err);
+void T1L(Fila* tokens, int *err);
 void FP(Fila* tokens, int *err);
 void FP1(Fila* tokens, int *err);
 void FP2(Fila* tokens, int *err);
-void FP2LINHA(Fila* tokens, int *err);
-void FP2DUASLINHA(Fila* tokens, int *err);
+void FP2L(Fila* tokens, int *err);
+void FP2DL(Fila* tokens, int *err);
 void V(Fila* tokens, int *err);
 void V1(Fila* tokens, int *err);
 void V2(Fila* tokens, int *err);
 void V3(Fila* tokens, int *err);
-void V3LINHA(Fila* tokens, int *err);
-void V3DUASLINHA(Fila* tokens, int *err);
+void V3L(Fila* tokens, int *err);
+void V3DL(Fila* tokens, int *err);
 void CMD(Fila* tokens, int *err);
-void CMDLINHA(Fila* tokens, int *err);
+void CMDL(Fila* tokens, int *err);
 void C1(Fila* tokens, int *err);
 void C2(Fila* tokens, int *err);
-void C2LINHA(Fila* tokens, int *err);
+void C2L(Fila* tokens, int *err);
 void C3(Fila* tokens, int *err);
-void C3LINHA(Fila* tokens, int *err);
+void C3L(Fila* tokens, int *err);
 void C4(Fila* tokens, int *err);
 void EXPRESSAO(Fila* tokens, int *err);
 void E1(Fila* tokens, int *err);
@@ -361,10 +361,10 @@ void ES1(Fila* tokens, int *err);
 void TERMO(Fila* tokens, int *err);
 void TERMO1(Fila* tokens, int *err);
 void FATOR(Fila* tokens, int *err);
-void FATORLINHA(Fila* tokens, int *err);
+void FATORL(Fila* tokens, int *err);
 void F1(Fila* tokens, int *err);
 void F2(Fila* tokens, int *err);
-void F2LINHA(Fila* tokens, int *err);
+void F2L(Fila* tokens, int *err);
 void CONSTANTE(Fila* tokens, int *err); 
 
 
@@ -458,7 +458,7 @@ void B1(Fila* tokens, int *err){
 	switch(getToken(token)){
 		case ID :
 			eat(tokens, ID, err);
-			B1LINHA(tokens, err);
+			B1L(tokens, err);
 			break;
 		default :
 			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
@@ -466,7 +466,7 @@ void B1(Fila* tokens, int *err){
 	}
 }
 
-void B1LINHA(Fila* tokens, int *err){
+void B1L(Fila* tokens, int *err){
 
 	if(*err == 1)
 		return;
@@ -481,7 +481,7 @@ void B1LINHA(Fila* tokens, int *err){
 			eat(tokens,DOIS_PONTOS,err);
 			TIPO(tokens,err);
 			eat(tokens,PONTO_VIRGULA,err);
-			B1DUASLINHA(tokens,err);
+			B1DL(tokens,err);
 			break;
 		default :
 			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
@@ -489,7 +489,7 @@ void B1LINHA(Fila* tokens, int *err){
 	}
 }
 
-void B1DUASLINHA(Fila* tokens, int *err){
+void B1DL(Fila* tokens, int *err){
 
 	if(*err == 1)
 		return;
@@ -560,31 +560,31 @@ void B2(Fila* tokens, int *err){
 	switch(getToken(token)){
 		case ID :
 			CMD(tokens,err);
-			B2LINHA(tokens,err);
+			B2L(tokens,err);
 			break;
 		case PONTO_VIRGULA :
 			CMD(tokens,err);
-			B2LINHA(tokens,err);
+			B2L(tokens,err);
 			break;
 		case PONTO :
 			CMD(tokens,err);
-			B2LINHA(tokens,err);
+			B2L(tokens,err);
 			break;
 		case BEGIN :
 			CMD(tokens,err);
-			B2LINHA(tokens,err);
+			B2L(tokens,err);
 			break;
 		case END :
 			CMD(tokens,err);
-			B2LINHA(tokens,err);
+			B2L(tokens,err);
 			break;
 		case IF :
 			CMD(tokens,err);
-			B2LINHA(tokens,err);
+			B2L(tokens,err);
 			break;
 		case WHILE :
 			CMD(tokens,err);
-			B2LINHA(tokens,err);
+			B2L(tokens,err);
 			break;
 		default :
 			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
@@ -592,7 +592,7 @@ void B2(Fila* tokens, int *err){
 	}
 }
 
-void B2LINHA(Fila* tokens, int *err){
+void B2L(Fila* tokens, int *err){
 
 	if(*err == 1)
 		return;
@@ -621,7 +621,7 @@ void TIPO(Fila* tokens, int *err){
 	switch(getToken(token)){
 		case ID :
 			eat(tokens,ID,err);
-			TIPOLINHA(tokens,err);
+			TIPOL(tokens,err);
 			break;
 		case NUM :
 			eat(tokens,NUM,err);
@@ -651,7 +651,7 @@ void TIPO(Fila* tokens, int *err){
 	}
 }
 
-void TIPOLINHA(Fila* tokens, int *err){
+void TIPOL(Fila* tokens, int *err){
 
 	if(*err == 1)
 		return;
@@ -681,23 +681,23 @@ void T1(Fila* tokens, int *err){
 	switch(getToken(token)){
 		case ID :
 			TIPO(tokens,err);
-			T1LINHA(tokens,err);
+			T1L(tokens,err);
 			break;
 		case NUM :
 			TIPO(tokens,err);
-			T1LINHA(tokens,err);
+			T1L(tokens,err);
 			break;
 		case MAIS :
 			TIPO(tokens,err);
-			T1LINHA(tokens,err);
+			T1L(tokens,err);
 			break;
 		case MENOS :
 			TIPO(tokens,err);
-			T1LINHA(tokens,err);
+			T1L(tokens,err);
 			break;
 		case ARRAY :
 			TIPO(tokens,err);
-			T1LINHA(tokens,err);
+			T1L(tokens,err);
 			break;
 		default :
 			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
@@ -705,7 +705,7 @@ void T1(Fila* tokens, int *err){
 	}
 }
 
-void T1LINHA(Fila* tokens, int *err){
+void T1L(Fila* tokens, int *err){
 
 	if(*err == 1)
 		return;
@@ -776,7 +776,7 @@ void FP2(Fila* tokens, int *err){
 	switch(getToken(token)){
 		case ID :
 			eat(tokens,ID,err);
-			FP2LINHA(tokens, err);
+			FP2L(tokens, err);
 			break;
 		default :
 			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
@@ -784,7 +784,7 @@ void FP2(Fila* tokens, int *err){
 	}
 }
 
-void FP2LINHA(Fila* tokens, int *err){
+void FP2L(Fila* tokens, int *err){
 
 	if(*err == 1)
 		return;
@@ -795,7 +795,7 @@ void FP2LINHA(Fila* tokens, int *err){
 			eat(tokens,ID,err);
 			eat(tokens,DOIS_PONTOS,err);
 			eat(tokens,ID,err);
-			FP2DUASLINHA(tokens,err);
+			FP2DL(tokens,err);
 			break; 
 		default :
 			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
@@ -803,7 +803,7 @@ void FP2LINHA(Fila* tokens, int *err){
 	}
 }
 
-void FP2DUASLINHA(Fila* tokens, int *err){
+void FP2DL(Fila* tokens, int *err){
 
 	if(*err == 1)
 		return;
@@ -903,27 +903,27 @@ void V3(Fila* tokens, int *err){
 	switch(getToken(token)){
 		case ID :
 			EXPRESSAO(tokens,err);
-			V3LINHA(tokens,err);
+			V3L(tokens,err);
 			break;
 		case NUM :
 			EXPRESSAO(tokens,err);
-			V3LINHA(tokens,err);
+			V3L(tokens,err);
 			break;
 		case MAIS :
 			EXPRESSAO(tokens,err);
-			V3LINHA(tokens,err);
+			V3L(tokens,err);
 			break;
 		case MENOS :
 			EXPRESSAO(tokens,err);
-			V3LINHA(tokens,err);
+			V3L(tokens,err);
 			break;
 		case ABRE_PARENTESES :
 			EXPRESSAO(tokens,err);
-			V3LINHA(tokens,err);
+			V3L(tokens,err);
 			break;
 		case NOT :
 			EXPRESSAO(tokens,err);
-			V3LINHA(tokens,err);
+			V3L(tokens,err);
 			break;
 		default :
 			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
@@ -931,7 +931,7 @@ void V3(Fila* tokens, int *err){
 	}
 }
 
-void V3LINHA(Fila* tokens, int *err){
+void V3L(Fila* tokens, int *err){
 
 	if(*err == 1)
 		return;
@@ -944,7 +944,7 @@ void V3LINHA(Fila* tokens, int *err){
 			break;
 		case FECHA_COLCHETES :
 			eat(tokens, FECHA_COLCHETES,err);
-			V3DUASLINHA(tokens,err);
+			V3DL(tokens,err);
 			break;
 		default :
 			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
@@ -952,7 +952,7 @@ void V3LINHA(Fila* tokens, int *err){
 	}
 }
 
-void V3DUASLINHA(Fila* tokens, int *err){
+void V3DL(Fila* tokens, int *err){
 
 	if(*err == 1)
 		return;
@@ -996,7 +996,7 @@ void CMD(Fila* tokens, int *err){
 	switch(getToken(token)){
 		case ID :
 			eat(tokens,ID,err);
-			CMDLINHA(tokens,err);
+			CMDL(tokens,err);
 			break;
 		case PONTO_VIRGULA :
 		case END :	
@@ -1004,7 +1004,7 @@ void CMD(Fila* tokens, int *err){
 		case BEGIN :
 			eat(tokens,BEGIN,err);
 			CMD(tokens,err);
-			C3LINHA(tokens,err);
+			C3L(tokens,err);
 			break;
 		case IF :
 			eat(tokens,IF,err);
@@ -1027,7 +1027,7 @@ void CMD(Fila* tokens, int *err){
 	}
 }
 
-void CMDLINHA(Fila* tokens, int *err){
+void CMDL(Fila* tokens, int *err){
 
 	if(*err == 1)
 		return;
@@ -1104,27 +1104,27 @@ void C2(Fila* tokens, int *err){
 	switch(getToken(token)){
 		case ID :
 			EXPRESSAO(tokens,err);
-			C2LINHA(tokens,err);
+			C2L(tokens,err);
 			break;
 		case NUM :
 			EXPRESSAO(tokens,err);
-			C2LINHA(tokens,err);
+			C2L(tokens,err);
 			break;	
 		case MAIS :
 			EXPRESSAO(tokens,err);
-			C2LINHA(tokens,err);
+			C2L(tokens,err);
 			break;	
 		case MENOS :
 			EXPRESSAO(tokens,err);
-			C2LINHA(tokens,err);
+			C2L(tokens,err);
 			break;
 		case ABRE_PARENTESES :
 			EXPRESSAO(tokens,err);
-			C2LINHA(tokens,err);
+			C2L(tokens,err);
 			break;
 		case NOT :
 			EXPRESSAO(tokens,err);
-			C2LINHA(tokens,err);
+			C2L(tokens,err);
 			break;
 		default :
 			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
@@ -1132,7 +1132,7 @@ void C2(Fila* tokens, int *err){
 	}
 }
 
-void C2LINHA(Fila* tokens, int *err){
+void C2L(Fila* tokens, int *err){
 
 	if(*err == 1)
 		return;
@@ -1159,27 +1159,27 @@ void C3(Fila* tokens, int *err){
 	switch(getToken(token)){
 		case ID :
 			CMD(tokens,err);
-			C3LINHA(tokens,err);
+			C3L(tokens,err);
 			break;
 		case PONTO_VIRGULA :
 			CMD(tokens,err);
-			C3LINHA(tokens,err);
+			C3L(tokens,err);
 			break;
 		case BEGIN :
 			CMD(tokens,err);
-			C3LINHA(tokens,err);
+			C3L(tokens,err);
 			break;	
 		case END :
 			CMD(tokens,err);
-			C3LINHA(tokens,err);	
+			C3L(tokens,err);	
 			break;
 		case IF :
 			CMD(tokens,err);
-			C3LINHA(tokens,err);
+			C3L(tokens,err);
 			break;
 		case WHILE :
 			CMD(tokens,err);
-			C3LINHA(tokens,err);
+			C3L(tokens,err);
 			break;
 		default :
 			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
@@ -1187,7 +1187,7 @@ void C3(Fila* tokens, int *err){
 	}
 }
 
-void C3LINHA(Fila* tokens, int *err){
+void C3L(Fila* tokens, int *err){
 
 	if(*err == 1)
 		return;
@@ -1466,7 +1466,7 @@ void FATOR(Fila* tokens, int *err){
 	switch(getToken(token)){
 		case ID :
 			eat(tokens,ID,err);
-			FATORLINHA(tokens,err);
+			FATORL(tokens,err);
 			break;
 		case NUM :
 			eat(tokens,NUM,err);
@@ -1486,7 +1486,7 @@ void FATOR(Fila* tokens, int *err){
 	}
 }
 
-void FATORLINHA(Fila* tokens, int *err){
+void FATORL(Fila* tokens, int *err){
 
 	if(*err == 1)
 		return;
@@ -1603,27 +1603,27 @@ void F2(Fila* tokens, int *err){
 	switch(getToken(token)){
 		case ID :
 			EXPRESSAO(tokens,err);
-			F2LINHA(tokens,err);
+			F2L(tokens,err);
 			break;
 		case NUM :
 			EXPRESSAO(tokens,err);
-			F2LINHA(tokens,err);
+			F2L(tokens,err);
 			break;
 		case MAIS :
 			EXPRESSAO(tokens,err);
-			F2LINHA(tokens,err);
+			F2L(tokens,err);
 			break;
 		case MENOS :
 			EXPRESSAO(tokens,err);
-			F2LINHA(tokens,err);
+			F2L(tokens,err);
 			break;
 		case ABRE_PARENTESES :
 			EXPRESSAO(tokens,err);
-			F2LINHA(tokens,err);
+			F2L(tokens,err);
 			break;
 		case NOT :
 			EXPRESSAO(tokens,err);
-			F2LINHA(tokens,err);
+			F2L(tokens,err);
 			break;
 		default :
 			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
@@ -1631,7 +1631,7 @@ void F2(Fila* tokens, int *err){
 	}
 }
 
-void F2LINHA(Fila* tokens, int *err){
+void F2L(Fila* tokens, int *err){
 
 	if(*err == 1)
 		return;
