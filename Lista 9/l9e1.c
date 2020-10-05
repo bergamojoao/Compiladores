@@ -206,7 +206,6 @@ void errorS(int* token){
 }
 
 void errorL(int* token){
-    printf("errro L");
     switch (*token){
         case NUM:
             printf("ERRO SINTATICO EM: num ESPERADO: end, ;");
