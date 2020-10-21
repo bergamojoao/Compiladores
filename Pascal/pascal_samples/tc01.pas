@@ -1,6 +1,6 @@
 program tc01;
-var a:integer;
+var __a_:integer;
 begin
-    read(a);
-    write(a);
+    read(a_);
+    write(_a);
 end.
