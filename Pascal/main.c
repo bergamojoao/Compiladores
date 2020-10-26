@@ -738,6 +738,8 @@ void FP(Fila* tokens, int *err){
 			eat(tokens,ABRE_PARENTESES,err);
 			FP1(tokens,err);
 			break;
+		case PONTO_VIRGULA:
+			break;
 		default :
 			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
@@ -778,6 +780,11 @@ void FP2(Fila* tokens, int *err){
 			eat(tokens,ID,err);
 			FP2L(tokens, err);
 			break;
+		case VAR :
+			eat(tokens,VAR,err);
+			eat(tokens,ID,err);
+			FP2L(tokens, err);
+			break;
 		default :
 			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;
@@ -791,12 +798,16 @@ void FP2L(Fila* tokens, int *err){
 
 
 	switch(getToken(token)){
-		case ID :
-			eat(tokens,ID,err);
+		case DOIS_PONTOS :
 			eat(tokens,DOIS_PONTOS,err);
 			eat(tokens,ID,err);
 			FP2DL(tokens,err);
-			break; 
+			break;
+		case VIRGULA:
+			eat(tokens,VIRGULA,err);
+			eat(tokens,ID,err);
+			FP2L(tokens,err);
+			break;
 		default :
 			printf("ERRO DE SINTAXE. Linha: %d -> \"%s\"",getLinha(token),getStr(token));
 			*err = 1;

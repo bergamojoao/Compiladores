@@ -1,5 +1,5 @@
 program tc09;
-var N,c:integer;
+var n,c:integer;
     function Fat (N:integer; var c:integer): integer;
     begin
         c:=c+1;
