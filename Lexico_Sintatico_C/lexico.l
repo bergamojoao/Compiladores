@@ -12,7 +12,6 @@
 char v[size_str];
 char v2[size_str];
 
-int yylval;
 
 int sintatico_aux = 0;
 int lexico_aux = 0;
