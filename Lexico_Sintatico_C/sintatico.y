@@ -10,6 +10,7 @@ extern int yylex();
 extern char* yytext;
 
 extern char STR_ERRO[size_str];
+extern char STR_BACKUP[size_str];
 
 extern int sintatico_aux;
 extern int lexico_aux;
@@ -23,6 +24,9 @@ int tam;
 int L = 0;
 
 char str_token[size_str];
+
+extern int nao_terminado;
+extern int backupTamanho;
 
 void yyerror(char *s);
 
@@ -318,10 +322,18 @@ numero: NUM_INTEGER
 void yyerror(char *s)
 {   
 	if(sintatico_aux == 0){
-	    tam = coluna - (strlen(STR_ERRO)-1);
-		L = linha;
-		strcpy(str_token, STR_ERRO);
-		sintatico_aux = 1;
+		if(strlen(v2)==0){
+			tam = backupTamanho+1;
+			L = linha;
+			nao_terminado=1;
+			sintatico_aux=1;
+			strcpy(str_token, STR_BACKUP);
+		}else{
+			tam = coluna - (strlen(STR_ERRO)-1);
+			L = linha;
+			strcpy(str_token, STR_ERRO);
+			sintatico_aux = 1;
+		}
 	}
 }
 
@@ -342,6 +354,11 @@ int main(int argc, char **argv)
 	str_espaco[indice] = '\0';
 
 	if(sintatico_aux == 1){
-		printf("error:syntax:%d:%d: %s\n%s\n%*s",L,tam,str_token,str_espaco,tam, "^");
+		if(nao_terminado==1){
+			printf("error:syntax:%d:%d: expected declaration or statement at end of input\n%s\n%*s",L,tam,str_token,tam, "^");
+		}else{
+			printf("error:syntax:%d:%d: %s\n%s\n%*s",L,tam,str_token,str_espaco,tam, "^");
+		}
+		
 	}
 }

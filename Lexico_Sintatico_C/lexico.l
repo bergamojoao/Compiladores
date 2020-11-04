@@ -25,8 +25,13 @@ int coluna = 0;
 
 int pula_linha = 0;
 char STR_ERRO[size_str];
+char STR_BACKUP[size_str];
 int i=0;
 char *str;
+
+int nao_terminado = 0;
+int backupTamanho=0;
+int comentarioUmalinha = 0;
 
 
 void save_token();
@@ -127,14 +132,14 @@ void save_token();
      \n        save_token();yylineno++;linha++;
 }
 
-\/\/([^\n])* 			{ save_token();caracteres += strlen(yytext); }
+\/\/([^\n])* 			{ comentarioUmalinha=1;save_token();caracteres += strlen(yytext); }
 .                       { if(sintatico_aux == 0){printf("error:lexical:%d:%d: %s",linha,caracteres,yytext); caracteres+= strlen(yytext); pula_linha++;exit(0);}}
 
 %%    
 
 void save_token(){
 
-	int i=0;
+    int i=0;
 
 
 	for (i = 0; yytext[i] != '\0'; i++){
@@ -142,6 +147,8 @@ void save_token(){
 		if(yytext[i] == '\n'){
 
         	strcpy(STR_ERRO,"");
+            strcpy(STR_BACKUP,"");
+            backupTamanho=0;
             coluna = 0;
         }
 		else if(yytext[i] == '\t')
@@ -153,4 +160,12 @@ void save_token(){
             coluna++;
         }  
     }
+    strcat(STR_BACKUP,STR_ERRO);
+    if(comentarioUmalinha==1){
+        comentarioUmalinha=0;
+    }else{
+        backupTamanho=(int)strlen(STR_BACKUP);
+    }
+    
+
 }
