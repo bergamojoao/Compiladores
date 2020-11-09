@@ -322,7 +322,7 @@ numero: NUM_INTEGER
 void yyerror(char *s)
 {   
 	if(sintatico_aux == 0){
-		if(strlen(v2)==0){
+		if(strlen(STR_ERRO)==0){
 			tam = backupTamanho+1;
 			L = linha;
 			nao_terminado=1;
@@ -354,7 +354,12 @@ int main(int argc, char **argv)
 	str_espaco[indice] = '\0';
 
 	if(sintatico_aux == 1){
-		if(nao_terminado==1){
+		if(strlen(str_espaco)==0){
+			tam = backupTamanho+1;
+			L = linha;
+			nao_terminado=1;
+			sintatico_aux=1;
+			strcpy(str_token, STR_BACKUP);
 			printf("error:syntax:%d:%d: expected declaration or statement at end of input\n%s\n%*s",L,tam,str_token,tam, "^");
 		}else{
 			printf("error:syntax:%d:%d: %s\n%s\n%*s",L,tam,str_token,str_espaco,tam, "^");
