@@ -10,7 +10,7 @@ $(PROGRAMA): $(LEXICO) $(SINTATICO)
 	$(BISON) -d $(SINTATICO)
 	$(FLEX) $(LEXICO)
 	$(CC) -c *.c -I.
-	$(CC) *.o -o $(PROGRAMA)
+	$(CC) *.o -o $(PROGRAMA) -lm
 
 clean:
 	rm -f *.yy.c

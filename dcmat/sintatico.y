@@ -4,6 +4,7 @@
 #include<string.h>
 #include<stdlib.h>
 #include<stdbool.h>
+#include<math.h>
 
 extern int yylex();
 extern void yyrestart(FILE *f);
@@ -32,7 +33,7 @@ void about();
 %token MUL
 %token DIV
 %token POW
-%token PROCENTAGEM
+%token PORCENTAGEM
 %token ABRE_PARENTESES
 %token FECHA_PARENTESES
 %token SEN
@@ -79,11 +80,24 @@ COMANDOS: SHOW SETTINGS SEMI_COLON {configs();}
 	| SET AXIS ON {draw_axis=true;}
 	| SET AXIS OFF {draw_axis=false;}
 	| ABOUT SEMI_COLON {about();}
+	| EXP {printf("%lf\n",$$);}
+	| ;
 
 NUM_FORM: ADD NUM {$$=$2;}
 	| SUB NUM {$$=-$2;}
 	| NUM {$$=$1;}
 	
+EXP: NUM_FORM
+	| EXP ADD EXP {$$ = $1+$3;}
+	| EXP SUB EXP {$$ = $1-$3;}
+	| EXP MUL EXP {$$ = $1*$3;}
+	| EXP DIV EXP {$$ = $1/$3;}
+	| EXP POW EXP {$$ = pow($1,$3);}
+	| SEN ABRE_PARENTESES EXP FECHA_PARENTESES {$$ = sin($3);}
+	| COS ABRE_PARENTESES EXP FECHA_PARENTESES {$$ = cos($3);}
+	| TAN ABRE_PARENTESES EXP FECHA_PARENTESES {$$ = tan($3);}
+	| ABS ABRE_PARENTESES EXP FECHA_PARENTESES {$$ = abs($3);}
+	| ABRE_PARENTESES EXP FECHA_PARENTESES {$$ = $2;}
 
 %%
 

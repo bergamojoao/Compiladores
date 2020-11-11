@@ -19,6 +19,7 @@ extern YYSTYPE yylval;
 "/"             { return DIV;}
 "("             { return ABRE_PARENTESES;}
 ")"             { return FECHA_PARENTESES;}
+"^"             { return POW;}
 "sen"           { return SEN;}
 "cos"           { return COS;}
 "tan"           { return TAN;}
