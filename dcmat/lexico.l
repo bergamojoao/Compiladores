@@ -5,13 +5,14 @@
 #include<stdio.h>
 #include<stdlib.h>
 typedef struct T{
-	char * tipo;
+	char tipo[10];
 	double value;
+    char f[10];
 }Tipo;
 #define YYSTYPE Tipo
 extern YYSTYPE yylval;
 #include <sintatico.tab.h>
-
+int f;
 
 %}
 
@@ -28,7 +29,7 @@ extern YYSTYPE yylval;
 "cos"           { return COS;}
 "tan"           { return TAN;}
 "abs"           { return ABS;}
-"x"             { yylval.tipo="F";return VAR;}
+"x"             { sprintf(yylval.tipo,"%d",f);f++;return VAR;}
 "show"          { return SHOW;}
 "reset"         { return RESET;}
 "settings"      { return SETTINGS;}
@@ -52,8 +53,8 @@ extern YYSTYPE yylval;
 ":"             { return COLON;}
 ";"             { return SEMI_COLON;}
 ","             { return COMMA;}
-[0-9]+"."[0-9]+ { yylval.value = atof(yytext);yylval.tipo="D";return NUM; }
-[0-9]+          { yylval.value = atof(yytext);yylval.tipo="D";return NUM; }
+[0-9]+"."[0-9]+ { yylval.value = atof(yytext);strcpy(yylval.tipo,"D");return NUM; }
+[0-9]+          { yylval.value = atof(yytext);strcpy(yylval.tipo,"D");return NUM; }
 \n              { return EOL; }
 [ \t]           { /* espaço em branco/tabulação */  }
 .               { printf("Simbolo Invalido -> %c\n", *yytext);}

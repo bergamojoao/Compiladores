@@ -1,7 +1,8 @@
 %{
 typedef struct T{
-	char tipo[2];
+	char tipo[10];
 	double value;
+	char f[10];
 }Tipo;
 
 #define YYSTYPE Tipo
@@ -26,7 +27,7 @@ bool connect_dots=false;
 int op=0;
 char RPN[100] = "";
 bool function=false;
-double resulF[80];
+double resulF[10][80];
 
 
 
@@ -35,10 +36,10 @@ void configs();
 void resetConfigs();
 void about();
 void montaFunc();
-void calcFunc(char* op);
+void calcFunc(char* op,int f);
 void verificaOp(Tipo exp1, Tipo exp2,char* op);
-void calcFuncLeft(char* op,double value);
-void calcFuncRight(char* op,double value);
+void calcFuncLeft(char* op,int f,double value);
+void calcFuncRight(char* op,int f,double value);
 
 %}
 
@@ -102,106 +103,135 @@ NUM_FORM: ADD NUM {$$.value=$2.value;strcpy($$.tipo,"D");}
 	| NUM {$$.value=$1.value;strcpy($$.tipo,"D");}
 	
 EXP: NUM_FORM {char aux[100];sprintf(aux,"%.6lf ",$$.value);strcat(RPN,aux);}
-	| VAR {strcat(RPN,"x ");function=true;montaFunc();$$=$1;}
+	| VAR {strcat(RPN,"x ");function=true;printf("teste:%s\n",$1.tipo);montaFunc(atoi($1.tipo));$$=$1;}
 	| EXP ADD EXP {strcat(RPN,"+ ");verificaOp($1,$3,"+");}
 	| EXP SUB EXP {strcat(RPN,"- ");verificaOp($1,$3,"-");}
 	| EXP MUL EXP {strcat(RPN,"* ");verificaOp($1,$3,"*");}
 	| EXP DIV EXP {strcat(RPN,"/ ");verificaOp($1,$3,"/");}
 	| EXP POW EXP {strcat(RPN,"^ ");verificaOp($1,$3,"^");}
-	| SEN ABRE_PARENTESES EXP FECHA_PARENTESES {strcat(RPN,"SEN ");if(function){calcFunc("SEN");strcpy($$.tipo,"F");function=false;}else{$$.value=sin($3.value);}}
-	| COS ABRE_PARENTESES EXP FECHA_PARENTESES {strcat(RPN,"COS ");if(function){calcFunc("COS");strcpy($$.tipo,"F");function=false;}else{$$.value=cos($3.value);}}
-	| TAN ABRE_PARENTESES EXP FECHA_PARENTESES {strcat(RPN,"TAN ");if(function){calcFunc("TAN");strcpy($$.tipo,"F");function=false;}else{$$.value=tan($3.value);}}
-	| ABS ABRE_PARENTESES EXP FECHA_PARENTESES {strcat(RPN,"ABS ");if(function){calcFunc("ABS");strcpy($$.tipo,"F");function=false;}else{$$.value=abs($3.value);}}
+	| SEN ABRE_PARENTESES EXP FECHA_PARENTESES {strcat(RPN,"SEN ");if(function){calcFunc("SEN",atoi($3.tipo));strcpy($$.tipo,$3.tipo);function=false;}else{$$.value=sin($3.value);}}
+	| COS ABRE_PARENTESES EXP FECHA_PARENTESES {strcat(RPN,"COS ");if(function){calcFunc("COS",atoi($3.tipo));strcpy($$.tipo,$3.tipo);function=false;}else{$$.value=cos($3.value);}}
+	| TAN ABRE_PARENTESES EXP FECHA_PARENTESES {strcat(RPN,"TAN ");if(function){calcFunc("TAN",atoi($3.tipo));strcpy($$.tipo,$3.tipo);function=false;}else{$$.value=tan($3.value);}}
+	| ABS ABRE_PARENTESES EXP FECHA_PARENTESES {strcat(RPN,"ABS ");if(function){calcFunc("ABS",atoi($3.tipo));strcpy($$.tipo,$3.tipo);function=false;}else{$$.value=abs($3.value);}}
 	| ABRE_PARENTESES EXP FECHA_PARENTESES;
 
 %%
 
-void montaFunc(){
+void montaFunc(int f){
 	double espacX = (h_view_hi-h_view_lo)/80;
 	int i;
 	double attr = h_view_lo;
 	for(i=0;i<80;i++){
-		resulF[i]=attr;
+		resulF[f][i]=attr;
 		attr+=espacX;
 	}
 }
 
 void verificaOp(Tipo exp1, Tipo exp2,char* op){
-	if(strcmp(exp1.tipo,"F")==0){
-		if(strcmp(exp2.tipo,"F")!=0){
-			calcFuncLeft(op,exp2.value);
+	if(strcmp(exp1.tipo,"D")!=0){
+		if(strcmp(exp2.tipo,"D")==0){
+			calcFuncLeft(op,atoi(exp2.tipo),exp2.value);
+		}else{
+			int i;
+			int f1,f2;
+			f1=atoi(exp1.tipo);
+			f2=atoi(exp2.tipo);
+			printf("f1:%d | f2:%d\n",f1,f2);
+			strcpy(exp2.tipo,exp1.tipo);
+
+			if(strcmp(op,"+")==0){
+				for(i=0;i<80;i++)
+					resulF[f1][i]=resulF[f1][i]+resulF[f2][i];
+			}else if(strcmp(op,"-")==0){
+				for(i=0;i<80;i++)
+					resulF[f1][i]=resulF[f1][i]-resulF[f2][i];
+			}else if(strcmp(op,"*")==0){
+				for(i=0;i<80;i++)
+					resulF[f1][i]=resulF[f1][i]*resulF[f2][i];
+			}else if(strcmp(op,"/")==0){
+				for(i=0;i<80;i++)
+					resulF[f1][i]=resulF[f1][i]/resulF[f2][i];
+			}else if(strcmp(op,"^")==0){
+				for(i=0;i<80;i++)
+					resulF[f1][i]=pow(resulF[f1][i],resulF[f2][i]);
+			}	
+
+			for(i=0;i<80;i++)
+					printf("%.6lf ",resulF[f1][i]);
+			printf("\n");
 		}
 	}else{
-		if(strcmp(exp2.tipo,"F")==0){
-			calcFuncRight(op,exp1.value);
+		if(strcmp(exp2.tipo,"D")!=0){
+			calcFuncRight(op,atoi(exp1.tipo),exp1.value);
 		}
 	}
 }
 
-void calcFuncLeft(char* op,double value){
+void calcFuncLeft(char* op,int f,double value){
 	int i;
 	if(strcmp(op,"+")==0){
 		for(i=0;i<80;i++)
-			resulF[i]=resulF[i]+value;
+			resulF[f][i]=resulF[f][i]+value;
 	}else if(strcmp(op,"-")==0){
 		for(i=0;i<80;i++)
-			resulF[i]=resulF[i]-value;
+			resulF[f][i]=resulF[f][i]-value;
 	}else if(strcmp(op,"*")==0){
 		for(i=0;i<80;i++)
-			resulF[i]=resulF[i]*value;
+			resulF[f][i]=resulF[f][i]*value;
 	}else if(strcmp(op,"/")==0){
 		for(i=0;i<80;i++)
-			resulF[i]=resulF[i]/value;
+			resulF[f][i]=resulF[f][i]/value;
 	}else if(strcmp(op,"^")==0){
 		for(i=0;i<80;i++)
-			resulF[i]=pow(resulF[i],value);
+			resulF[f][i]=pow(resulF[f][i],value);
 	}	
 
 	for(i=0;i<80;i++)
-			printf("%.6lf ",resulF[i]);
+			printf("%.6lf ",resulF[f][i]);
 }
 
-void calcFuncRight(char* op,double value){
+void calcFuncRight(char* op,int f,double value){
 	int i;
 	if(strcmp(op,"+")==0){
 		for(i=0;i<80;i++)
-			resulF[i]=value+resulF[i];
+			resulF[f][i]=value+resulF[f][i];
 	}else if(strcmp(op,"-")==0){
 		for(i=0;i<80;i++)
-			resulF[i]=value-resulF[i];
+			resulF[f][i]=value-resulF[f][i];
 	}else if(strcmp(op,"*")==0){
 		for(i=0;i<80;i++)
-			resulF[i]=value*resulF[i];
+			resulF[f][i]=value*resulF[f][i];
 	}else if(strcmp(op,"/")==0){
 		for(i=0;i<80;i++)
-			resulF[i]=value/resulF[i];
+			resulF[f][i]=value/resulF[f][i];
 	}else if(strcmp(op,"^")==0){
 		for(i=0;i<80;i++)
-			resulF[i]=pow(value,resulF[i]);
+			resulF[f][i]=pow(value,resulF[f][i]);
 	}	
 
 	for(i=0;i<80;i++)
-			printf("%.6lf ",resulF[i]);
+			printf("%.6lf ",resulF[f][i]);
 }
 
-void calcFunc(char* op){
+void calcFunc(char* op,int f){
 	int i;
 	if(strcmp(op,"SEN")==0){
 		for(i=0;i<80;i++)
-			resulF[i]=sin(resulF[i]);
+			resulF[f][i]=sin(resulF[f][i]);
 	}else if(strcmp(op,"COS")==0){
 		for(i=0;i<80;i++)
-			resulF[i]=cos(resulF[i]);
+			resulF[f][i]=cos(resulF[f][i]);
 	}else if(strcmp(op,"TAN")==0){
 		for(i=0;i<80;i++)
-			resulF[i]=tan(resulF[i]);
+			resulF[f][i]=tan(resulF[f][i]);
 	}else if(strcmp(op,"ABS")==0){
 		for(i=0;i<80;i++)
-			resulF[i]=abs(resulF[i]);
+			resulF[f][i]=abs(resulF[f][i]);
 	}
 
 	for(i=0;i<80;i++)
-			printf("%.6lf ",resulF[i]);
+			printf("%.6lf ",resulF[f][i]);
+	printf("\n");
 }
 
 void configs(){
