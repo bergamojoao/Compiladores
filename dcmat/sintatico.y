@@ -27,7 +27,11 @@ bool connect_dots=false;
 int op=0;
 char RPN[100] = "";
 bool function=false;
-double resulF[10][80];
+bool integral=false;
+double resulF[10][3000];
+int tam=80,auxInt=0;
+double lInf,lSup;
+int f=0;
 
 
 
@@ -35,11 +39,12 @@ double resulF[10][80];
 void configs();
 void resetConfigs();
 void about();
-void montaFunc();
+void montaFunc(int f,int s);
 void calcFunc(char* op,int f);
 void verificaOp(Tipo exp1, Tipo exp2,char* op);
 void calcFuncLeft(char* op,int f,double value);
 void calcFuncRight(char* op,int f,double value);
+void integrate();
 
 %}
 
@@ -95,15 +100,21 @@ COMANDOS: SHOW SETTINGS SEMI_COLON {configs();}
 	| SET AXIS ON {draw_axis=true;}
 	| SET AXIS OFF {draw_axis=false;}
 	| ABOUT SEMI_COLON {about();}
+	| SET INTEGRAL_STEPS NUM_FORM SEMI_COLON {integral_steps=$3.value;}
+	| INTEGRATE ABRE_PARENTESES NUM_FORM1 COLON NUM_FORM1 COMMA EXP1 FECHA_PARENTESES SEMI_COLON {integrate();auxInt=0;f=0;}
 	| EXP {printf("\nFunction in RPN format:\n\n%s\n\n",RPN);strcpy(RPN,"");}
 	| ;
 
-NUM_FORM: ADD NUM {$$.value=$2.value;strcpy($$.tipo,"D");}
-	| SUB NUM {$$.value=-$2.value;strcpy($$.tipo,"D");}
-	| NUM {$$.value=$1.value;strcpy($$.tipo,"D");}
+NUM_FORM: ADD NUM {$$.value=$2.value;strcpy($$.tipo,"D");integral=false;}
+	| SUB NUM {$$.value=-$2.value;strcpy($$.tipo,"D");integral=false;}
+	| NUM {$$.value=$1.value;strcpy($$.tipo,"D");integral=false;}
+
+NUM_FORM1: ADD NUM {$$.value=$2.value;strcpy($$.tipo,"D");if(auxInt==0){lInf=$2.value;}else if(auxInt==1){lSup=$2.value;}auxInt++;integral=true;}
+	| SUB NUM {$$.value=-$2.value;strcpy($$.tipo,"D");if(auxInt==0){lInf=-$2.value;}else if(auxInt==1){lSup=-$2.value;}auxInt++;integral=true;}
+	| NUM {$$.value=$1.value;strcpy($$.tipo,"D");if(auxInt==0){lInf=$1.value;}else if(auxInt==1){lSup=$1.value;}auxInt++;integral=true;}
 	
 EXP: NUM_FORM {char aux[100];sprintf(aux,"%.6lf ",$$.value);strcat(RPN,aux);}
-	| VAR {strcat(RPN,"x ");function=true;printf("teste:%s\n",$1.tipo);montaFunc(atoi($1.tipo));$$=$1;}
+	| VAR {strcat(RPN,"x ");function=true;montaFunc(atoi($1.tipo),80);$$=$1;}
 	| EXP ADD EXP {strcat(RPN,"+ ");verificaOp($1,$3,"+");}
 	| EXP SUB EXP {strcat(RPN,"- ");verificaOp($1,$3,"-");}
 	| EXP MUL EXP {strcat(RPN,"* ");verificaOp($1,$3,"*");}
@@ -113,18 +124,41 @@ EXP: NUM_FORM {char aux[100];sprintf(aux,"%.6lf ",$$.value);strcat(RPN,aux);}
 	| COS ABRE_PARENTESES EXP FECHA_PARENTESES {strcat(RPN,"COS ");if(function){calcFunc("COS",atoi($3.tipo));strcpy($$.tipo,$3.tipo);function=false;}else{$$.value=cos($3.value);}}
 	| TAN ABRE_PARENTESES EXP FECHA_PARENTESES {strcat(RPN,"TAN ");if(function){calcFunc("TAN",atoi($3.tipo));strcpy($$.tipo,$3.tipo);function=false;}else{$$.value=tan($3.value);}}
 	| ABS ABRE_PARENTESES EXP FECHA_PARENTESES {strcat(RPN,"ABS ");if(function){calcFunc("ABS",atoi($3.tipo));strcpy($$.tipo,$3.tipo);function=false;}else{$$.value=abs($3.value);}}
-	| ABRE_PARENTESES EXP FECHA_PARENTESES;
+	| ABRE_PARENTESES EXP FECHA_PARENTESES
+
+EXP1: NUM_FORM1
+	| VAR {function=true;montaFunc(atoi($1.tipo),integral_steps);$$=$1;}
+	| EXP1 ADD EXP1 {verificaOp($1,$3,"+");}
+	| EXP1 SUB EXP1 {verificaOp($1,$3,"-");}
+	| EXP1 MUL EXP1 {verificaOp($1,$3,"*");}
+	| EXP1 DIV EXP1 {verificaOp($1,$3,"/");}
+	| EXP1 POW EXP1 {verificaOp($1,$3,"^");}
+	| SEN ABRE_PARENTESES EXP1 FECHA_PARENTESES {if(function){calcFunc("SEN",atoi($3.tipo));strcpy($$.tipo,$3.tipo);function=false;}else{$$.value=sin($3.value);}}
+	| COS ABRE_PARENTESES EXP1 FECHA_PARENTESES {if(function){calcFunc("COS",atoi($3.tipo));strcpy($$.tipo,$3.tipo);function=false;}else{$$.value=cos($3.value);}}
+	| TAN ABRE_PARENTESES EXP1 FECHA_PARENTESES {if(function){calcFunc("TAN",atoi($3.tipo));strcpy($$.tipo,$3.tipo);function=false;}else{$$.value=tan($3.value);}}
+	| ABS ABRE_PARENTESES EXP1 FECHA_PARENTESES {if(function){calcFunc("ABS",atoi($3.tipo));strcpy($$.tipo,$3.tipo);function=false;}else{$$.value=abs($3.value);}}
+	| ABRE_PARENTESES EXP1 FECHA_PARENTESES;
+
 
 %%
 
-void montaFunc(int f){
-	double espacX = (h_view_hi-h_view_lo)/80;
+void montaFunc(int f,int s){
+	tam=s;
+	double espacX,attr;
+	if(integral){
+		espacX=(lSup-lInf)/integral_steps;
+		attr=lInf;
+	}else{
+		espacX = (h_view_hi-h_view_lo)/tam;
+		attr = h_view_lo;
+	}
 	int i;
-	double attr = h_view_lo;
-	for(i=0;i<80;i++){
+	for(i=0;i<tam;i++){
 		resulF[f][i]=attr;
 		attr+=espacX;
 	}
+
+
 }
 
 void verificaOp(Tipo exp1, Tipo exp2,char* op){
@@ -136,29 +170,24 @@ void verificaOp(Tipo exp1, Tipo exp2,char* op){
 			int f1,f2;
 			f1=atoi(exp1.tipo);
 			f2=atoi(exp2.tipo);
-			printf("f1:%d | f2:%d\n",f1,f2);
 			strcpy(exp2.tipo,exp1.tipo);
 
 			if(strcmp(op,"+")==0){
-				for(i=0;i<80;i++)
+				for(i=0;i<tam;i++)
 					resulF[f1][i]=resulF[f1][i]+resulF[f2][i];
 			}else if(strcmp(op,"-")==0){
-				for(i=0;i<80;i++)
+				for(i=0;i<tam;i++)
 					resulF[f1][i]=resulF[f1][i]-resulF[f2][i];
 			}else if(strcmp(op,"*")==0){
-				for(i=0;i<80;i++)
+				for(i=0;i<tam;i++)
 					resulF[f1][i]=resulF[f1][i]*resulF[f2][i];
 			}else if(strcmp(op,"/")==0){
-				for(i=0;i<80;i++)
+				for(i=0;i<tam;i++)
 					resulF[f1][i]=resulF[f1][i]/resulF[f2][i];
 			}else if(strcmp(op,"^")==0){
-				for(i=0;i<80;i++)
+				for(i=0;i<tam;i++)
 					resulF[f1][i]=pow(resulF[f1][i],resulF[f2][i]);
 			}	
-
-			for(i=0;i<80;i++)
-					printf("%.6lf ",resulF[f1][i]);
-			printf("\n");
 		}
 	}else{
 		if(strcmp(exp2.tipo,"D")!=0){
@@ -170,68 +199,58 @@ void verificaOp(Tipo exp1, Tipo exp2,char* op){
 void calcFuncLeft(char* op,int f,double value){
 	int i;
 	if(strcmp(op,"+")==0){
-		for(i=0;i<80;i++)
+		for(i=0;i<tam;i++)
 			resulF[f][i]=resulF[f][i]+value;
 	}else if(strcmp(op,"-")==0){
-		for(i=0;i<80;i++)
+		for(i=0;i<tam;i++)
 			resulF[f][i]=resulF[f][i]-value;
 	}else if(strcmp(op,"*")==0){
-		for(i=0;i<80;i++)
+		for(i=0;i<tam;i++)
 			resulF[f][i]=resulF[f][i]*value;
 	}else if(strcmp(op,"/")==0){
-		for(i=0;i<80;i++)
+		for(i=0;i<tam;i++)
 			resulF[f][i]=resulF[f][i]/value;
 	}else if(strcmp(op,"^")==0){
-		for(i=0;i<80;i++)
+		for(i=0;i<tam;i++)
 			resulF[f][i]=pow(resulF[f][i],value);
 	}	
-
-	for(i=0;i<80;i++)
-			printf("%.6lf ",resulF[f][i]);
 }
 
 void calcFuncRight(char* op,int f,double value){
 	int i;
 	if(strcmp(op,"+")==0){
-		for(i=0;i<80;i++)
+		for(i=0;i<tam;i++)
 			resulF[f][i]=value+resulF[f][i];
 	}else if(strcmp(op,"-")==0){
-		for(i=0;i<80;i++)
+		for(i=0;i<tam;i++)
 			resulF[f][i]=value-resulF[f][i];
 	}else if(strcmp(op,"*")==0){
-		for(i=0;i<80;i++)
+		for(i=0;i<tam;i++)
 			resulF[f][i]=value*resulF[f][i];
 	}else if(strcmp(op,"/")==0){
-		for(i=0;i<80;i++)
+		for(i=0;i<tam;i++)
 			resulF[f][i]=value/resulF[f][i];
 	}else if(strcmp(op,"^")==0){
-		for(i=0;i<80;i++)
+		for(i=0;i<tam;i++)
 			resulF[f][i]=pow(value,resulF[f][i]);
 	}	
-
-	for(i=0;i<80;i++)
-			printf("%.6lf ",resulF[f][i]);
 }
 
 void calcFunc(char* op,int f){
 	int i;
 	if(strcmp(op,"SEN")==0){
-		for(i=0;i<80;i++)
+		for(i=0;i<tam;i++)
 			resulF[f][i]=sin(resulF[f][i]);
 	}else if(strcmp(op,"COS")==0){
-		for(i=0;i<80;i++)
+		for(i=0;i<tam;i++)
 			resulF[f][i]=cos(resulF[f][i]);
 	}else if(strcmp(op,"TAN")==0){
-		for(i=0;i<80;i++)
+		for(i=0;i<tam;i++)
 			resulF[f][i]=tan(resulF[f][i]);
 	}else if(strcmp(op,"ABS")==0){
-		for(i=0;i<80;i++)
+		for(i=0;i<tam;i++)
 			resulF[f][i]=abs(resulF[f][i]);
 	}
-
-	for(i=0;i<80;i++)
-			printf("%.6lf ",resulF[f][i]);
-	printf("\n");
 }
 
 void configs(){
@@ -244,6 +263,17 @@ void configs(){
 	printf("Draw Axis: %s.\n",draw_axis?"ON":"OFF");
 	printf("Connect Dots: %s.\n",connect_dots?"ON":"OFF");
 	printf("\n");
+}
+
+void integrate(){
+	double soma=0;
+	double delta=((lSup-lInf)/integral_steps);
+	int i;
+	for(i=0;i<tam;i++){
+		soma+=resulF[0][i];
+	}
+	printf("\n%.6lf\n\n",soma*delta);
+
 }
 
 void resetConfigs(){

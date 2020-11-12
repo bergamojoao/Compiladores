@@ -12,7 +12,7 @@ typedef struct T{
 #define YYSTYPE Tipo
 extern YYSTYPE yylval;
 #include <sintatico.tab.h>
-int f;
+extern int f;
 
 %}
 
