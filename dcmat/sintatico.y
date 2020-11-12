@@ -32,6 +32,7 @@ double resulF[10][3000];
 int tam=80,auxInt=0;
 double lInf,lSup;
 int f=0;
+char tela[25][80];
 
 
 
@@ -45,6 +46,10 @@ void verificaOp(Tipo exp1, Tipo exp2,char* op);
 void calcFuncLeft(char* op,int f,double value);
 void calcFuncRight(char* op,int f,double value);
 void integrate();
+double min();
+double max();
+void preparaTela();
+void plot();
 
 %}
 
@@ -102,7 +107,8 @@ COMANDOS: SHOW SETTINGS SEMI_COLON {configs();}
 	| ABOUT SEMI_COLON {about();}
 	| SET INTEGRAL_STEPS NUM_FORM SEMI_COLON {integral_steps=$3.value;}
 	| INTEGRATE ABRE_PARENTESES NUM_FORM1 COLON NUM_FORM1 COMMA EXP1 FECHA_PARENTESES SEMI_COLON {integrate();auxInt=0;f=0;}
-	| EXP {printf("\nFunction in RPN format:\n\n%s\n\n",RPN);strcpy(RPN,"");}
+	| PLOT {plot();}
+	| EXP {printf("\nFunction in RPN format:\n\n%s\n\n",RPN);strcpy(RPN,"");f=0;}
 	| ;
 
 NUM_FORM: ADD NUM {$$.value=$2.value;strcpy($$.tipo,"D");integral=false;}
@@ -251,6 +257,9 @@ void calcFunc(char* op,int f){
 		for(i=0;i<tam;i++)
 			resulF[f][i]=abs(resulF[f][i]);
 	}
+
+	for(i=0;i<tam;i++)
+			printf("%lf ",resulF[f][i]);
 }
 
 void configs(){
@@ -275,6 +284,74 @@ void integrate(){
 	printf("\n%.6lf\n\n",soma*delta);
 
 }
+
+double min(){
+	double minF = resulF[f][0];
+	int i;
+	for(i=1;i<80;i++)
+		if(resulF[f][i]<minF) minF=resulF[f][i];
+	return minF;
+}
+
+double max(){
+	double minF = resulF[f][0];
+	int i;
+	for(i=1;i<80;i++)
+		if(resulF[f][i]>minF) minF=resulF[f][i];
+	return minF;
+}
+
+void plot(){
+	preparaTela();
+	int i,j;
+	for(i=0;i<25;i++){
+		for(j=0;j<80;j++)
+			printf("%c",tela[i][j]);
+		printf("\n");
+	}
+}
+
+void preparaTela(){
+	int i,j;
+	double v_view[25];
+	double dif = (v_view_hi-v_view_lo)/25;
+	double som=v_view_lo;
+	for(i=0;i<80;i++){
+		printf("%lf ",resulF[f][i]);
+	}
+	printf("\n\n");
+	for(i=0;i<25;i++){
+		v_view[i]=som;
+		printf("%lf ",v_view[i]);
+		som+=dif;
+		for(j=0;j<80;j++){
+			if(draw_axis && j==40) tela[i][j]='|';
+			else if(draw_axis && i==12) tela[i][j]='-';
+			else tela[i][j]=' ';
+		}
+	}
+	printf("\n\n");
+	for(i=24;i>=0;i--){
+		for(j=79;j>=0;j--){
+			if(resulF[f][j]>=v_view[i] && resulF[f][j]<=v_view[i+1])
+				tela[i][j]='*';
+		}
+	}
+	/*double minF=min(resulF,80);
+	double maxF=max(resulF,80);
+	double norm;
+	int k=0;
+	for(j=79;j>=0;j--){
+		double v= resulF[f][k];
+		k++;
+		norm=(v-minF)/(maxF-minF);
+		norm=(norm*25);
+		int indice = (int) norm;
+		tela[indice][j]='*';
+	}*/
+
+}
+
 
 void resetConfigs(){
 	h_view_lo = -6.500000;
