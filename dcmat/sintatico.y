@@ -28,6 +28,7 @@ int op=0;
 char RPN[100] = "";
 bool function=false;
 bool integral=false;
+bool num=false;
 double resulF[10][3000];
 int tam=80,auxInt=0;
 double lInf,lSup;
@@ -41,6 +42,7 @@ void configs();
 void resetConfigs();
 void about();
 void montaFunc(int f,int s);
+void montaNum(double value);
 void calcFunc(char* op,int f);
 void verificaOp(Tipo exp1, Tipo exp2,char* op);
 void calcFuncLeft(char* op,int f,double value);
@@ -102,18 +104,19 @@ COMANDOS: SHOW SETTINGS SEMI_COLON {configs();}
 	| RESET SETTINGS SEMI_COLON {resetConfigs();}
 	| SET H_VIEW NUM_FORM COLON NUM_FORM SEMI_COLON {h_view_lo=$3.value;h_view_hi=$5.value;}
 	| SET V_VIEW NUM_FORM COLON NUM_FORM SEMI_COLON {v_view_lo=$3.value;v_view_hi=$5.value;}
-	| SET AXIS ON {draw_axis=true;}
-	| SET AXIS OFF {draw_axis=false;}
+	| SET AXIS ON SEMI_COLON {draw_axis=true;}
+	| SET AXIS OFF SEMI_COLON {draw_axis=false;}
 	| ABOUT SEMI_COLON {about();}
 	| SET INTEGRAL_STEPS NUM_FORM SEMI_COLON {integral_steps=$3.value;}
-	| INTEGRATE ABRE_PARENTESES NUM_FORM1 COLON NUM_FORM1 COMMA EXP1 FECHA_PARENTESES SEMI_COLON {integrate();auxInt=0;f=0;}
-	| PLOT {plot();}
-	| EXP {printf("\nFunction in RPN format:\n\n%s\n\n",RPN);strcpy(RPN,"");f=0;}
+	| INTEGRATE ABRE_PARENTESES NUM_FORM1 COLON NUM_FORM1 COMMA EXP1 FECHA_PARENTESES SEMI_COLON {integrate();auxInt=0;f=0;integral=false;}
+	| PLOT SEMI_COLON {plot();}
+	| PLOT ABRE_PARENTESES EXP FECHA_PARENTESES SEMI_COLON {f=0;function=false;strcpy(RPN,"");num=false;plot();}
+	| EXP {printf("\nFunction in RPN format:\n\n%s\n\n",RPN);strcpy(RPN,"");f=0;function=false;num=false;}
 	| ;
 
-NUM_FORM: ADD NUM {$$.value=$2.value;strcpy($$.tipo,"D");integral=false;}
-	| SUB NUM {$$.value=-$2.value;strcpy($$.tipo,"D");integral=false;}
-	| NUM {$$.value=$1.value;strcpy($$.tipo,"D");integral=false;}
+NUM_FORM: ADD NUM {$$.value=$2.value;strcpy($$.tipo,"D");integral=false;if(!function && !num){montaNum($2.value);num=true;}}
+	| SUB NUM {$$.value=-$2.value;strcpy($$.tipo,"D");integral=false;if(!function && !num){montaNum($2.value);num=true;}}
+	| NUM {$$.value=$1.value;strcpy($$.tipo,"D");integral=false;if(!function && !num){montaNum($1.value);num=true;}}
 
 NUM_FORM1: ADD NUM {$$.value=$2.value;strcpy($$.tipo,"D");if(auxInt==0){lInf=$2.value;}else if(auxInt==1){lSup=$2.value;}auxInt++;integral=true;}
 	| SUB NUM {$$.value=-$2.value;strcpy($$.tipo,"D");if(auxInt==0){lInf=-$2.value;}else if(auxInt==1){lSup=-$2.value;}auxInt++;integral=true;}
@@ -126,10 +129,10 @@ EXP: NUM_FORM {char aux[100];sprintf(aux,"%.6lf ",$$.value);strcat(RPN,aux);}
 	| EXP MUL EXP {strcat(RPN,"* ");verificaOp($1,$3,"*");}
 	| EXP DIV EXP {strcat(RPN,"/ ");verificaOp($1,$3,"/");}
 	| EXP POW EXP {strcat(RPN,"^ ");verificaOp($1,$3,"^");}
-	| SEN ABRE_PARENTESES EXP FECHA_PARENTESES {strcat(RPN,"SEN ");if(function){calcFunc("SEN",atoi($3.tipo));strcpy($$.tipo,$3.tipo);function=false;}else{$$.value=sin($3.value);}}
-	| COS ABRE_PARENTESES EXP FECHA_PARENTESES {strcat(RPN,"COS ");if(function){calcFunc("COS",atoi($3.tipo));strcpy($$.tipo,$3.tipo);function=false;}else{$$.value=cos($3.value);}}
-	| TAN ABRE_PARENTESES EXP FECHA_PARENTESES {strcat(RPN,"TAN ");if(function){calcFunc("TAN",atoi($3.tipo));strcpy($$.tipo,$3.tipo);function=false;}else{$$.value=tan($3.value);}}
-	| ABS ABRE_PARENTESES EXP FECHA_PARENTESES {strcat(RPN,"ABS ");if(function){calcFunc("ABS",atoi($3.tipo));strcpy($$.tipo,$3.tipo);function=false;}else{$$.value=abs($3.value);}}
+	| SEN ABRE_PARENTESES EXP FECHA_PARENTESES {strcat(RPN,"SEN ");if(function){calcFunc("SEN",atoi($3.tipo));strcpy($$.tipo,$3.tipo);}else{$$.value=sin($3.value);}}
+	| COS ABRE_PARENTESES EXP FECHA_PARENTESES {strcat(RPN,"COS ");if(function){calcFunc("COS",atoi($3.tipo));strcpy($$.tipo,$3.tipo);}else{$$.value=cos($3.value);}}
+	| TAN ABRE_PARENTESES EXP FECHA_PARENTESES {strcat(RPN,"TAN ");if(function){calcFunc("TAN",atoi($3.tipo));strcpy($$.tipo,$3.tipo);}else{$$.value=tan($3.value);}}
+	| ABS ABRE_PARENTESES EXP FECHA_PARENTESES {strcat(RPN,"ABS ");if(function){calcFunc("ABS",atoi($3.tipo));strcpy($$.tipo,$3.tipo);}else{$$.value=abs($3.value);}}
 	| ABRE_PARENTESES EXP FECHA_PARENTESES
 
 EXP1: NUM_FORM1
@@ -163,8 +166,13 @@ void montaFunc(int f,int s){
 		resulF[f][i]=attr;
 		attr+=espacX;
 	}
+}
 
-
+void montaNum(double value){
+	int i;
+	for(i=0;i<80;i++){
+		resulF[f][i]=value;
+	}
 }
 
 void verificaOp(Tipo exp1, Tipo exp2,char* op){
@@ -198,6 +206,24 @@ void verificaOp(Tipo exp1, Tipo exp2,char* op){
 	}else{
 		if(strcmp(exp2.tipo,"D")!=0){
 			calcFuncRight(op,atoi(exp1.tipo),exp1.value);
+		}else{
+			int i;
+			if(strcmp(op,"+")==0){
+				for(i=0;i<tam;i++)
+					resulF[0][i]=exp1.value+exp2.value;
+			}else if(strcmp(op,"-")==0){
+				for(i=0;i<tam;i++)
+					resulF[0][i]=exp1.value-exp2.value;
+			}else if(strcmp(op,"*")==0){
+				for(i=0;i<tam;i++)
+					resulF[0][i]=exp1.value*exp2.value;
+			}else if(strcmp(op,"/")==0){
+				for(i=0;i<tam;i++)
+					resulF[0][i]=exp1.value/exp2.value;
+			}else if(strcmp(op,"^")==0){
+				for(i=0;i<tam;i++)
+					resulF[0][i]=pow(exp1.value,exp2.value);
+			}	
 		}
 	}
 }
@@ -257,9 +283,6 @@ void calcFunc(char* op,int f){
 		for(i=0;i<tam;i++)
 			resulF[f][i]=abs(resulF[f][i]);
 	}
-
-	for(i=0;i<tam;i++)
-			printf("%lf ",resulF[f][i]);
 }
 
 void configs(){
@@ -304,11 +327,13 @@ double max(){
 void plot(){
 	preparaTela();
 	int i,j;
+	printf("\n");
 	for(i=0;i<25;i++){
 		for(j=0;j<80;j++)
 			printf("%c",tela[i][j]);
 		printf("\n");
 	}
+	printf("\n");
 }
 
 void preparaTela(){
@@ -316,13 +341,8 @@ void preparaTela(){
 	double v_view[25];
 	double dif = (v_view_hi-v_view_lo)/25;
 	double som=v_view_lo;
-	for(i=0;i<80;i++){
-		printf("%lf ",resulF[f][i]);
-	}
-	printf("\n\n");
 	for(i=0;i<25;i++){
 		v_view[i]=som;
-		printf("%lf ",v_view[i]);
 		som+=dif;
 		for(j=0;j<80;j++){
 			if(draw_axis && j==40) tela[i][j]='|';
@@ -330,12 +350,13 @@ void preparaTela(){
 			else tela[i][j]=' ';
 		}
 	}
-	printf("\n\n");
+	int k=0;
 	for(i=24;i>=0;i--){
-		for(j=79;j>=0;j--){
-			if(resulF[f][j]>=v_view[i] && resulF[f][j]<=v_view[i+1])
-				tela[i][j]='*';
+		for(j=0;j<80;j++){
+			if(resulF[0][j]>=v_view[i] && resulF[0][j]<=v_view[i+1])
+				tela[k][j]='*';
 		}
+		k++;
 	}
 	/*double minF=min(resulF,80);
 	double maxF=max(resulF,80);
