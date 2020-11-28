@@ -34,6 +34,8 @@ int tam=80,auxInt=0;
 double lInf,lSup;
 int f=0;
 char tela[25][80];
+double matrix[10][10];
+int linha=0,coluna=0;
 
 
 
@@ -52,9 +54,10 @@ double min();
 double max();
 void preparaTela();
 void plot();
+void showMatrix();
 
 %}
-
+%token EQUAL
 %token ADD
 %token SUB
 %token MUL
@@ -98,7 +101,7 @@ void plot();
 %%
 
 S:  COMANDOS EOL {printf(">");} S
-	| error {}
+	| error {} ;
 
 COMANDOS: SHOW SETTINGS SEMI_COLON {configs();}
 	| RESET SETTINGS SEMI_COLON {resetConfigs();}
@@ -111,8 +114,19 @@ COMANDOS: SHOW SETTINGS SEMI_COLON {configs();}
 	| INTEGRATE ABRE_PARENTESES NUM_FORM1 COLON NUM_FORM1 COMMA EXP1 FECHA_PARENTESES SEMI_COLON {integrate();auxInt=0;f=0;integral=false;}
 	| PLOT SEMI_COLON {plot();}
 	| PLOT ABRE_PARENTESES EXP FECHA_PARENTESES SEMI_COLON {f=0;function=false;strcpy(RPN,"");num=false;plot();}
+	| MATRIX EQUAL L_SQUARE_BRACKET MATRIX1 R_SQUARE_BRACKET SEMI_COLON
+	| SHOW MATRIX SEMI_COLON {showMatrix();}
 	| EXP {printf("\nFunction in RPN format:\n\n%s\n\n",RPN);strcpy(RPN,"");f=0;function=false;num=false;}
 	| ;
+
+MATRIX1: L_SQUARE_BRACKET MATRIX2 R_SQUARE_BRACKET 
+	| L_SQUARE_BRACKET MATRIX2 R_SQUARE_BRACKET COMMA MATRIX1 ;
+
+MATRIX2: NUM_FORM MAUX {matrix[linha-1][coluna]=$1.value;coluna++;};
+
+MAUX : COMMA MATRIX2
+	| {linha++;coluna=0;} ;
+		 
 
 NUM_FORM: ADD NUM {$$.value=$2.value;strcpy($$.tipo,"D");integral=false;if(!function && !num){montaNum($2.value);num=true;}}
 	| SUB NUM {$$.value=-$2.value;strcpy($$.tipo,"D");integral=false;if(!function && !num){montaNum($2.value);num=true;}}
@@ -382,6 +396,26 @@ void resetConfigs(){
 	integral_steps= 1000;
 	draw_axis=true;
 	connect_dots=false;
+}
+
+void showMatrix(){
+	int i=0,j=0,k=coluna;
+	char espaco[400] = "";
+	printf("\n");
+	while(k>0){
+		strcat(espaco,"            \t\t");
+		k--;
+	}
+	printf("+-\t\t%s-+\n",espaco);
+	for(i=1;i<=linha;i++){
+		printf("|\t\t");
+		for(j=coluna-1;j>=0;j--){
+			printf("%e\t\t",matrix[i-1][j]);
+		}
+		printf(" |\n");
+	}	
+	printf("+-\t\t%s-+\n\n",espaco);
+
 }
 
 void about(){

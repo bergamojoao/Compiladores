@@ -17,7 +17,7 @@ extern int f;
 %}
 
 %%
-
+"="				{ return EQUAL;}
 "+"             { return ADD;}
 "-"             { return SUB;}
 "*"             { return MUL;}
