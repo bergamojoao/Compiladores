@@ -34,8 +34,8 @@ int tam=80,auxInt=0;
 double lInf,lSup;
 int f=0;
 char tela[25][80];
-double matrix[10][10];
-int linha=0,coluna=0;
+double matrix[10][10],aux[10][10];
+int linha=0,coluna=0,auxColuna=0,auxLinha;
 
 
 
@@ -54,7 +54,9 @@ double min();
 double max();
 void preparaTela();
 void plot();
+void ajustaMatrix();
 void showMatrix();
+void solveDeterminant();
 
 %}
 %token EQUAL
@@ -114,18 +116,19 @@ COMANDOS: SHOW SETTINGS SEMI_COLON {configs();}
 	| INTEGRATE ABRE_PARENTESES NUM_FORM1 COLON NUM_FORM1 COMMA EXP1 FECHA_PARENTESES SEMI_COLON {integrate();auxInt=0;f=0;integral=false;}
 	| PLOT SEMI_COLON {plot();}
 	| PLOT ABRE_PARENTESES EXP FECHA_PARENTESES SEMI_COLON {f=0;function=false;strcpy(RPN,"");num=false;plot();}
-	| MATRIX EQUAL L_SQUARE_BRACKET MATRIX1 R_SQUARE_BRACKET SEMI_COLON
+	| MATRIX EQUAL L_SQUARE_BRACKET MATRIX1 R_SQUARE_BRACKET SEMI_COLON {ajustaMatrix();}
 	| SHOW MATRIX SEMI_COLON {showMatrix();}
+	| SOLVE DET SEMI_COLON {solveDeterminant();}
 	| EXP {printf("\nFunction in RPN format:\n\n%s\n\n",RPN);strcpy(RPN,"");f=0;function=false;num=false;}
 	| ;
 
 MATRIX1: L_SQUARE_BRACKET MATRIX2 R_SQUARE_BRACKET 
 	| L_SQUARE_BRACKET MATRIX2 R_SQUARE_BRACKET COMMA MATRIX1 ;
 
-MATRIX2: NUM_FORM MAUX {matrix[linha-1][coluna]=$1.value;coluna++;};
+MATRIX2: NUM_FORM MAUX {aux[auxLinha-1][auxColuna]=$1.value;if(auxColuna>coluna)coluna=auxColuna;auxColuna++;};
 
 MAUX : COMMA MATRIX2
-	| {linha++;coluna=0;} ;
+	| {auxLinha++;auxColuna=0;} ;
 		 
 
 NUM_FORM: ADD NUM {$$.value=$2.value;strcpy($$.tipo,"D");integral=false;if(!function && !num){montaNum($2.value);num=true;}}
@@ -398,6 +401,24 @@ void resetConfigs(){
 	connect_dots=false;
 }
 
+void ajustaMatrix(){
+	linha=auxLinha;
+	coluna+=1;
+	int i=0,j=0,i1=0,j1=0;
+
+	for(i=0;i<linha;i++){
+		for(j=coluna-1;j>=0;j--){
+			matrix[i1][j1]=aux[i][j];
+			aux[i][j]=0;
+			j1++;
+		}
+		j1=0;
+		i1++;
+	}
+	auxLinha=0;
+	auxColuna=0;
+}
+
 void showMatrix(){
 	int i=0,j=0,k=coluna;
 	char espaco[400] = "";
@@ -407,15 +428,44 @@ void showMatrix(){
 		k--;
 	}
 	printf("+-\t\t%s-+\n",espaco);
-	for(i=1;i<=linha;i++){
+	for(i=0;i<linha;i++){
 		printf("|\t\t");
-		for(j=coluna-1;j>=0;j--){
-			printf("%e\t\t",matrix[i-1][j]);
+		for(j=0;j<coluna;j++){
+			printf("%e\t\t",matrix[i][j]);
 		}
 		printf(" |\n");
 	}	
 	printf("+-\t\t%s-+\n\n",espaco);
 
+}
+
+void solveDeterminant(){
+	// Encontrando a determinante
+	int fdr = coluna,i=0,j=0,k=0;
+	double matrixDet[10][10];
+	for(i=0;i<linha;i++){
+		for(j=0;j<coluna;j++){
+			matrixDet[i][j]=matrix[i][j];
+		}
+	}
+
+    float mult;
+    float deter=1;
+    for(i=0;i<fdr;i++){
+		for(j=0;j<fdr;j++){
+			if(matrixDet[i][i]==0)
+				mult=0;
+            else mult=matrixDet[j][i]/matrixDet[i][i];
+            for(k=0;k<fdr;k++){
+                if(i==j) break;
+                matrixDet[j][k]=matrixDet[j][k]-matrixDet[i][k]*mult;
+            }
+        }
+    }
+    for(i=0;i<fdr;i++){
+        deter=deter*matrixDet[i][i];
+    }
+	printf("\n%lf\n\n",deter);
 }
 
 void about(){
