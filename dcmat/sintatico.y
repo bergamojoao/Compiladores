@@ -35,7 +35,10 @@ double lInf,lSup;
 int f=0;
 char tela[25][80];
 double matrix[10][10],aux[10][10];
+int auxMat[10],iAuxMat=0;
 int linha=0,coluna=0,auxColuna=0,auxLinha;
+bool matrixSetada = false;
+bool inserindoMatrix = false;
 
 
 
@@ -57,6 +60,7 @@ void plot();
 void ajustaMatrix();
 void showMatrix();
 double solveDeterminant(double m[10][10],int ordem);
+void calculaDet();
 void linearSystem();
 
 %}
@@ -119,7 +123,7 @@ COMANDOS: SHOW SETTINGS SEMI_COLON {configs();}
 	| PLOT ABRE_PARENTESES EXP FECHA_PARENTESES SEMI_COLON {f=0;function=false;strcpy(RPN,"");num=false;plot();}
 	| MATRIX EQUAL L_SQUARE_BRACKET MATRIX1 R_SQUARE_BRACKET SEMI_COLON {ajustaMatrix();}
 	| SHOW MATRIX SEMI_COLON {showMatrix();}
-	| SOLVE DET SEMI_COLON {printf("\n%lf\n\n",solveDeterminant(matrix,linha));}
+	| SOLVE DET SEMI_COLON {calculaDet();}
 	| SOLVE LINEAR_S SEMI_COLON {linearSystem();}
 	| EXP {printf("\nFunction in RPN format:\n\n%s\n\n",RPN);strcpy(RPN,"");f=0;function=false;num=false;}
 	| ;
@@ -127,10 +131,10 @@ COMANDOS: SHOW SETTINGS SEMI_COLON {configs();}
 MATRIX1: L_SQUARE_BRACKET MATRIX2 R_SQUARE_BRACKET 
 	| L_SQUARE_BRACKET MATRIX2 R_SQUARE_BRACKET COMMA MATRIX1 ;
 
-MATRIX2: NUM_FORM MAUX {aux[auxLinha-1][auxColuna]=$1.value;if(auxColuna>coluna)coluna=auxColuna;auxColuna++;};
+MATRIX2: NUM_FORM MAUX {aux[auxLinha-1][auxColuna]=$1.value;auxMat[auxLinha-1]=auxColuna;if(auxColuna>coluna)coluna=auxColuna;auxColuna++;};
 
 MAUX : COMMA MATRIX2
-	| {auxLinha++;auxColuna=0;} ;
+	| {if(!inserindoMatrix){auxLinha=0;auxColuna=0;linha=0;coluna=0;inserindoMatrix=true;}auxLinha++;auxColuna=0;} ;
 		 
 
 NUM_FORM: ADD NUM {$$.value=$2.value;strcpy($$.tipo,"D");integral=false;if(!function && !num){montaNum($2.value);num=true;}}
@@ -406,11 +410,46 @@ void resetConfigs(){
 void ajustaMatrix(){
 	linha=auxLinha;
 	coluna+=1;
+	iAuxMat=0;
+	if(coluna>10 || linha>10){
+		printf("\nERROR: Matrix limits out of boundaries.\n\n");
+		matrixSetada=false;
+		auxLinha=0;
+		auxColuna=0;
+		coluna=0;
+		linha=0;
+		inserindoMatrix=false;
+		return;
+	}
 	int i=0,j=0,i1=0,j1=0;
+
+	/*
+			if(auxMat[i]<coluna-1){
+				int k=0;
+				for(k=j1+1;k<coluna-1;k++){
+					if(aux[i1][k]!=0){
+						aux[i1][j1] = aux[i1][k];
+						aux[i1][k] = 0;
+						break;
+					}
+				}
+			}
+
+	*/
+
 
 	for(i=0;i<linha;i++){
 		for(j=coluna-1;j>=0;j--){
-			matrix[i1][j1]=aux[i][j];
+			if(auxMat[i]<coluna-1){
+				if(aux[i][j]!=0 && j-1>=0){
+					double au = aux[i][j];
+					aux[i][j] = aux[i][j-1];
+					aux[i][j-1] = au;
+					matrix[i][j] = aux[i][j];
+				}
+				matrix[i][j] = aux[i][j];
+			}
+			else matrix[i1][j1]=aux[i][j];
 			aux[i][j]=0;
 			j1++;
 		}
@@ -419,9 +458,15 @@ void ajustaMatrix(){
 	}
 	auxLinha=0;
 	auxColuna=0;
+	inserindoMatrix=false;
+	matrixSetada=true;
 }
 
 void showMatrix(){
+	if(!matrixSetada){
+		printf("\nNo Matrix defined!\n\n");
+		return;
+	}
 	int i=0,j=0,k=coluna;
 	char espaco[400] = "";
 	printf("\n");
@@ -471,7 +516,20 @@ double solveDeterminant(double m[10][10],int ordem){
 	return deter;
 }
 
+void calculaDet(){
+	if(linha!=coluna){
+		printf("\nMatrix format incorrect!\n\n");
+		return;
+	}
+	printf("\n%lf\n\n",solveDeterminant(matrix,linha));
+}
+
 void linearSystem(){
+	if(linha+1!=coluna){
+		printf("\nMatrix format incorrect!\n\n");
+		return;
+	}
+
 	double A[10][10],L[10][10],U[10][10],B[10],X[10],Y[10],soma=0;
 	int i,j,k,n=linha;
 
