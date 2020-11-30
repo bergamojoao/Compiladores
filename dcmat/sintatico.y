@@ -38,6 +38,7 @@ double matrix[10][10],aux[10][10];
 int auxMat[10],iAuxMat=0;
 int linha=0,coluna=0,auxColuna=0,auxLinha;
 bool matrixSetada = false;
+bool functionSetada = false;
 bool inserindoMatrix = false;
 
 
@@ -120,21 +121,21 @@ COMANDOS: SHOW SHOW_A
 	| PLOT PLOT_A
 	| MATRIX EQUAL L_SQUARE_BRACKET MATRIX1 R_SQUARE_BRACKET SEMI_COLON {ajustaMatrix();}
 	| SOLVE SOLVE_A
-	| EXP {printf("\nFunction in RPN format:\n\n%s\n\n",RPN);strcpy(RPN,"");f=0;function=false;num=false;}
+	| EXP {printf("\nFunction in RPN format:\n\n%s\n\n",RPN);strcpy(RPN,"");f=0;function=false;num=false;functionSetada=true;}
 	| ;
 
 SHOW_A: SETTINGS SEMI_COLON {configs();}
 	| MATRIX SEMI_COLON {showMatrix();} ;
 
-SET_A: H_VIEW NUM_FORM COLON NUM_FORM SEMI_COLON {h_view_lo=$3.value;h_view_hi=$5.value;}
-	| V_VIEW NUM_FORM COLON NUM_FORM SEMI_COLON {v_view_lo=$3.value;v_view_hi=$5.value;}
-	| INTEGRAL_STEPS NUM_FORM SEMI_COLON {integral_steps=$3.value;}
+SET_A: H_VIEW NUM_FORM COLON NUM_FORM SEMI_COLON {if($2.value>=$4.value)printf("\nERROR: h_view_lo must be smaller than h_view_hi\n\n");else{h_view_lo=$2.value;h_view_hi=$4.value;}}
+	| V_VIEW NUM_FORM COLON NUM_FORM SEMI_COLON {if($2.value>=$4.value)printf("\nERROR: v_view_lo must be smaller than v_view_hi\n\n");else{v_view_lo=$2.value;v_view_hi=$4.value;}}
+	| INTEGRAL_STEPS NUM_FORM SEMI_COLON {if($2.value<=0)printf("\nERROR: integral_steps must be a positive non-zero integer\n\n");else integral_steps=$2.value;}
 	| AXIS AXIS_A;
 
 AXIS_A: ON SEMI_COLON {draw_axis=true;}
 	| OFF SEMI_COLON {draw_axis=false;};
 
-PLOT_A: SEMI_COLON {plot();}
+PLOT_A: SEMI_COLON {if(!functionSetada)printf("\nNo function defined!\n\n");else plot();}
 	| ABRE_PARENTESES EXP FECHA_PARENTESES SEMI_COLON {f=0;function=false;strcpy(RPN,"");num=false;plot();}
 	;
 
@@ -334,6 +335,10 @@ void configs(){
 }
 
 void integrate(){
+	if(lInf>lSup){
+		printf("\nERROR: lower limit must be smaller than upper limit\n\n");
+		return;
+	}
 	double soma=0;
 	double delta=((lSup-lInf)/integral_steps);
 	int i;
@@ -636,7 +641,7 @@ void about(){
 
 // erro
 void yyerror(char *s){
-	printf("Erro de Sintaxe: [%s]\n\n", yytext);
+	printf("Erro de Sintaxe: [%s]\n\n", strcmp(yytext,"\n") == 0 ? " ":yytext);
 	yyparse();
 }
 
