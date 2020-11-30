@@ -110,23 +110,34 @@ void linearSystem();
 S:  COMANDOS EOL {printf(">");} S
 	| error {} ;
 
-COMANDOS: SHOW SETTINGS SEMI_COLON {configs();}
+COMANDOS: SHOW SHOW_A
 	| RESET SETTINGS SEMI_COLON {resetConfigs();}
-	| SET H_VIEW NUM_FORM COLON NUM_FORM SEMI_COLON {h_view_lo=$3.value;h_view_hi=$5.value;}
-	| SET V_VIEW NUM_FORM COLON NUM_FORM SEMI_COLON {v_view_lo=$3.value;v_view_hi=$5.value;}
-	| SET AXIS ON SEMI_COLON {draw_axis=true;}
-	| SET AXIS OFF SEMI_COLON {draw_axis=false;}
+	| SET SET_A
 	| ABOUT SEMI_COLON {about();}
-	| SET INTEGRAL_STEPS NUM_FORM SEMI_COLON {integral_steps=$3.value;}
 	| INTEGRATE ABRE_PARENTESES NUM_FORM1 COLON NUM_FORM1 COMMA EXP1 FECHA_PARENTESES SEMI_COLON {integrate();auxInt=0;f=0;integral=false;}
-	| PLOT SEMI_COLON {plot();}
-	| PLOT ABRE_PARENTESES EXP FECHA_PARENTESES SEMI_COLON {f=0;function=false;strcpy(RPN,"");num=false;plot();}
+	| PLOT PLOT_A
 	| MATRIX EQUAL L_SQUARE_BRACKET MATRIX1 R_SQUARE_BRACKET SEMI_COLON {ajustaMatrix();}
-	| SHOW MATRIX SEMI_COLON {showMatrix();}
-	| SOLVE DET SEMI_COLON {calculaDet();}
-	| SOLVE LINEAR_S SEMI_COLON {linearSystem();}
+	| SOLVE SOLVE_A
 	| EXP {printf("\nFunction in RPN format:\n\n%s\n\n",RPN);strcpy(RPN,"");f=0;function=false;num=false;}
 	| ;
+
+SHOW_A: SETTINGS SEMI_COLON {configs();}
+	| MATRIX SEMI_COLON {showMatrix();} ;
+
+SET_A: H_VIEW NUM_FORM COLON NUM_FORM SEMI_COLON {h_view_lo=$3.value;h_view_hi=$5.value;}
+	| V_VIEW NUM_FORM COLON NUM_FORM SEMI_COLON {v_view_lo=$3.value;v_view_hi=$5.value;}
+	| INTEGRAL_STEPS NUM_FORM SEMI_COLON {integral_steps=$3.value;}
+	| AXIS AXIS_A;
+
+AXIS_A: ON SEMI_COLON {draw_axis=true;}
+	| OFF SEMI_COLON {draw_axis=false;};
+
+PLOT_A: SEMI_COLON {plot();}
+	| ABRE_PARENTESES EXP FECHA_PARENTESES SEMI_COLON {f=0;function=false;strcpy(RPN,"");num=false;plot();}
+	;
+
+SOLVE_A: DET SEMI_COLON {calculaDet();}
+	| LINEAR_S SEMI_COLON {linearSystem();} ;
 
 MATRIX1: L_SQUARE_BRACKET MATRIX2 R_SQUARE_BRACKET 
 	| L_SQUARE_BRACKET MATRIX2 R_SQUARE_BRACKET COMMA MATRIX1 ;
