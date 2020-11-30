@@ -57,6 +57,7 @@ void plot();
 void ajustaMatrix();
 void showMatrix();
 void solveDeterminant();
+void linearSystem();
 
 %}
 %token EQUAL
@@ -119,6 +120,7 @@ COMANDOS: SHOW SETTINGS SEMI_COLON {configs();}
 	| MATRIX EQUAL L_SQUARE_BRACKET MATRIX1 R_SQUARE_BRACKET SEMI_COLON {ajustaMatrix();}
 	| SHOW MATRIX SEMI_COLON {showMatrix();}
 	| SOLVE DET SEMI_COLON {solveDeterminant();}
+	| SOLVE LINEAR_S SEMI_COLON {linearSystem();}
 	| EXP {printf("\nFunction in RPN format:\n\n%s\n\n",RPN);strcpy(RPN,"");f=0;function=false;num=false;}
 	| ;
 
@@ -466,6 +468,63 @@ void solveDeterminant(){
         deter=deter*matrixDet[i][i];
     }
 	printf("\n%lf\n\n",deter);
+}
+
+void linearSystem(){
+	double A[9][9],L[9][9],U[9][9],B[9],X[9],Y[9],soma=0;
+	int i,j,k,n=linha;
+
+	for(i=0;i<n;i++)
+		B[i] = matrix[i][coluna-1];
+
+
+	for(i=0;i<n;i++)
+		for(j=0;j<n;j++)
+			A[i][j] = matrix[i][j];
+
+	for(j=0; j<n; j++){
+        for(i=0; i<n; i++){
+            if(i<=j){
+                U[i][j]=A[i][j];
+                for(k=0; k<=i-1; k++)
+                    U[i][j]-=L[i][k]*U[k][j];
+                if(i==j)
+                    L[i][j]=1;
+                else
+                    L[i][j]=0;
+            }
+            else{
+                L[i][j]=A[i][j];
+                for(k=0; k<=j-1; k++)
+                    L[i][j]-=L[i][k]*U[k][j];
+                L[i][j]/=U[j][j];
+                U[i][j]=0;
+            }
+        }
+    }
+
+	for(i=0; i<n; i++){
+        Y[i]=B[i];
+        for(j=0; j<i; j++)
+        {
+            Y[i]-=L[i][j]*Y[j];
+        }
+    }
+
+	for(i=n-1; i>=0; i--){
+        X[i]= Y[i];
+        for(j=i+1; j<n; j++)
+        {
+            X[i]-=U[i][j]*X[j];
+        }
+        X[i]/=U[i][i];
+    }
+
+	printf("\nMatrix x:\n\n");
+	for(i=0;i<n;i++)
+		printf("%lf\n",X[i]);
+	printf("\n");
+
 }
 
 void about(){
