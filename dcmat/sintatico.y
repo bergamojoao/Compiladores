@@ -56,7 +56,7 @@ void preparaTela();
 void plot();
 void ajustaMatrix();
 void showMatrix();
-void solveDeterminant();
+double solveDeterminant(double m[10][10],int ordem);
 void linearSystem();
 
 %}
@@ -119,7 +119,7 @@ COMANDOS: SHOW SETTINGS SEMI_COLON {configs();}
 	| PLOT ABRE_PARENTESES EXP FECHA_PARENTESES SEMI_COLON {f=0;function=false;strcpy(RPN,"");num=false;plot();}
 	| MATRIX EQUAL L_SQUARE_BRACKET MATRIX1 R_SQUARE_BRACKET SEMI_COLON {ajustaMatrix();}
 	| SHOW MATRIX SEMI_COLON {showMatrix();}
-	| SOLVE DET SEMI_COLON {solveDeterminant();}
+	| SOLVE DET SEMI_COLON {printf("\n%lf\n\n",solveDeterminant(matrix,linha));}
 	| SOLVE LINEAR_S SEMI_COLON {linearSystem();}
 	| EXP {printf("\nFunction in RPN format:\n\n%s\n\n",RPN);strcpy(RPN,"");f=0;function=false;num=false;}
 	| ;
@@ -441,13 +441,13 @@ void showMatrix(){
 
 }
 
-void solveDeterminant(){
+double solveDeterminant(double m[10][10],int ordem){
 	// Encontrando a determinante
-	int fdr = coluna,i=0,j=0,k=0;
+	int fdr = ordem,i=0,j=0,k=0;
 	double matrixDet[10][10];
-	for(i=0;i<linha;i++){
-		for(j=0;j<coluna;j++){
-			matrixDet[i][j]=matrix[i][j];
+	for(i=0;i<ordem;i++){
+		for(j=0;j<ordem;j++){
+			matrixDet[i][j]=m[i][j];
 		}
 	}
 
@@ -467,11 +467,12 @@ void solveDeterminant(){
     for(i=0;i<fdr;i++){
         deter=deter*matrixDet[i][i];
     }
-	printf("\n%lf\n\n",deter);
+
+	return deter;
 }
 
 void linearSystem(){
-	double A[9][9],L[9][9],U[9][9],B[9],X[9],Y[9],soma=0;
+	double A[10][10],L[10][10],U[10][10],B[10],X[10],Y[10],soma=0;
 	int i,j,k,n=linha;
 
 	for(i=0;i<n;i++)
@@ -502,6 +503,31 @@ void linearSystem(){
             }
         }
     }
+
+	double det=1;
+	for(i=0;i<n;i++)
+		det = det * U[i][i];
+
+	if(det == 0){
+		double aux[10][10];
+		for(k=0;k<n;k++){
+
+			for(i=0;i<n;i++)
+				for(j=0;j<n;j++)
+					aux[i][j] = A[i][j];
+
+			for(i=0;i<n;i++)
+				aux[i][k] = B[i];
+			
+			if(solveDeterminant(aux,n)!=0){
+				printf("\nSI - The Linear System has no solution\n\n");
+				return;
+			}
+
+		}
+		printf("\nSPI - The Linear System has infinitely many solutions\n\n");
+		return;
+	}
 
 	for(i=0; i<n; i++){
         Y[i]=B[i];
