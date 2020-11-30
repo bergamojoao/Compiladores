@@ -57,7 +57,7 @@ extern int f;
 [0-9]+          { yylval.value = atof(yytext);strcpy(yylval.tipo,"D");return NUM; }
 \n              { return EOL; }
 [ \t]           { /* espaço em branco/tabulação */  }
-.               { printf("Simbolo Invalido -> %c\n\n", *yytext);}
+.               { return ERRO_LEXICO; }
 
 
 %%  

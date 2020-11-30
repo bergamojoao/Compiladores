@@ -102,12 +102,14 @@ void linearSystem();
 %token COMMA;
 %token L_SQUARE_BRACKET;
 %token R_SQUARE_BRACKET;
+%token ERRO_LEXICO;
 
 %start S
 
 %%
 
 S:  COMANDOS EOL {printf(">");} S
+	| ERRO_LEXICO {printf("Simbolo Invalido -> %c\n\n", *yytext); while(yylex()!=EOL);printf(">");} S
 	| error {} ;
 
 COMANDOS: SHOW SHOW_A
@@ -634,7 +636,8 @@ void about(){
 
 // erro
 void yyerror(char *s){
-	printf("Erro de sintaxe: %s\n", yytext);
+	printf("Erro de Sintaxe: [%s]\n\n", yytext);
+	yyparse();
 }
 
 
