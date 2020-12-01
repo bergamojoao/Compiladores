@@ -535,6 +535,10 @@ double solveDeterminant(double m[10][10],int ordem){
 }
 
 void calculaDet(){
+	if(!matrixSetada){
+		printf("\nNo Matrix defined!\n\n");
+		return;
+	}
 	if(linha!=coluna){
 		printf("\nMatrix format incorrect!\n\n");
 		return;
@@ -647,6 +651,13 @@ void yyerror(char *s){
 
 
 int main(int argc, char **argv){
+	int i,j;
+	for(i=0;i<10;i++)
+		for(j=0;j<10;j++){
+			matrix[i][j] = 0;
+			aux[i][j] = 0;
+		}
+
     printf(">");
 	yyparse();
 	
