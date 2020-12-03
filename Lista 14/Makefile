@@ -2,7 +2,7 @@ FLEX=flex
 BISON=bison
 CC=gcc
 
-PROGRAMA = l1401
+PROGRAMA = l14e1
 LEXICO = lexico.l
 SINTATICO = sintatico.y
 
