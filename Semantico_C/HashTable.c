@@ -2,7 +2,6 @@
 #include<stdlib.h>
 #include<string.h>
 #include"HashTable.h"
-#include"ListaDinamica.h"
 
 
 //vetor de primos
