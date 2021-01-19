@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include"Hash.h"
+#include"HashTable.h"
 #include"ListaDinamica.h"
 
 
@@ -9,7 +9,7 @@
 int p[21];
 
 typedef struct{
-    ListaD lista;
+    Lista lista;
 }Item;
 
 typedef struct{
@@ -89,10 +89,10 @@ void removerHashTable(HashTable h,char* chave){
 Elem getElemHash(HashTable H,char* chave){
     HashTableImpl *hash=H;
     int pos=strToKey(chave,hash->tamanho);
-    ListaD posic=hash->table[pos].lista;
+    Lista posic=hash->table[pos].lista;
     if(posic!=NULL){
         while(posic!=NULL){     
-            Elem k=getD(posic);  
+            Elem k=get(posic);  
             if(strcmp(hash->getChave(k),chave)==0){
                 return k;
             }
@@ -107,5 +107,4 @@ void desalocaHash(HashTable h){
     for (int i = 0; i < hash->tamanho; i++){
         finalizar(hash->table[i].lista);
     }
-    
 }

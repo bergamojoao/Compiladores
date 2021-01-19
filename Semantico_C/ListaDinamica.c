@@ -7,7 +7,7 @@ typedef struct elemento{
     struct elemento *prox;
 }ListaImpl;
 
-ListaD inserir(ListaD L,Elem elemento){
+Lista inserir(Lista L,Elem elemento){
     ListaImpl *inicio = L;
 
     ListaImpl *novo=(ListaImpl *)malloc(sizeof(ListaImpl));
@@ -30,7 +30,7 @@ ListaD inserir(ListaD L,Elem elemento){
     return inicio;
 }
 
-ListaD remover(ListaD L,Elem elemento){
+Lista remover(Lista L,Elem elemento){
     ListaImpl *inicio = L;
     ListaImpl *aux,*ant;
 
@@ -56,7 +56,7 @@ ListaD remover(ListaD L,Elem elemento){
     return inicio;
 }
 
-ListaD removerSemFree(ListaD L,Elem elemento){
+Lista removerSemFree(Lista L,Elem elemento){
     ListaImpl *inicio = L;
     ListaImpl *aux,*ant;
 
@@ -80,17 +80,17 @@ ListaD removerSemFree(ListaD L,Elem elemento){
     return inicio;
 }
 
-ListaD getProx(ListaD L){
+Lista getProx(Lista L){
     ListaImpl *l = L;
     return l->prox;
 }
 
-Elem getD(ListaD L){
+Elem get(Lista L){
     ListaImpl *l = L;
     return l->e;
 }
 
-int getListaDSize(ListaD lista){
+int getListaSize(Lista lista){
     ListaImpl* L = lista;
     int cont = 0;
     while(L != NULL){
@@ -100,7 +100,7 @@ int getListaDSize(ListaD lista){
     return cont;
 }
 
-void finalizar(ListaD L){
+void finalizar(Lista L){
     ListaImpl *inicio=L;
     ListaImpl *aux;
     aux=inicio;
