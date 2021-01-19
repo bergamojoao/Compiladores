@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include"Expression.h"
 
-typedef struct{
+typedef struct exp{
     int expType;
-    ExpressionImpl* leftChild;
-    ExpressionImpl* rightChild;
+    struct exp* leftChild;
+    struct exp* rightChild;
 }ExpressionImpl;
 
 Expression createExpression(int expType, Expression leftChild, Expression rightChild){

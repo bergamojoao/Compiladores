@@ -3,18 +3,18 @@
 #include"Command.h"
 #include"Expression.h"
 
-typedef struct{
+typedef struct cmd{
     int cmdType;
     Expression exp;
 
     //if
-    CommandImpl* thenCmd;
-    CommandImpl* elseCmd;
+    struct cmd* thenCmd;
+    struct cmd* elseCmd;
 
     //while
-    CommandImpl* commands;
+    struct cmd* commands;
 
-    CommandImpl* next;
+    struct cmd* next;
 }CommandImpl;
 
 Command createCommand(int cmdType, Expression exp, Command thenCmd, Command elseCmd, Command commands, Command next){
