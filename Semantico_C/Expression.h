@@ -3,6 +3,8 @@
 
 typedef void * Expression;
 
+enum ExpTypes {OPERANDO, OPERADOR};
+
 Expression createExpression(int expType, Expression leftChild, Expression rightChild);
 
 int getExpType(Expression e);

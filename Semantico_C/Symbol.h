@@ -3,7 +3,9 @@
 
 typedef void * Symbol;
 
-Symbol createSymbol(char* name, char* type, int symbolSpec);
+enum SymSpec {FUNCAO, CONSTANTE, VARIAVEL, ARRAY};
+
+Symbol createSymbol(char* name, char* type, int symbolSpec, int arraySize);
 
 char* getSymbolName(Symbol s);
 

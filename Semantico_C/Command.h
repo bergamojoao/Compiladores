@@ -4,6 +4,8 @@
 
 typedef void * Command;
 
+enum CmdType {WHILE, IF, EXPRESSAO};
+
 Command createCommand(int cmdType, Expression exp, Command thenCmd, Command elseCmd, Command commands, Command next);
 
 int getCmdType(Command c);
