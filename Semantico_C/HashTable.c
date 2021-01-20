@@ -14,14 +14,14 @@ typedef struct{
 typedef struct{
     Item *table;
     int tamanho;
-    char* (*getChave)(Elem*);    
+    char* (*getChave)(Elem);    
 }HashTableImpl;
 
 int getPrimo(int indice){
     return p[indice];
 }
 
-int hashFunction(Elem * e,char* (*getChave)(Elem*),int tamanho){
+int hashFunction(Elem e,char* (*getChave)(Elem),int tamanho){
     int k=0;
     char chave[21];
     strcpy(chave,getChave(e));
@@ -44,7 +44,7 @@ int strToKey(char* chave,int tamanho){
     return k%(tamanho-1);
 }
 
-HashTable criaHashTable(int tamanho ,char* (*getChave)(Elem*)){
+HashTable criaHashTable(int tamanho ,char* (*getChave)(Elem)){
     HashTableImpl *new = malloc(sizeof(HashTableImpl));
     new->table = malloc(sizeof(Item)*tamanho);
     new->tamanho=tamanho;

@@ -22,7 +22,7 @@ typedef void * HashTable;
  * Tem como parametro um inteiro que representa a quantidade de posições que serão alocadas
  * E tambem como parametro uma função que é responsável por retornar a chave do elemento a ser inserido,removido ou buscado. 
 */
-HashTable criaHashTable(int tamanho, char* (*getChave)(Elem*));
+HashTable criaHashTable(int tamanho, char* (*getChave)(Elem));
 
 /*
  * Função responsável por inserir um elemento na tabela de espalhamento.
