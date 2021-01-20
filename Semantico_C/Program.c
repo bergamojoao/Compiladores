@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include"Program.h"
 #include"HashTable.h"
-#include"ListaDinamica.h"
+#include"Function.h"
 #include"Symbol.h"
 
 typedef struct {
@@ -10,11 +10,11 @@ typedef struct {
 
     HashTable globalSymbolTable;
 
-    Lista functionList;
+    Function functionList;
 
 }ProgramImpl;
 
-Program createProgram(Lista functionList){
+Program createProgram(Function functionList){
 
     ProgramImpl* program = malloc(sizeof(ProgramImpl));
 

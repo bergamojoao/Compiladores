@@ -2,21 +2,21 @@
 #include <stdlib.h>
 #include"Function.h"
 #include"HashTable.h"
-#include"ListaDinamica.h"
 #include"Symbol.h"
+#include"Command.h"
 
 typedef struct func{
     char* name;
 
     HashTable symbolTable;
 
-    Lista commandList;
+    Command commandList;
 
     struct func* next;
 
 }FunctionImpl;
 
-Function createFunction(char* name, Lista commandList){
+Function createFunction(char* name, Command commandList){
 
     FunctionImpl* function = malloc(sizeof(FunctionImpl));
 
