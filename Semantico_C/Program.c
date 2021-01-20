@@ -3,7 +3,7 @@
 #include"Program.h"
 #include"HashTable.h"
 #include"ListaDinamica.h"
-#include"Function.h"
+#include"Symbol.h"
 
 typedef struct {
     char* name;
@@ -18,7 +18,7 @@ Program createProgram(Lista functionList){
 
     ProgramImpl* program = malloc(sizeof(ProgramImpl));
 
-    program->globalSymbolTable = criaHashTable(107,getFunctionName);
+    program->globalSymbolTable = criaHashTable(108,getSymbolName);
 
     program->functionList = functionList;
     
