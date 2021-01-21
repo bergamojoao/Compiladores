@@ -4,7 +4,9 @@
 #include<string.h>
 #include<stdlib.h>
 #include"HashTable.h"
+#include"Expression.h"
 
+#define YYSTYPE void*
 #define size_str 100000
 
 extern int yylex();
@@ -251,34 +253,34 @@ expressao_relacional1: LESS_THAN expressao_shift expressao_relacional1
 	| GREATER_EQUAL expressao_shift expressao_relacional1
 	| ;
 
-expressao_shift: expressao_aditiva expressao_shift1 ;
+expressao_shift: expressao_aditiva expressao_shift1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
 
-expressao_shift1: L_SHIFT expressao_aditiva expressao_shift1
-	| R_SHIFT expressao_aditiva expressao_shift1
-	| ;
+expressao_shift1: L_SHIFT expressao_aditiva expressao_shift1 { $$ = createExpression(OPERADOR, $2, $3); }
+	| R_SHIFT expressao_aditiva expressao_shift1 { $$ = createExpression(OPERADOR, $2, $3); }
+	| { $$ = NULL; } ;
 
-expressao_aditiva: expressao_multiplicativa expressao_aditiva1 ;
+expressao_aditiva: expressao_multiplicativa expressao_aditiva1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
 
-expressao_aditiva1: MINUS expressao_multiplicativa expressao_aditiva1
-	| PLUS expressao_multiplicativa expressao_aditiva1
-	| ;
+expressao_aditiva1: MINUS expressao_multiplicativa expressao_aditiva1 { $$ = createExpression(OPERADOR, $2, $3); }
+	| PLUS expressao_multiplicativa expressao_aditiva1 { $$ = createExpression(OPERADOR, $2, $3); }
+	| { $$ = NULL; } ;
 
-expressao_multiplicativa: expressao_cast expressao_multiplicativa1 ;
+expressao_multiplicativa: expressao_cast expressao_multiplicativa1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
 
-expressao_multiplicativa1: MULTIPLY expressao_cast expressao_multiplicativa1
-	| DIV expressao_cast expressao_multiplicativa1
-	| REMAINDER expressao_cast expressao_multiplicativa1
-	| ;
+expressao_multiplicativa1: MULTIPLY expressao_cast expressao_multiplicativa1 { $$ = createExpression(OPERADOR, $2, $3); }
+	| DIV expressao_cast expressao_multiplicativa1 { $$ = createExpression(OPERADOR, $2, $3); }
+	| REMAINDER expressao_cast expressao_multiplicativa1 { $$ = createExpression(OPERADOR, $2, $3); }
+	| { $$ = NULL; } ;
 
 
-expressao_cast: expressao_unaria
+expressao_cast: expressao_unaria { $$ = $1; }
 	| L_PAREN tipo expressao_cast1 ;
 
 expressao_cast1: MULTIPLY expressao_cast1
 	| R_PAREN expressao_cast ;
 
 
-expressao_unaria: expressao_pos_fixa
+expressao_unaria: expressao_pos_fixa { $$ = $1; }
 	| INC expressao_unaria
 	| DEC expressao_unaria
 	| BITWISE_AND expressao_cast
@@ -289,7 +291,7 @@ expressao_unaria: expressao_pos_fixa
 	| NOT expressao_cast ;
 
 
-expressao_pos_fixa: expressao_primaria
+expressao_pos_fixa: expressao_primaria { $$ = $1; }
 	| expressao_pos_fixa expressao_pos_fixa1 ;
 
 expressao_pos_fixa1: L_SQUARE_BRACKET expressao R_SQUARE_BRACKET
@@ -305,16 +307,17 @@ expressao_pos_fixa3: expressao_de_atribuicao expressao_pos_fixa4 ;
 expressao_pos_fixa4: COMMA expressao_pos_fixa3
 	| R_PAREN ;
 
-expressao_primaria: IDENTIFIER
-	| numero
-	| CHARACTER
-	| STRING
-	| L_PAREN expressao R_PAREN ;
+expressao_primaria: IDENTIFIER { $$ = createExpression(OPERANDO, NULL, NULL); }
+	| numero { $$ = $1; }
+	| CHARACTER { $$ = createExpression(OPERANDO, NULL, NULL); }
+	| STRING { $$ = createExpression(OPERANDO, NULL, NULL); }
+	| L_PAREN expressao R_PAREN { $$ = $2; }
+;
 
-
-numero: NUM_INTEGER
-	| NUM_HEXA
-	| NUM_OCTAL ;
+numero: NUM_INTEGER { $$ = createExpression(OPERANDO, NULL, NULL); }
+	| NUM_HEXA { $$ = createExpression(OPERANDO, NULL, NULL); }
+	| NUM_OCTAL { $$ = createExpression(OPERANDO, NULL, NULL); } 
+;
 
 
 %%

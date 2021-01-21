@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include"Expression.h"
@@ -9,7 +10,7 @@ typedef struct exp{
 }ExpressionImpl;
 
 Expression createExpression(int expType, Expression leftChild, Expression rightChild){
-
+    
     ExpressionImpl* expression = malloc(sizeof(ExpressionImpl));
 
     expression->expType=expType;
