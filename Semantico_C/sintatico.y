@@ -255,21 +255,21 @@ expressao_relacional1: LESS_THAN expressao_shift expressao_relacional1
 
 expressao_shift: expressao_aditiva expressao_shift1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
 
-expressao_shift1: L_SHIFT expressao_aditiva expressao_shift1 { $$ = createExpression(OPERADOR, $2, $3); }
-	| R_SHIFT expressao_aditiva expressao_shift1 { $$ = createExpression(OPERADOR, $2, $3); }
+expressao_shift1: L_SHIFT expressao_aditiva expressao_shift1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
+	| R_SHIFT expressao_aditiva expressao_shift1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
 	| { $$ = NULL; } ;
 
 expressao_aditiva: expressao_multiplicativa expressao_aditiva1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
 
-expressao_aditiva1: MINUS expressao_multiplicativa expressao_aditiva1 { $$ = createExpression(OPERADOR, $2, $3); }
-	| PLUS expressao_multiplicativa expressao_aditiva1 { $$ = createExpression(OPERADOR, $2, $3); }
+expressao_aditiva1: MINUS expressao_multiplicativa expressao_aditiva1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
+	| PLUS expressao_multiplicativa expressao_aditiva1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
 	| { $$ = NULL; } ;
 
 expressao_multiplicativa: expressao_cast expressao_multiplicativa1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
 
-expressao_multiplicativa1: MULTIPLY expressao_cast expressao_multiplicativa1 { $$ = createExpression(OPERADOR, $2, $3); }
-	| DIV expressao_cast expressao_multiplicativa1 { $$ = createExpression(OPERADOR, $2, $3); }
-	| REMAINDER expressao_cast expressao_multiplicativa1 { $$ = createExpression(OPERADOR, $2, $3); }
+expressao_multiplicativa1: MULTIPLY expressao_cast expressao_multiplicativa1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
+	| DIV expressao_cast expressao_multiplicativa1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
+	| REMAINDER expressao_cast expressao_multiplicativa1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
 	| { $$ = NULL; } ;
 
 
