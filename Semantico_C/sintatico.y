@@ -1,13 +1,15 @@
 %{
-
+#define YYSTYPE void*
 #include <stdio.h>
 #include<string.h>
 #include<stdlib.h>
 #include"HashTable.h"
 #include"Expression.h"
 #include"Command.h"
+#include"Function.h"
+#include"Symbol.h"
+#include"Program.h"
 
-#define YYSTYPE void*
 #define size_str 100000
 
 extern int yylex();
@@ -33,6 +35,8 @@ extern int nao_terminado;
 extern int backupTamanho;
 
 void yyerror(char *s);
+
+Program AST;
 
 
 %}
@@ -104,25 +108,25 @@ void yyerror(char *s);
 
 %%
 
-S: programa { printf("SUCCESSFUL COMPILATION."); return 0;} ;
+S: { AST = createProgram(); } programa { setFunctionList(AST, $1); printf("SUCCESSFUL COMPILATION."); return 0;} ;
 	
-programa: declaracoes programa1
-	| funcao programa1 ;
+programa: declaracoes programa1 { $$ = $2; }
+	| funcao programa1  { setNextFunction($1, $2); $$ = $1; };
 
-programa1: programa
-	| ;
+programa1: programa { $$ = $1; }
+	| { $$ = NULL; } ;
 
 declaracoes: NUMBER_SIGN DEFINE IDENTIFIER expressao
 	| declaracao_variaveis
 	| declaracao_prototipos ;
 
-funcao: tipo funcao1 ;
+funcao: tipo funcao1 { $$ = $2; } ;
 
-funcao1: MULTIPLY funcao1
-	| IDENTIFIER parametros L_CURLY_BRACKET funcao2 ;
+funcao1: MULTIPLY funcao1 { $$ = $2; }
+	| IDENTIFIER parametros L_CURLY_BRACKET funcao2 { setFunctionName($4, getSymbolName($1)); $$ = $4; } ;
 
-funcao2: declaracao_variaveis funcao2
-	| comandos R_CURLY_BRACKET ;
+funcao2: declaracao_variaveis funcao2 { $$ = $2; }
+	| comandos R_CURLY_BRACKET { $$ = createFunction($1); };
 
 declaracao_variaveis: tipo declaracao_variaveis1 ;
 
