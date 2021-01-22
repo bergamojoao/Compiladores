@@ -6,8 +6,12 @@
 #include<string.h>
 #include<stdio.h>
 #include<stdlib.h>
+#define YYSTYPE void*
+extern YYSTYPE yylval;
 #include <sintatico.tab.h>
+#include"Symbol.h"
 #define size_str 100000
+
 
 char v[size_str];
 char v2[size_str];
@@ -112,7 +116,11 @@ void save_token();
 			         caracteres+=strlen(yytext);tokens++;return(STRING);
                     }
 
-[_a-zA-Z][_a-zA-Z0-9]*	{strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(IDENTIFIER);}
+[_a-zA-Z][_a-zA-Z0-9]*	{char* tokenName = (char*) malloc(strlen(yytext)+1);
+                         strcpy(tokenName,yytext);
+                         yylval=createSymbol(tokenName, "", VARIAVEL, 0);strcat(v, yytext);
+                         save_token();caracteres+=strlen(yytext);tokens++;return(IDENTIFIER);
+                        }
 
 " "		        { strcat(v, yytext);save_token();caracteres+= strlen(yytext); }
 "\t"            { strcat(v, yytext);save_token();caracteres+= strlen(yytext); }   
