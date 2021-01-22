@@ -4,7 +4,11 @@
 
 typedef void * Function;
 
-Function createFunction(char* name, Lista commandList);
+Function createFunction(Lista commandList);
+
+void setNextFunction(Function f, Function next);
+
+void setFunctionName(Function f, char* name);
 
 char* getFunctionName(Function f);
 

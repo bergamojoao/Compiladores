@@ -14,13 +14,18 @@ typedef struct {
 
 }ProgramImpl;
 
-Program createProgram(Function functionList){
+Program createProgram(){
 
     ProgramImpl* program = malloc(sizeof(ProgramImpl));
 
     program->globalSymbolTable = criaHashTable(108,getSymbolName);
 
-    program->functionList = functionList;
+    program->functionList = NULL;
     
     return program;
+}
+
+void setFunctionList(Program p, Function functionList){
+    ProgramImpl* program = p;
+    program->functionList=functionList;
 }

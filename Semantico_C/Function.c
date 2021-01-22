@@ -16,16 +16,26 @@ typedef struct func{
 
 }FunctionImpl;
 
-Function createFunction(char* name, Command commandList){
+Function createFunction(Command commandList){
 
     FunctionImpl* function = malloc(sizeof(FunctionImpl));
 
-    function->name=name;
+    function->name=NULL;
     function->symbolTable= criaHashTable(108,getSymbolName);
     function->commandList=commandList;
     function->next=NULL;
     
     return function;
+}
+
+void setNextFunction(Function f, Function next){
+    FunctionImpl* function = f;
+    function->next = next;
+}
+
+void setFunctionName(Function f, char* name){
+    FunctionImpl* function = f;
+    function->name = name;
 }
 
 char* getFunctionName(Function f){
