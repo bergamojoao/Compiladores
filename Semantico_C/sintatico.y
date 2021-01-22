@@ -5,6 +5,7 @@
 #include<stdlib.h>
 #include"HashTable.h"
 #include"Expression.h"
+#include"Command.h"
 
 #define YYSTYPE void*
 #define size_str 100000
@@ -158,100 +159,100 @@ tipo: INT
 	| CHAR
 	| VOID ;
 
-comandos: lista_de_comandos comandos1 ;
+comandos: lista_de_comandos comandos1 { setNextCommand($1, $2); $$ = $1; } ;
 
-comandos1: comandos
-	| ;
+comandos1: comandos { $$ = $1; }
+	| { $$ = NULL; } ;
 
-bloco: L_CURLY_BRACKET comandos R_CURLY_BRACKET ;
+bloco: L_CURLY_BRACKET comandos R_CURLY_BRACKET { $$ = $2; } ;
 
 lista_de_comandos: DO bloco WHILE L_PAREN expressao R_PAREN SEMICOLON
-	| IF L_PAREN expressao R_PAREN bloco lista_de_comandos1
-	| WHILE L_PAREN expressao R_PAREN bloco
-	| FOR L_PAREN lista_de_comandos2
-	| PRINTF L_PAREN STRING lista_de_comandos6
-	| SCANF L_PAREN STRING COMMA BITWISE_AND IDENTIFIER R_PAREN SEMICOLON
-	| EXIT L_PAREN expressao R_PAREN SEMICOLON
-	| RETURN lista_de_comandos7
-	| expressao SEMICOLON
-	| SEMICOLON
-	| bloco ;
+	| IF L_PAREN expressao R_PAREN bloco lista_de_comandos1 { $$ = createCommand(IF_CMD, $3, $5, $6, NULL, NULL); }
+	| WHILE L_PAREN expressao R_PAREN bloco { $$ = createCommand(WHILE_CMD, $3, NULL, NULL, $5, NULL); }
+	| FOR L_PAREN lista_de_comandos2 { $$ = $3; }
+	| PRINTF L_PAREN STRING lista_de_comandos6 { $$ = $4; }
+	| SCANF L_PAREN STRING COMMA BITWISE_AND IDENTIFIER R_PAREN SEMICOLON { $$ = NULL; }
+	| EXIT L_PAREN expressao R_PAREN SEMICOLON { $$ = createCommand(EXPRESSAO, $1, NULL, NULL, NULL, NULL); }
+	| RETURN lista_de_comandos7 { $$ = $2; }
+	| expressao SEMICOLON { $$ = createCommand(EXPRESSAO, $1, NULL, NULL, NULL, NULL); }
+	| SEMICOLON { $$ = NULL; }
+	| bloco { $$ = $1; } ;
 
-lista_de_comandos1: ELSE bloco
-	| ;
+lista_de_comandos1: ELSE bloco { $$ = $2; }
+	| { $$ = NULL; };
 	
-lista_de_comandos2: expressao SEMICOLON lista_de_comandos3
-	| SEMICOLON lista_de_comandos3 ;
+lista_de_comandos2: expressao SEMICOLON lista_de_comandos3 { setCmdExp1($3, $1); $$ = $3; }
+	| SEMICOLON lista_de_comandos3 { $$ = $2; } ;
 
-lista_de_comandos3: expressao SEMICOLON lista_de_comandos4
-	| SEMICOLON lista_de_comandos4 ;
+lista_de_comandos3: expressao SEMICOLON lista_de_comandos4 { setCmdExp2($3, $1); $$ = $3; }
+	| SEMICOLON lista_de_comandos4 { $$ = $2; } ;
 
-lista_de_comandos4: expressao lista_de_comandos5
-	| lista_de_comandos5 ;
+lista_de_comandos4: expressao lista_de_comandos5 { $$ = createCmdFor($1, $2); }
+	| lista_de_comandos5 { $$ = createCmdFor(NULL, $1); } ;
 
-lista_de_comandos5: R_PAREN bloco ;
+lista_de_comandos5: R_PAREN bloco { $$ = $2; };
 
-lista_de_comandos6: COMMA expressao R_PAREN SEMICOLON
-	| R_PAREN SEMICOLON ;
+lista_de_comandos6: COMMA expressao R_PAREN SEMICOLON { $$ = createCommand(EXPRESSAO, $2, NULL, NULL, NULL, NULL); }
+	| R_PAREN SEMICOLON { $$ = NULL; } ;
 
-lista_de_comandos7: expressao SEMICOLON
-	| SEMICOLON ;
+lista_de_comandos7: expressao SEMICOLON { $$ = createCommand(EXPRESSAO, $1, NULL, NULL, NULL, NULL); }
+	| SEMICOLON { $$ = NULL; } ;
 
-expressao: expressao_de_atribuicao expressao1 ;
+expressao: expressao_de_atribuicao expressao1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
 
-expressao1: COMMA expressao_de_atribuicao expressao1
-	| ;
+expressao1: COMMA expressao_de_atribuicao expressao1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); }
+	| { $$ = NULL; } ;
 
-expressao_de_atribuicao: expressao_condicional
-	| expressao_unaria expressao_de_atribuicao1 ;
+expressao_de_atribuicao: expressao_condicional { $$ = $1; }
+	| expressao_unaria expressao_de_atribuicao1 { setLeftChild($2, $1); $$ = $2; } ;
 
-expressao_de_atribuicao1: ASSIGN expressao_de_atribuicao
-	| ADD_ASSIGN expressao_de_atribuicao
-	| MINUS_ASSIGN expressao_de_atribuicao ;
+expressao_de_atribuicao1: ASSIGN expressao_de_atribuicao { $$ = createExpression(OPERADOR, NULL, $2); }
+	| ADD_ASSIGN expressao_de_atribuicao { $$ = createExpression(OPERADOR, NULL, $2); }
+	| MINUS_ASSIGN expressao_de_atribuicao { $$ = createExpression(OPERADOR, NULL, $2); } ;
 
-expressao_condicional: expressao_or_logico ternario ;
+expressao_condicional: expressao_or_logico ternario { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
 
-ternario: TERNARY_CONDITIONAL expressao COLON expressao_condicional
-	| ;
+ternario: TERNARY_CONDITIONAL expressao COLON expressao_condicional { $$ = createExpression(OPERADOR, $2, $4); }
+	| { $$ = NULL; } ;
 
-expressao_or_logico: expressao_and_logico expressao_or_logico1 ;
+expressao_or_logico: expressao_and_logico expressao_or_logico1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
 
-expressao_or_logico1: LOGICAL_OR expressao_and_logico expressao_or_logico1
-	| ;
+expressao_or_logico1: LOGICAL_OR expressao_and_logico expressao_or_logico1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
+	| { $$ = NULL; } ;
 
-expressao_and_logico: expressao_or expressao_and_logico1 ;
+expressao_and_logico: expressao_or expressao_and_logico1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
 
-expressao_and_logico1: LOGICAL_AND expressao_or expressao_and_logico1
-	| ;
+expressao_and_logico1: LOGICAL_AND expressao_or expressao_and_logico1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
+	| { $$ = NULL; } ;
 
-expressao_or: expressao_xor expressao_or1 ;
+expressao_or: expressao_xor expressao_or1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
 
-expressao_or1: BITWISE_OR expressao_xor expressao_or1
-	| ;
+expressao_or1: BITWISE_OR expressao_xor expressao_or1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
+	| { $$ = NULL; } ;
 
-expressao_xor: expressao_and expressao_xor1 ;
+expressao_xor: expressao_and expressao_xor1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
 
-expressao_xor1: BITWISE_XOR expressao_and expressao_xor1
-	| ;
+expressao_xor1: BITWISE_XOR expressao_and expressao_xor1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
+	|  { $$ = NULL; } ;
 
-expressao_and: expressao_igualdade expressao_and1 ;
+expressao_and: expressao_igualdade expressao_and1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
 
-expressao_and1: BITWISE_AND expressao_igualdade expressao_and1
-	| ;
+expressao_and1: BITWISE_AND expressao_igualdade expressao_and1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
+	| { $$ = NULL; } ;
 
-expressao_igualdade: expressao_relacional expressao_igualdade1 ;
+expressao_igualdade: expressao_relacional expressao_igualdade1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
 
-expressao_igualdade1: EQUAL expressao_relacional expressao_igualdade1
-	| NOT_EQUAL expressao_relacional expressao_igualdade1
-	| ;
+expressao_igualdade1: EQUAL expressao_relacional expressao_igualdade1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
+	| NOT_EQUAL expressao_relacional expressao_igualdade1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
+	| { $$ = NULL; } ;
 
-expressao_relacional: expressao_shift expressao_relacional1 ;
+expressao_relacional: expressao_shift expressao_relacional1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
 
-expressao_relacional1: LESS_THAN expressao_shift expressao_relacional1
-	| LESS_EQUAL expressao_shift expressao_relacional1
-	| GREATER_THAN expressao_shift expressao_relacional1
-	| GREATER_EQUAL expressao_shift expressao_relacional1
-	| ;
+expressao_relacional1: LESS_THAN expressao_shift expressao_relacional1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
+	| LESS_EQUAL expressao_shift expressao_relacional1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
+	| GREATER_THAN expressao_shift expressao_relacional1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
+	| GREATER_EQUAL expressao_shift expressao_relacional1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
+	| { $$ = NULL; } ;
 
 expressao_shift: expressao_aditiva expressao_shift1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
 
