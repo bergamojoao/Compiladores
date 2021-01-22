@@ -25,6 +25,16 @@ int getExpType(Expression e){
     return exp->expType;
 }
 
+void setLeftChild(Expression e, Expression leftChild){
+    ExpressionImpl *exp = e;
+    exp->leftChild=leftChild;
+}
+
+void setRightChild(Expression e, Expression rightChild){
+    ExpressionImpl *exp = e;
+    exp->rightChild=rightChild;
+}
+
 Expression getLeftChild(Expression e){
     ExpressionImpl *exp = e;
     return exp->leftChild;

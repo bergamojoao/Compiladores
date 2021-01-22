@@ -9,6 +9,10 @@ Expression createExpression(int expType, Expression leftChild, Expression rightC
 
 int getExpType(Expression e);
 
+void setLeftChild(Expression e, Expression leftChild);
+
+void setRightChild(Expression e, Expression rightChild);
+
 Expression getLeftChild(Expression e);
 
 Expression getRightChild(Expression e);

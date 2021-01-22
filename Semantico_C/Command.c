@@ -6,6 +6,8 @@
 typedef struct cmd{
     int cmdType;
     Expression exp;
+    Expression exp2;
+    Expression exp3;
 
     //if
     struct cmd* thenCmd;
@@ -23,12 +25,42 @@ Command createCommand(int cmdType, Expression exp, Command thenCmd, Command else
 
     command->cmdType=cmdType;
     command->exp=exp;
+    command->exp2=NULL;
+    command->exp3=NULL;
     command->thenCmd=thenCmd;
     command->elseCmd=elseCmd;
     command->commands=commands;
     command->next=next;
     
     return command;
+}
+
+Command createCmdFor(Expression exp3, Command bloco){
+    CommandImpl* command = malloc(sizeof(CommandImpl));
+
+    command->cmdType=FOR_CMD;
+    command->exp=NULL;
+    command->exp2=NULL;
+    command->exp3=exp3;
+    command->commands=bloco;
+    command->thenCmd=NULL;
+    command->elseCmd=NULL;
+    command->next=NULL;
+}
+
+void setCmdExp2(Command c, Expression exp2){
+    CommandImpl *cmd = c;
+    cmd->exp2=exp2;
+}
+
+void setCmdExp1(Command c, Expression exp1){
+    CommandImpl *cmd = c;
+    cmd->exp=exp1;
+}
+
+void setNextCommand(Command c, Command next){
+    CommandImpl *cmd = c;
+    cmd->next=next;
 }
 
 int getCmdType(Command c){
