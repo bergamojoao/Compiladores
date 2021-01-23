@@ -18,7 +18,7 @@ Program createProgram(){
 
     ProgramImpl* program = malloc(sizeof(ProgramImpl));
 
-    program->globalSymbolTable = criaHashTable(108,getSymbolName);
+    program->globalSymbolTable = criaHashTable(108, getSymbolName);
 
     program->functionList = NULL;
     
@@ -28,4 +28,14 @@ Program createProgram(){
 void setFunctionList(Program p, Function functionList){
     ProgramImpl* program = p;
     program->functionList=functionList;
+}
+
+HashTable getGlobalSymbolTable(Program p){
+    ProgramImpl* program = p;
+    return program->globalSymbolTable;
+}
+
+Function getFunctions(Program p){
+    ProgramImpl* program = p;
+    return program->functionList;
 }

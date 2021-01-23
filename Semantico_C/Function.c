@@ -21,7 +21,7 @@ Function createFunction(Command commandList){
     FunctionImpl* function = malloc(sizeof(FunctionImpl));
 
     function->name=NULL;
-    function->symbolTable= criaHashTable(108,getSymbolName);
+    function->symbolTable= NULL;
     function->commandList=commandList;
     function->next=NULL;
     
@@ -33,6 +33,11 @@ void setNextFunction(Function f, Function next){
     function->next = next;
 }
 
+Function getNextFunction(Function f){
+    FunctionImpl* function = f;
+    return function->next;
+}
+
 void setFunctionName(Function f, char* name){
     FunctionImpl* function = f;
     function->name = name;
@@ -41,4 +46,14 @@ void setFunctionName(Function f, char* name){
 char* getFunctionName(Function f){
     FunctionImpl* function = f;
     return function->name;
+}
+
+void setFunctionSymbolTable(Function f, HashTable symbolTable){
+    FunctionImpl* function = f;
+    function->symbolTable = symbolTable;
+}
+
+HashTable getFunctionSymbolTable(Function f){
+    FunctionImpl* function = f;
+    return function->symbolTable;
 }

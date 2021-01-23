@@ -3,12 +3,14 @@
 #include <stdio.h>
 #include<string.h>
 #include<stdlib.h>
+#include<stdbool.h>
 #include"HashTable.h"
 #include"Expression.h"
 #include"Command.h"
 #include"Function.h"
 #include"Symbol.h"
 #include"Program.h"
+#include"semantico.h"
 
 #define size_str 100000
 
@@ -37,7 +39,9 @@ extern int backupTamanho;
 void yyerror(char *s);
 
 Program AST;
-
+HashTable symbolTable, globalSymbolTable;
+bool criaST = true;
+char tipoVar[10];
 
 %}
 
@@ -108,7 +112,8 @@ Program AST;
 
 %%
 
-S: { AST = createProgram(); } programa { setFunctionList(AST, $1); printf("SUCCESSFUL COMPILATION."); return 0;} ;
+S: { AST = createProgram(); globalSymbolTable = getGlobalSymbolTable(AST); } 
+	programa { setFunctionList(AST, $2); semantico(AST); printf("SUCCESSFUL COMPILATION."); return 0;} ;
 	
 programa: declaracoes programa1 { $$ = $2; }
 	| funcao programa1  { setNextFunction($1, $2); $$ = $1; };
@@ -120,7 +125,7 @@ declaracoes: NUMBER_SIGN DEFINE IDENTIFIER expressao
 	| declaracao_variaveis
 	| declaracao_prototipos ;
 
-funcao: tipo funcao1 { $$ = $2; } ;
+funcao: tipo funcao1 { setFunctionSymbolTable($2, symbolTable); symbolTable = globalSymbolTable; criaST=true; $$ = $2; } ;
 
 funcao1: MULTIPLY funcao1 { $$ = $2; }
 	| IDENTIFIER parametros L_CURLY_BRACKET funcao2 { setFunctionName($4, getSymbolName($1)); $$ = $4; } ;
@@ -131,14 +136,14 @@ funcao2: declaracao_variaveis funcao2 { $$ = $2; }
 declaracao_variaveis: tipo declaracao_variaveis1 ;
 
 declaracao_variaveis1: MULTIPLY declaracao_variaveis1
-	| IDENTIFIER declaracao_variaveis2 ;
+	| IDENTIFIER declaracao_variaveis2 { setSymbolName($2, getSymbolName($1)); insertHashTable(symbolTable, $2); } ;
 
-declaracao_variaveis2:L_SQUARE_BRACKET expressao R_SQUARE_BRACKET declaracao_variaveis2
-	| ASSIGN expressao_de_atribuicao declaracao_variaveis3
-	| declaracao_variaveis3 ;
+declaracao_variaveis2:L_SQUARE_BRACKET expressao R_SQUARE_BRACKET declaracao_variaveis2 { $$ = $4; }
+	| ASSIGN expressao_de_atribuicao declaracao_variaveis3 { $$ = $3; }
+	| declaracao_variaveis3 { $$ = $1; };
 
-declaracao_variaveis3: COMMA declaracao_variaveis1
-	| SEMICOLON ;
+declaracao_variaveis3: COMMA declaracao_variaveis1 { if(criaST){symbolTable = criaHashTable(108, getSymbolName);criaST=false;} $$ = createVar(VARIAVEL, tipoVar); }
+	| SEMICOLON  { if(criaST){symbolTable = criaHashTable(108, getSymbolName);criaST=false;} $$ = createVar(VARIAVEL, tipoVar); };
 
 declaracao_prototipos: tipo declaracao_prototipos1 ;
 
@@ -159,9 +164,9 @@ parametros4: L_SQUARE_BRACKET expressao R_SQUARE_BRACKET parametros4
 	| COMMA parametros2
 	| R_PAREN ;
 
-tipo: INT
-	| CHAR
-	| VOID ;
+tipo: INT { strcpy(tipoVar,"INT"); }
+	| CHAR { strcpy(tipoVar,"CHAR"); }
+	| VOID { strcpy(tipoVar,"VOID"); } ;
 
 comandos: lista_de_comandos comandos1 { setNextCommand($1, $2); $$ = $1; } ;
 
