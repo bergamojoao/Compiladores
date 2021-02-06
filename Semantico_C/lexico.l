@@ -118,7 +118,7 @@ void save_token();
 
 [_a-zA-Z][_a-zA-Z0-9]*	{char* tokenName = (char*) malloc(strlen(yytext)+1);
                          strcpy(tokenName,yytext);
-                         yylval=createSymbol(tokenName, "", VARIAVEL, 0);strcat(v, yytext);
+                         yylval=createSymbol(tokenName, "", VARIAVEL, 0, linha, caracteres);strcat(v, yytext);
                          save_token();caracteres+=strlen(yytext);tokens++;return(IDENTIFIER);
                         }
 

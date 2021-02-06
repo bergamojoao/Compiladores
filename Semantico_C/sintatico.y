@@ -136,7 +136,12 @@ funcao2: declaracao_variaveis funcao2 { $$ = $2; }
 declaracao_variaveis: tipo declaracao_variaveis1 ;
 
 declaracao_variaveis1: MULTIPLY declaracao_variaveis1
-	| IDENTIFIER declaracao_variaveis2 { setSymbolName($2, getSymbolName($1)); insertHashTable(symbolTable, $2); } ;
+	| IDENTIFIER declaracao_variaveis2 { setSymbolName($2, getSymbolName($1));
+										 setSymbolLinha($2, getSymbolLinha($1));
+										 setSymbolColuna($2, getSymbolColuna($1));
+										 verificaVariaveisIguais(symbolTable, $2, STR_BACKUP);
+										 insertHashTable(symbolTable, $2);
+									   } ;
 
 declaracao_variaveis2:L_SQUARE_BRACKET expressao R_SQUARE_BRACKET declaracao_variaveis2 { $$ = $4; }
 	| ASSIGN expressao_de_atribuicao declaracao_variaveis3 { $$ = $3; }

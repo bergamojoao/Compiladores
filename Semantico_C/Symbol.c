@@ -8,10 +8,12 @@ typedef struct{
     int symbolSpec;
     char name[150];
     char type[10];
+    int linha;
+    int coluna;
     int arraySize;
 }SymbolImpl;
 
-Symbol createSymbol(char* name, char* type, int symbolSpec, int arraySize){
+Symbol createSymbol(char* name, char* type, int symbolSpec, int arraySize, int linha, int coluna){
 
     SymbolImpl* symbol = malloc(sizeof(SymbolImpl));
 
@@ -19,7 +21,9 @@ Symbol createSymbol(char* name, char* type, int symbolSpec, int arraySize){
     strcpy(symbol->name,name);
     strcpy(symbol->type,type);
     symbol->arraySize=arraySize;
-    
+    symbol->linha=linha;
+    symbol->coluna=coluna;
+
     return symbol;
 }
 
@@ -46,4 +50,24 @@ char* getSymbolName(Symbol s){
 char* getSymbolType(Symbol s){
     SymbolImpl* symbol=s;
     return symbol->type;
+}
+
+int getSymbolLinha(Symbol s){
+    SymbolImpl* symbol=s;
+    return symbol->linha;
+}
+
+int getSymbolColuna(Symbol s){
+    SymbolImpl* symbol=s;
+    return symbol->coluna;
+}
+
+void setSymbolLinha(Symbol s, int linha){
+    SymbolImpl* symbol=s;
+    symbol->linha = linha;
+}
+
+void setSymbolColuna(Symbol s, int coluna){
+    SymbolImpl* symbol=s;
+    symbol->coluna = coluna;
 }

@@ -4,4 +4,6 @@
 
 void semantico(Program p);
 
+void verificaVariaveisIguais(HashTable symbolTable, Symbol symbol, char* str);
+
 #endif
