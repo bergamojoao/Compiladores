@@ -5,6 +5,8 @@
 
 typedef struct exp{
     int expType;
+    char varName[150];
+    int value;
     struct exp* leftChild;
     struct exp* rightChild;
 }ExpressionImpl;
@@ -33,6 +35,26 @@ void setLeftChild(Expression e, Expression leftChild){
 void setRightChild(Expression e, Expression rightChild){
     ExpressionImpl *exp = e;
     exp->rightChild=rightChild;
+}
+
+void setExpVarName(Expression e, char* varName){
+    ExpressionImpl *exp = e;
+    strcpy(exp->varName,varName);
+}
+
+char* getExpVarName(Expression e){
+    ExpressionImpl *exp = e;
+    return exp->varName;
+}
+
+void setExpValue(Expression e, int value){
+    ExpressionImpl *exp = e;
+    exp->value=value;
+}
+
+int getExpValue(Expression e){
+    ExpressionImpl *exp = e;
+    return exp->value;
 }
 
 Expression getLeftChild(Expression e){

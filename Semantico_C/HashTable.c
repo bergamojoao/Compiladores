@@ -107,3 +107,14 @@ void desalocaHash(HashTable h){
         finalizar(hash->table[i].lista);
     }
 }
+
+int getSizeHash(HashTable H){
+    HashTableImpl *hash=H;
+    return hash->tamanho;
+}
+
+Lista getLista(HashTable H, int index){
+    HashTableImpl *hash=H;
+    return hash->table[index].lista;
+}
+    

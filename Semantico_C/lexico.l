@@ -10,6 +10,7 @@
 extern YYSTYPE yylval;
 #include <sintatico.tab.h>
 #include"Symbol.h"
+#include"Expression.h"
 #define size_str 100000
 
 
@@ -103,7 +104,12 @@ void save_token();
 
 
 0[1-7][0-7]*        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(NUM_OCTAL);}
-[0-9]+              {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(NUM_INTEGER);}
+[0-9]+          {
+                        Expression exp = createExpression(EXP_NUMBER, NULL, NULL);
+                        setExpValue(exp, atoi(yytext));
+                        yylval = exp;
+                        strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(NUM_INTEGER);
+                    }
 0[Xx][0-9a-fA-F]+   {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(NUM_HEXA);}
 
 '[\\]?(.)'	        {strcat(v, yytext);save_token(); str = malloc(strlen(yytext)*sizeof(char));strcpy(str, yytext); i = 0;
@@ -111,14 +117,15 @@ void save_token();
 			         caracteres+=strlen(yytext);tokens++;return(CHARACTER);
                     }
 
-\"([^\\\"]|\\.)*\"	{strcat(v, yytext);save_token(); str = malloc(strlen(yytext)*sizeof(char)); strcpy(str, yytext); i = 0;
+\"([^\\\"]|\\.)*\"	{
+                     strcat(v, yytext);save_token(); str = malloc(strlen(yytext)*sizeof(char)); strcpy(str, yytext); i = 0;
 			         while(str[i] != '\0'){str[i] = str[i+1];i++;} str[i-2] = '\0';
 			         caracteres+=strlen(yytext);tokens++;return(STRING);
                     }
 
 [_a-zA-Z][_a-zA-Z0-9]*	{char* tokenName = (char*) malloc(strlen(yytext)+1);
                          strcpy(tokenName,yytext);
-                         yylval=createSymbol(tokenName, "", VARIAVEL, 0, linha, caracteres);strcat(v, yytext);
+                         yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);strcat(v, yytext);
                          save_token();caracteres+=strlen(yytext);tokens++;return(IDENTIFIER);
                         }
 

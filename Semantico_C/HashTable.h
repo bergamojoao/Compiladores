@@ -52,4 +52,8 @@ Elem getElemHash(HashTable H,char* chave);
 */
 void desalocaHash(HashTable h);
 
+int getSizeHash(HashTable H);
+
+Lista getLista(HashTable H, int index);
+
 #endif

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include<string.h>
 #include"Symbol.h"
+#include"Expression.h"
 
 typedef struct{
     int symbolSpec;
@@ -10,10 +11,11 @@ typedef struct{
     char type[10];
     int linha;
     int coluna;
-    int arraySize;
+    Expression arraySize;
+    Expression constante;
 }SymbolImpl;
 
-Symbol createSymbol(char* name, char* type, int symbolSpec, int arraySize, int linha, int coluna){
+Symbol createSymbol(char* name, char* type, int symbolSpec, Expression arraySize, int linha, int coluna){
 
     SymbolImpl* symbol = malloc(sizeof(SymbolImpl));
 
@@ -23,6 +25,7 @@ Symbol createSymbol(char* name, char* type, int symbolSpec, int arraySize, int l
     symbol->arraySize=arraySize;
     symbol->linha=linha;
     symbol->coluna=coluna;
+    symbol->constante=NULL;
 
     return symbol;
 }
@@ -33,6 +36,8 @@ Symbol createVar(int symbolSpec, char* type){
 
     symbol->symbolSpec=symbolSpec;
     strcpy(symbol->type,type);
+    symbol->arraySize=NULL;
+    symbol->constante=NULL;
     
     return symbol;
 }
@@ -70,4 +75,24 @@ void setSymbolLinha(Symbol s, int linha){
 void setSymbolColuna(Symbol s, int coluna){
     SymbolImpl* symbol=s;
     symbol->coluna = coluna;
+}
+
+void setArraySize(Symbol s, Expression arraySize){
+    SymbolImpl* symbol=s;
+    symbol->arraySize = arraySize;
+}
+
+Expression getArraySize(Symbol s){
+    SymbolImpl* symbol=s;
+    return symbol->arraySize;
+}
+
+void setExpConstante(Symbol s, Expression constante){
+    SymbolImpl* symbol=s;
+    symbol->constante = constante;
+}
+
+Expression getExpConstante(Symbol s){
+    SymbolImpl* symbol=s;
+    return symbol->constante;
 }

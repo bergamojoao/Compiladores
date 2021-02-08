@@ -1,11 +1,12 @@
 #ifndef Symbol_H
 #define Symbol_H
+#include"Expression.h"
 
 typedef void * Symbol;
 
 enum SymSpec {FUNCAO, CONSTANTE, VARIAVEL, ARRAY};
 
-Symbol createSymbol(char* name, char* type, int symbolSpec, int arraySize, int linha, int coluna);
+Symbol createSymbol(char* name, char* type, int symbolSpec, Expression arraySize, int linha, int coluna);
 
 Symbol createVar(int symbolSpec, char* type);
 
@@ -22,5 +23,13 @@ int getSymbolColuna(Symbol s);
 void setSymbolLinha(Symbol s, int linha);
 
 void setSymbolColuna(Symbol s, int coluna);
+
+void setArraySize(Symbol s, Expression arraySize);
+
+Expression getArraySize(Symbol s);
+
+void setExpConstante(Symbol s, Expression constante);
+
+Expression getExpConstante(Symbol s);
 
 #endif

@@ -42,6 +42,9 @@ Program AST;
 HashTable symbolTable, globalSymbolTable;
 bool criaST = true;
 char tipoVar[10];
+Expression arraySize;
+
+int OPERACAO;
 
 %}
 
@@ -112,7 +115,7 @@ char tipoVar[10];
 
 %%
 
-S: { AST = createProgram(); globalSymbolTable = getGlobalSymbolTable(AST); } 
+S: { AST = createProgram(); symbolTable = getGlobalSymbolTable(AST); globalSymbolTable = symbolTable; } 
 	programa { setFunctionList(AST, $2); semantico(AST); printf("SUCCESSFUL COMPILATION."); return 0;} ;
 	
 programa: declaracoes programa1 { $$ = $2; }
@@ -121,7 +124,14 @@ programa: declaracoes programa1 { $$ = $2; }
 programa1: programa { $$ = $1; }
 	| { $$ = NULL; } ;
 
-declaracoes: NUMBER_SIGN DEFINE IDENTIFIER expressao
+declaracoes: NUMBER_SIGN DEFINE IDENTIFIER expressao {  Symbol s = createVar(CONSTANTE, "INT");
+														setSymbolName(s, getSymbolName($3));
+														setSymbolLinha(s, getSymbolLinha($3));
+														setSymbolColuna(s, getSymbolColuna($3));
+														setExpConstante(s, $4);
+														verificaVariaveisIguais(symbolTable, globalSymbolTable, s, STR_BACKUP);
+														insertHashTable(symbolTable, s);
+									   				}
 	| declaracao_variaveis
 	| declaracao_prototipos ;
 
@@ -139,11 +149,12 @@ declaracao_variaveis1: MULTIPLY declaracao_variaveis1
 	| IDENTIFIER declaracao_variaveis2 { setSymbolName($2, getSymbolName($1));
 										 setSymbolLinha($2, getSymbolLinha($1));
 										 setSymbolColuna($2, getSymbolColuna($1));
-										 verificaVariaveisIguais(symbolTable, $2, STR_BACKUP);
+										 setArraySize($2, arraySize);
+										 verificaVariaveisIguais(symbolTable, globalSymbolTable, $2, STR_BACKUP);
 										 insertHashTable(symbolTable, $2);
 									   } ;
 
-declaracao_variaveis2:L_SQUARE_BRACKET expressao R_SQUARE_BRACKET declaracao_variaveis2 { $$ = $4; }
+declaracao_variaveis2:L_SQUARE_BRACKET expressao R_SQUARE_BRACKET declaracao_variaveis2 { arraySize = $2; }
 	| ASSIGN expressao_de_atribuicao declaracao_variaveis3 { $$ = $3; }
 	| declaracao_variaveis3 { $$ = $1; };
 
@@ -274,16 +285,16 @@ expressao_shift1: L_SHIFT expressao_aditiva expressao_shift1 { $$ = $3 == NULL ?
 	| R_SHIFT expressao_aditiva expressao_shift1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
 	| { $$ = NULL; } ;
 
-expressao_aditiva: expressao_multiplicativa expressao_aditiva1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
+expressao_aditiva: expressao_multiplicativa expressao_aditiva1 { $$ = $2 == NULL ? $1 : createExpression(OPERACAO, $1, $2); } ;
 
-expressao_aditiva1: MINUS expressao_multiplicativa expressao_aditiva1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
-	| PLUS expressao_multiplicativa expressao_aditiva1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
+expressao_aditiva1: MINUS expressao_multiplicativa expressao_aditiva1 { OPERACAO = OPERADOR_SUB; $$ = $3 == NULL ? $2 : createExpression(OPERADOR_SUB, $2, $3); }
+	| PLUS expressao_multiplicativa expressao_aditiva1 { OPERACAO = OPERADOR_PLUS; $$ = $3 == NULL ? $2 : createExpression(OPERADOR_PLUS, $2, $3); }
 	| { $$ = NULL; } ;
 
-expressao_multiplicativa: expressao_cast expressao_multiplicativa1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
+expressao_multiplicativa: expressao_cast expressao_multiplicativa1 { $$ = $2 == NULL ? $1 : createExpression(OPERACAO, $1, $2); } ;
 
-expressao_multiplicativa1: MULTIPLY expressao_cast expressao_multiplicativa1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
-	| DIV expressao_cast expressao_multiplicativa1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
+expressao_multiplicativa1: MULTIPLY expressao_cast expressao_multiplicativa1 { OPERACAO = OPERADOR_MULT; $$ = $3 == NULL ? $2 : createExpression(OPERADOR_MULT, $2, $3); }
+	| DIV expressao_cast expressao_multiplicativa1 { OPERACAO = OPERADOR_DIV; $$ = $3 == NULL ? $2 : createExpression(OPERADOR_DIV, $2, $3); }
 	| REMAINDER expressao_cast expressao_multiplicativa1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
 	| { $$ = NULL; } ;
 
@@ -322,14 +333,17 @@ expressao_pos_fixa3: expressao_de_atribuicao expressao_pos_fixa4 ;
 expressao_pos_fixa4: COMMA expressao_pos_fixa3
 	| R_PAREN ;
 
-expressao_primaria: IDENTIFIER { $$ = createExpression(OPERANDO, NULL, NULL); }
+expressao_primaria: IDENTIFIER { Expression exp = createExpression(EXP_VARIAVEL, NULL, NULL);
+							   	 setExpVarName(exp, getSymbolName($1));
+								 $$ = exp;	
+							   }
 	| numero { $$ = $1; }
-	| CHARACTER { $$ = createExpression(OPERANDO, NULL, NULL); }
+	| CHARACTER { $$ = createExpression(OPERANDO, NULL, NULL);}
 	| STRING { $$ = createExpression(OPERANDO, NULL, NULL); }
 	| L_PAREN expressao R_PAREN { $$ = $2; }
 ;
 
-numero: NUM_INTEGER { $$ = createExpression(OPERANDO, NULL, NULL); }
+numero: NUM_INTEGER { $$ = $1; }
 	| NUM_HEXA { $$ = createExpression(OPERANDO, NULL, NULL); }
 	| NUM_OCTAL { $$ = createExpression(OPERANDO, NULL, NULL); } 
 ;
