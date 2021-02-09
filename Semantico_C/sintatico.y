@@ -11,6 +11,7 @@
 #include"Symbol.h"
 #include"Program.h"
 #include"semantico.h"
+#include"ListaDinamica.h"
 
 #define size_str 100000
 
@@ -45,6 +46,10 @@ char tipoVar[10];
 Expression arraySize;
 
 int OPERACAO;
+
+Lista listaPar = NULL;
+
+char funcaoMsg[180];
 
 %}
 
@@ -115,7 +120,7 @@ int OPERACAO;
 
 %%
 
-S: { AST = createProgram(); symbolTable = getGlobalSymbolTable(AST); globalSymbolTable = symbolTable; } 
+S: { AST = createProgram(); symbolTable = getGlobalSymbolTable(AST); globalSymbolTable = symbolTable; }
 	programa { setFunctionList(AST, $2); semantico(AST); printf("SUCCESSFUL COMPILATION."); return 0;} ;
 	
 programa: declaracoes programa1 { $$ = $2; }
@@ -154,7 +159,7 @@ declaracao_variaveis1: MULTIPLY declaracao_variaveis1
 										 insertHashTable(symbolTable, $2);
 									   } ;
 
-declaracao_variaveis2:L_SQUARE_BRACKET expressao R_SQUARE_BRACKET declaracao_variaveis2 { arraySize = $2; }
+declaracao_variaveis2:L_SQUARE_BRACKET expressao R_SQUARE_BRACKET declaracao_variaveis2 { arraySize = $2;  $$ = $4;}
 	| ASSIGN expressao_de_atribuicao declaracao_variaveis3 { $$ = $3; }
 	| declaracao_variaveis3 { $$ = $1; };
 

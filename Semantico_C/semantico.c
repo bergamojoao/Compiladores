@@ -49,11 +49,27 @@ void verificaVariaveisIguais(HashTable symbolTable, HashTable globalTable,Symbol
         }else if(percorreExpressionInt(exp,symbolTable, globalTable)<0){
             printf("error:semantic:%d:%d: size of array ’%s’ is negative\n%s\n%*s"
                     ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");
-                exit(0);
+            exit(0);
+        }else if(percorreExpressionInt(exp,symbolTable, globalTable)==0){
+                printf("error:semantic:%d:%d: size of array ’%s’ is zero\n%s\n%*s"
+                    ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");
+                exit(0); 
         }
     }
 
 }
+
+void verificaFuncao(HashTable symbolTable, Function f, char* msg){
+    printf("aqui");
+    char a[41];
+    scanf("%s",a);
+    Symbol s = getElemHash(symbolTable, getFunctionName(f));
+    if(s!=NULL){
+        if(getSymbolSpec(s) == PROTOTIPO){
+            printf("tem prototipo");
+        }
+    }
+}   
 
 
 int percorreExpressionInt(Expression exp, HashTable symbolTable, HashTable globalTable){

@@ -9,7 +9,7 @@ typedef struct elemento{
 
 Lista inserir(Lista L,Elem elemento){
     ListaImpl *inicio = L;
-
+    if(elemento == NULL) return inicio;
     ListaImpl *novo=(ListaImpl *)malloc(sizeof(ListaImpl));
     novo->e=elemento;
     novo->prox=NULL;

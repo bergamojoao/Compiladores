@@ -4,6 +4,7 @@
 #include<string.h>
 #include"Symbol.h"
 #include"Expression.h"
+#include"ListaDinamica.h"
 
 typedef struct{
     int symbolSpec;
@@ -13,6 +14,7 @@ typedef struct{
     int coluna;
     Expression arraySize;
     Expression constante;
+    Lista parametros;
 }SymbolImpl;
 
 Symbol createSymbol(char* name, char* type, int symbolSpec, Expression arraySize, int linha, int coluna){
@@ -26,6 +28,7 @@ Symbol createSymbol(char* name, char* type, int symbolSpec, Expression arraySize
     symbol->linha=linha;
     symbol->coluna=coluna;
     symbol->constante=NULL;
+    symbol->parametros=NULL;
 
     return symbol;
 }
@@ -38,6 +41,7 @@ Symbol createVar(int symbolSpec, char* type){
     strcpy(symbol->type,type);
     symbol->arraySize=NULL;
     symbol->constante=NULL;
+    symbol->parametros=NULL;
     
     return symbol;
 }
@@ -95,4 +99,19 @@ void setExpConstante(Symbol s, Expression constante){
 Expression getExpConstante(Symbol s){
     SymbolImpl* symbol=s;
     return symbol->constante;
+}
+
+void setListaParametros(Symbol s, Lista l){
+    SymbolImpl* symbol=s;
+    symbol->parametros = l;
+}
+
+Lista getListaParametros(Symbol s){
+    SymbolImpl* symbol=s;
+    return symbol->parametros;
+}
+
+int getSymbolSpec(Symbol s){
+    SymbolImpl* symbol=s;
+    return symbol->symbolSpec;
 }

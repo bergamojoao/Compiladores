@@ -45,9 +45,18 @@ void save_token();
 
 %%
 
-"void"     {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(VOID);}
-"int"      {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(INT);}
-"char"     {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(CHAR);}
+"void"     {char* tokenName = (char*) malloc(strlen(yytext)+1);
+            strcpy(tokenName,yytext);
+            yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
+            strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(VOID);}
+"int"      {char* tokenName = (char*) malloc(strlen(yytext)+1);
+            strcpy(tokenName,yytext);
+            yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
+            strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(INT);}
+"char"     {char* tokenName = (char*) malloc(strlen(yytext)+1);
+            strcpy(tokenName,yytext);
+            yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
+            strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(CHAR);}
 "return"   {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(RETURN);}
 "break"    {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(BREAK);}
 "switch"   {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(SWITCH);}

@@ -1,10 +1,11 @@
 #ifndef Symbol_H
 #define Symbol_H
 #include"Expression.h"
+#include"ListaDinamica.h"
 
 typedef void * Symbol;
 
-enum SymSpec {FUNCAO, CONSTANTE, VARIAVEL, ARRAY};
+enum SymSpec {FUNCAO, CONSTANTE, VARIAVEL, ARRAY, PARAMETRO, PROTOTIPO};
 
 Symbol createSymbol(char* name, char* type, int symbolSpec, Expression arraySize, int linha, int coluna);
 
@@ -31,5 +32,11 @@ Expression getArraySize(Symbol s);
 void setExpConstante(Symbol s, Expression constante);
 
 Expression getExpConstante(Symbol s);
+
+void setListaParametros(Symbol s, Lista l);
+
+Lista getListaParametros(Symbol s);
+
+int getSymbolSpec(Symbol s);
 
 #endif
