@@ -115,3 +115,8 @@ int getSymbolSpec(Symbol s){
     SymbolImpl* symbol=s;
     return symbol->symbolSpec;
 }
+
+void setSymbolType(Symbol s, char* type){
+    SymbolImpl* symbol=s;
+    strcpy(symbol->type,type);
+}

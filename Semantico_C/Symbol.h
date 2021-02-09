@@ -39,4 +39,6 @@ Lista getListaParametros(Symbol s);
 
 int getSymbolSpec(Symbol s);
 
+void setSymbolType(Symbol s, char* type);
+
 #endif

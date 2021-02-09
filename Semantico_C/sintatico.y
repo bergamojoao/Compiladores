@@ -49,6 +49,8 @@ int OPERACAO;
 
 Lista listaPar = NULL;
 
+char funcTipo[10];
+
 char funcaoMsg[180];
 
 %}
@@ -140,10 +142,14 @@ declaracoes: NUMBER_SIGN DEFINE IDENTIFIER expressao {  Symbol s = createVar(CON
 	| declaracao_variaveis
 	| declaracao_prototipos ;
 
-funcao: tipo funcao1 { setFunctionSymbolTable($2, symbolTable); symbolTable = globalSymbolTable; criaST=true; $$ = $2; } ;
+funcao: tipo funcao1 { setFunctionType($2, getSymbolName($1)); setFunctionSymbolTable($2, symbolTable); symbolTable = globalSymbolTable; criaST=true; $$ = $2; } ;
 
 funcao1: MULTIPLY funcao1 { $$ = $2; }
-	| IDENTIFIER parametros L_CURLY_BRACKET funcao2 { setFunctionName($4, getSymbolName($1)); $$ = $4; } ;
+	| IDENTIFIER parametros {strcpy(funcaoMsg, STR_BACKUP); } L_CURLY_BRACKET funcao2 { setListaParametrosFunc($5, listaPar);
+													  listaPar = NULL; 
+													  setFunctionMsg($5, funcaoMsg);
+													  setLinhaColunaFunc($5, getSymbolLinha($1), getSymbolColuna($1)); 
+													  setFunctionName($5, getSymbolName($1)); $$ = $5; } ;
 
 funcao2: declaracao_variaveis funcao2 { $$ = $2; }
 	| comandos R_CURLY_BRACKET { $$ = createFunction($1); };
@@ -155,6 +161,7 @@ declaracao_variaveis1: MULTIPLY declaracao_variaveis1
 										 setSymbolLinha($2, getSymbolLinha($1));
 										 setSymbolColuna($2, getSymbolColuna($1));
 										 setArraySize($2, arraySize);
+										 arraySize=NULL;
 										 verificaVariaveisIguais(symbolTable, globalSymbolTable, $2, STR_BACKUP);
 										 insertHashTable(symbolTable, $2);
 									   } ;
@@ -166,28 +173,37 @@ declaracao_variaveis2:L_SQUARE_BRACKET expressao R_SQUARE_BRACKET declaracao_var
 declaracao_variaveis3: COMMA declaracao_variaveis1 { if(criaST){symbolTable = criaHashTable(108, getSymbolName);criaST=false;} $$ = createVar(VARIAVEL, tipoVar); }
 	| SEMICOLON  { if(criaST){symbolTable = criaHashTable(108, getSymbolName);criaST=false;} $$ = createVar(VARIAVEL, tipoVar); };
 
-declaracao_prototipos: tipo declaracao_prototipos1 ;
+declaracao_prototipos: tipo declaracao_prototipos1 {
+											setSymbolType($2, getSymbolName($1));
+											verificaVariaveisIguais(symbolTable, globalSymbolTable, $2, STR_BACKUP);
+											insertHashTable(symbolTable, $2);
+};
 
 declaracao_prototipos1: MULTIPLY declaracao_prototipos1
-	| IDENTIFIER parametros SEMICOLON ;
+	| IDENTIFIER parametros SEMICOLON { Symbol s = createVar(PROTOTIPO, "");
+										setSymbolName(s, getSymbolName($1));
+										setListaParametros(s, listaPar);
+										listaPar = NULL;	
+										$$ = s;
+									} ;
 
 parametros: L_PAREN parametros1 ;
 
 parametros1: R_PAREN
 	| parametros2 ;
 
-parametros2: tipo parametros3 ;
+parametros2: tipo parametros3 { setSymbolType($2, getSymbolName($1)); listaPar = inserir(listaPar, $2); } ;
 
 parametros3: MULTIPLY parametros3
-	| IDENTIFIER parametros4 ;
+	| IDENTIFIER parametros4 { $$ = $1; };
 
-parametros4: L_SQUARE_BRACKET expressao R_SQUARE_BRACKET parametros4
-	| COMMA parametros2
+parametros4: L_SQUARE_BRACKET expressao R_SQUARE_BRACKET parametros4 { arraySize = $2;  $$ = $4;}
+	| COMMA parametros2 { $$ = $2; }
 	| R_PAREN ;
 
-tipo: INT { strcpy(tipoVar,"INT"); }
-	| CHAR { strcpy(tipoVar,"CHAR"); }
-	| VOID { strcpy(tipoVar,"VOID"); } ;
+tipo: INT { strcpy(tipoVar,"int"); $$ = $1; }
+	| CHAR { strcpy(tipoVar,"char"); $$ = $1; }
+	| VOID { strcpy(tipoVar,"void"); $$ = $1; } ;
 
 comandos: lista_de_comandos comandos1 { setNextCommand($1, $2); $$ = $1; } ;
 

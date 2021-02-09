@@ -9,7 +9,51 @@
 int percorreExpressionInt(Expression exp, HashTable symbolTable, HashTable globalTable);
 
 int semantico(Program p){
-    Function function = getFunctions(p);
+    
+
+    Function functions = getFunctions(p);
+    while (functions != NULL){
+        Symbol s = getElemHash(getGlobalSymbolTable(p),getFunctionName(functions));
+        if(s!=NULL){
+            if(getSymbolSpec(s) == PROTOTIPO){
+
+                if(strcmp(getFunctionType(functions),getSymbolType(s)) != 0){
+                    printf("error:semantic:%d:%d: conflicting types for ’%s’\n%s\n%*s"
+                        ,getLinhaFunc(functions), getColunaFunc(functions), getFunctionName(functions), getFunctionMsg(functions), getColunaFunc(functions), "^");
+                    exit(0); 
+                }
+                
+                Lista parametrosProt = getListaParametros(s);
+                Lista parametrosFunc = getListaParametrosFunc(functions);
+
+                int sizeProt = getListaSize(parametrosProt);
+                int sizeFunc = getListaSize(parametrosFunc);
+
+
+                if(sizeProt < sizeFunc){
+                    printf("error:semantic:%d:%d: prototype for ’%s’ declares fewer arguments\n%s\n%*s"
+                        ,getLinhaFunc(functions), getColunaFunc(functions), getFunctionName(functions), getFunctionMsg(functions), getColunaFunc(functions), "^");
+                    exit(0);    
+                }
+                
+
+                while (parametrosProt != NULL && parametrosFunc != NULL){
+                    Symbol sProt = get(parametrosProt), sFunc = get(parametrosFunc);
+                    if(strcmp(getSymbolType(sProt),getSymbolType(sFunc)) != 0){
+                        printf("error:semantic:%d:%d: argument ’%s’ does not match prototype\n%s\n%*s"
+                            ,getSymbolLinha(sFunc), getSymbolColuna(sFunc), getSymbolName(sFunc), getFunctionMsg(functions), getSymbolColuna(sFunc), "^");
+                        exit(0); 
+                    }
+
+                    parametrosProt = getProx(parametrosProt);
+                    parametrosFunc = getProx(parametrosFunc);
+                }
+                
+            }
+        }
+
+        functions = getNextFunction(functions);
+    }
     
 }
 
@@ -28,7 +72,7 @@ void verificaVariaveisIguais(HashTable symbolTable, HashTable globalTable,Symbol
         exit(0);
     }
 
-    if(strcmp(getSymbolType(symbol),"VOID") == 0){
+    if(getSymbolSpec(symbol) != PROTOTIPO && strcmp(getSymbolType(symbol),"void") == 0){
         printf("error:semantic:%d:%d: variable ’%s’ declared void\n%s\n%*s"
                     ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");
         exit(0);           
