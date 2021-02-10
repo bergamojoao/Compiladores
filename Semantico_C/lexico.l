@@ -31,6 +31,7 @@ int coluna = 0;
 int pula_linha = 0;
 char STR_ERRO[size_str];
 char STR_BACKUP[size_str];
+char AUX[size_str];
 int i=0;
 char *str;
 
@@ -169,7 +170,7 @@ void save_token(){
 	for (i = 0; yytext[i] != '\0'; i++){
 
 		if(yytext[i] == '\n'){
-
+            strcpy(AUX,STR_BACKUP);
         	strcpy(STR_ERRO,"");
             strcpy(STR_BACKUP,"");
             backupTamanho=0;

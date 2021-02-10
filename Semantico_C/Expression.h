@@ -3,7 +3,7 @@
 
 typedef void * Expression;
 
-enum ExpTypes {OPERANDO, OPERADOR, EXP_VARIAVEL, EXP_NUMBER, OPERADOR_PLUS, OPERADOR_SUB, OPERADOR_MULT, OPERADOR_DIV};
+enum ExpTypes {OPERANDO, OPERADOR, EXP_VARIAVEL, EXP_NUMBER, OPERADOR_PLUS, OPERADOR_SUB, OPERADOR_MULT, OPERADOR_DIV, EXP_STRING};
 
 Expression createExpression(int expType, Expression leftChild, Expression rightChild);
 

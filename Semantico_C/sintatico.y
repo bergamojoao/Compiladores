@@ -20,6 +20,7 @@ extern char* yytext;
 
 extern char STR_ERRO[size_str];
 extern char STR_BACKUP[size_str];
+extern char AUX[size_str];
 
 extern int sintatico_aux;
 extern int lexico_aux;
@@ -52,6 +53,8 @@ Lista listaPar = NULL;
 char funcTipo[10];
 
 char funcaoMsg[180];
+
+char returnMsg[180];
 
 %}
 
@@ -145,14 +148,15 @@ declaracoes: NUMBER_SIGN DEFINE IDENTIFIER expressao {  Symbol s = createVar(CON
 funcao: tipo funcao1 { setFunctionType($2, getSymbolName($1)); setFunctionSymbolTable($2, symbolTable); symbolTable = globalSymbolTable; criaST=true; $$ = $2; } ;
 
 funcao1: MULTIPLY funcao1 { $$ = $2; }
-	| IDENTIFIER parametros {strcpy(funcaoMsg, STR_BACKUP); } L_CURLY_BRACKET funcao2 { setListaParametrosFunc($5, listaPar);
+	| IDENTIFIER parametros { strlen(STR_BACKUP)<3 ? strcpy(funcaoMsg, AUX) : strcpy(funcaoMsg, STR_BACKUP); } 
+							L_CURLY_BRACKET funcao2 { setListaParametrosFunc($5, listaPar);
 													  listaPar = NULL; 
 													  setFunctionMsg($5, funcaoMsg);
 													  setLinhaColunaFunc($5, getSymbolLinha($1), getSymbolColuna($1)); 
 													  setFunctionName($5, getSymbolName($1)); $$ = $5; } ;
 
 funcao2: declaracao_variaveis funcao2 { $$ = $2; }
-	| comandos R_CURLY_BRACKET { $$ = createFunction($1); };
+	| comandos R_CURLY_BRACKET { Function f = createFunction($1); setReturnMsg(f, returnMsg); $$ = f; };
 
 declaracao_variaveis: tipo declaracao_variaveis1 ;
 
@@ -219,7 +223,7 @@ lista_de_comandos: DO bloco WHILE L_PAREN expressao R_PAREN SEMICOLON
 	| PRINTF L_PAREN STRING lista_de_comandos6 { $$ = $4; }
 	| SCANF L_PAREN STRING COMMA BITWISE_AND IDENTIFIER R_PAREN SEMICOLON { $$ = NULL; }
 	| EXIT L_PAREN expressao R_PAREN SEMICOLON { $$ = createCommand(EXPRESSAO, $1, NULL, NULL, NULL, NULL); }
-	| RETURN lista_de_comandos7 { $$ = $2; }
+	| RETURN lista_de_comandos7 { strcpy(returnMsg, STR_BACKUP); $$ = $2; }
 	| expressao SEMICOLON { $$ = createCommand(EXPRESSAO, $1, NULL, NULL, NULL, NULL); }
 	| SEMICOLON { $$ = NULL; }
 	| bloco { $$ = $1; } ;
@@ -241,7 +245,7 @@ lista_de_comandos5: R_PAREN bloco { $$ = $2; };
 lista_de_comandos6: COMMA expressao R_PAREN SEMICOLON { $$ = createCommand(EXPRESSAO, $2, NULL, NULL, NULL, NULL); }
 	| R_PAREN SEMICOLON { $$ = NULL; } ;
 
-lista_de_comandos7: expressao SEMICOLON { $$ = createCommand(EXPRESSAO, $1, NULL, NULL, NULL, NULL); }
+lista_de_comandos7: expressao SEMICOLON { $$ = createCommand(RETURN_CMD, $1, NULL, NULL, NULL, NULL); }
 	| SEMICOLON { $$ = NULL; } ;
 
 expressao: expressao_de_atribuicao expressao1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
@@ -360,7 +364,7 @@ expressao_primaria: IDENTIFIER { Expression exp = createExpression(EXP_VARIAVEL,
 							   }
 	| numero { $$ = $1; }
 	| CHARACTER { $$ = createExpression(OPERANDO, NULL, NULL);}
-	| STRING { $$ = createExpression(OPERANDO, NULL, NULL); }
+	| STRING { $$ = createExpression(EXP_STRING, NULL, NULL); }
 	| L_PAREN expressao R_PAREN { $$ = $2; }
 ;
 

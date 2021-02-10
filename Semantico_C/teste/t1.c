@@ -1,6 +1,4 @@
-void main(int a);
-
-int main(char b){
-    int i;
+void f(char* a)
+{
     return 0;
 }

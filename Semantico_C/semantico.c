@@ -2,9 +2,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include<string.h>
+#include<stdbool.h>
 #include"Program.h"
 #include"HashTable.h"
 #include"Symbol.h"
+#include"Command.h"
 
 int percorreExpressionInt(Expression exp, HashTable symbolTable, HashTable globalTable);
 
@@ -51,6 +53,28 @@ int semantico(Program p){
                 
             }
         }
+
+        Command listaComandos = getFunctionCommandList(functions);
+        bool temReturn = false;
+        while (listaComandos != NULL){
+            if(getCmdType(listaComandos) == RETURN_CMD){
+                temReturn = true;
+                Expression e = getExp(listaComandos);
+                if(strcmp(getFunctionType(functions),"void") == 0 && e != NULL){
+                    printf("error:semantic:%d:%d: return with a value, in function returning void\n%s\n%*s"
+                            ,getLinhaFunc(functions), getColunaFunc(functions), getFunctionMsg(functions), getColunaFunc(functions), "^");
+                    exit(0);
+                }
+            }
+            listaComandos = getNextCommand(listaComandos);
+        }
+
+        if(!temReturn && strcmp(getFunctionType(functions),"void") != 0){
+            printf("error:semantic:%d:%d: no return statement in function returning non-void\n%s\n%*s"
+                            ,getLinhaFunc(functions), getColunaFunc(functions), getFunctionMsg(functions), getColunaFunc(functions), "^");
+            exit(0);
+        }
+        
 
         functions = getNextFunction(functions);
     }

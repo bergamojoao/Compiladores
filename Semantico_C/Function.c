@@ -15,6 +15,8 @@ typedef struct func{
 
     char msg[180];
 
+    char returnMsg[180];
+
     HashTable symbolTable;
 
     Command commandList;
@@ -111,5 +113,20 @@ void setFunctionType(Function f, char* type){
 char* getFunctionType(Function f){
     FunctionImpl* function = f;
     return function->type;
+}
+
+void setReturnMsg(Function f, char* msg){
+    FunctionImpl* function = f;
+    strcpy(function->returnMsg, msg);
+}
+
+char* getReturnMsg(Function f){
+    FunctionImpl* function = f;
+    return function->returnMsg;
+}
+
+Command getFunctionCommandList(Function f){
+    FunctionImpl* function = f;
+    return function->commandList;
 }
 

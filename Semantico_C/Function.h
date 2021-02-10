@@ -2,6 +2,7 @@
 #define Function_H
 #include"ListaDinamica.h"
 #include"HashTable.h"
+#include"Command.h"
 
 typedef void * Function;
 
@@ -36,5 +37,11 @@ char* getFunctionMsg(Function f);
 void setFunctionType(Function f, char* name);
 
 char* getFunctionType(Function f);
+
+void setReturnMsg(Function f, char* msg);
+
+char* getReturnMsg(Function f);
+
+Command getFunctionCommandList(Function f);
 
 #endif
