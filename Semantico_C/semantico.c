@@ -24,7 +24,7 @@ int semantico(Program p){
             if(getSymbolSpec(s) == PROTOTIPO){
 
                 if(strcmp(getFunctionType(functions),getSymbolType(s)) != 0){
-                    printf("error:semantic:%d:%d: conflicting types for ’%s’\n%s\n%*s"
+                    printf("error:semantic:%d:%d: conflicting types for '%s'\n%s\n%*s"
                         ,getLinhaFunc(functions), getColunaFunc(functions), getFunctionName(functions), getFunctionMsg(functions), getColunaFunc(functions), "^");
                     exit(0); 
                 }
@@ -37,7 +37,7 @@ int semantico(Program p){
 
 
                 if(sizeProt < sizeFunc){
-                    printf("error:semantic:%d:%d: prototype for ’%s’ declares fewer arguments\n%s\n%*s"
+                    printf("error:semantic:%d:%d: prototype for '%s' declares fewer arguments\n%s\n%*s"
                         ,getLinhaFunc(functions), getColunaFunc(functions), getFunctionName(functions), getFunctionMsg(functions), getColunaFunc(functions), "^");
                     exit(0);    
                 }
@@ -46,7 +46,7 @@ int semantico(Program p){
                 while (parametrosProt != NULL && parametrosFunc != NULL){
                     Symbol sProt = get(parametrosProt), sFunc = get(parametrosFunc);
                     if(strcmp(getSymbolType(sProt),getSymbolType(sFunc)) != 0){
-                        printf("error:semantic:%d:%d: argument ’%s’ does not match prototype\n%s\n%*s"
+                        printf("error:semantic:%d:%d: argument '%s' does not match prototype\n%s\n%*s"
                             ,getSymbolLinha(sFunc), getSymbolColuna(sFunc), getSymbolName(sFunc), getFunctionMsg(functions), getSymbolColuna(sFunc), "^");
                         exit(0); 
                     }
@@ -82,13 +82,13 @@ int semantico(Program p){
                     int k = 0;
                     for(k=0; k<getPonteiroFunc(functions); k++) strcat(type, "*");
 
-                    printf("error:semantic:%d:%d: incompatible types when returning type ’char*’ but ’%s’ was expected\n%s\n%*s"
+                    printf("error:semantic:%d:%d: incompatible types when returning type 'char*' but '%s' was expected\n%s\n%*s"
                             ,getCmdLinha(listaComandos), getCmdColuna(listaComandos), type, getCmdText(listaComandos), getCmdColuna(listaComandos), "^");
                     exit(0);
                 }
 
                 if(e != NULL && getExpType(e) == EXP_VARIAVEL && getElemHash(localSymbolTable, getExpVarName(e)) == NULL){
-                    printf("error:semantic:%d:%d: ’%s’ undeclared\n%s\n%*s"
+                    printf("error:semantic:%d:%d: '%s' undeclared\n%s\n%*s"
                             ,getExpLinha(e), getExpColuna(e), getExpVarName(e), getCmdText(listaComandos), getExpColuna(e), "^");
                     exit(0);
                 }
@@ -114,17 +114,17 @@ void verificaVariaveisIguais(HashTable symbolTable, HashTable globalTable,Symbol
 
     if(existente != NULL){
         if(strcmp(getSymbolType(symbol),getSymbolType(existente)) == 0){
-            printf("error:semantic:%d:%d: variable ’%s’ already declared, previous declaration in line %d column %d\n%s\n%*s"
+            printf("error:semantic:%d:%d: variable '%s' already declared, previous declaration in line %d column %d\n%s\n%*s"
                         ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), getSymbolLinha(existente), getSymbolColuna(existente), str, getSymbolColuna(symbol),"^");
         }else{
-            printf("error:semantic:%d:%d: redefinition of ’%s’ previous defined in line %d column %d\n%s\n%*s"
+            printf("error:semantic:%d:%d: redefinition of '%s' previous defined in line %d column %d\n%s\n%*s"
                         ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), getSymbolLinha(existente), getSymbolColuna(existente), str, getSymbolColuna(symbol),"^");            
         }
         exit(0);
     }
 
     if(getSymbolSpec(symbol) != PROTOTIPO && strcmp(getSymbolType(symbol),"void") == 0){
-        printf("error:semantic:%d:%d: variable ’%s’ declared void\n%s\n%*s"
+        printf("error:semantic:%d:%d: variable '%s' declared void\n%s\n%*s"
                     ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");
         exit(0);           
     }
@@ -133,20 +133,20 @@ void verificaVariaveisIguais(HashTable symbolTable, HashTable globalTable,Symbol
     if(exp != NULL){
         if(getExpType(exp) == EXP_NUMBER){
             if(getExpValue(exp) == 0){
-                printf("error:semantic:%d:%d: size of array ’%s’ is zero\n%s\n%*s"
+                printf("error:semantic:%d:%d: size of array '%s' is zero\n%s\n%*s"
                     ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");
                 exit(0);    
             }else if(getExpValue(exp) < 0){
-                printf("error:semantic:%d:%d: size of array ’%s’ is negative\n%s\n%*s"
+                printf("error:semantic:%d:%d: size of array '%s' is negative\n%s\n%*s"
                     ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");
                 exit(0);
             }
         }else if(percorreExpressionInt(exp,symbolTable, globalTable)<0){
-            printf("error:semantic:%d:%d: size of array ’%s’ is negative\n%s\n%*s"
+            printf("error:semantic:%d:%d: size of array '%s' is negative\n%s\n%*s"
                     ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");
             exit(0);
         }else if(percorreExpressionInt(exp,symbolTable, globalTable)==0){
-                printf("error:semantic:%d:%d: size of array ’%s’ is zero\n%s\n%*s"
+                printf("error:semantic:%d:%d: size of array '%s' is zero\n%s\n%*s"
                     ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");
                 exit(0); 
         }
