@@ -8,6 +8,8 @@ enum CmdType {WHILE_CMD, IF_CMD, EXPRESSAO, FOR_CMD, RETURN_CMD};
 
 Command createCommand(int cmdType, Expression exp, Command thenCmd, Command elseCmd, Command commands, Command next);
 
+Command createReturn(Expression exp, int linha, int coluna, char* text);
+
 Command createCmdFor(Expression exp1, Command bloco);
 
 void setCmdExp2(Command c, Expression exp2);
@@ -27,5 +29,11 @@ Command getElseCmd(Command c);
 Command getCommands(Command c);
 
 Command getNextCommand(Command c);
+
+int getCmdLinha(Command c);
+
+int getCmdColuna(Command c);
+
+char* getCmdText(Command c);
 
 #endif

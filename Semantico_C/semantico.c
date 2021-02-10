@@ -60,9 +60,14 @@ int semantico(Program p){
             if(getCmdType(listaComandos) == RETURN_CMD){
                 temReturn = true;
                 Expression e = getExp(listaComandos);
+
                 if(strcmp(getFunctionType(functions),"void") == 0 && e != NULL){
                     printf("error:semantic:%d:%d: return with a value, in function returning void\n%s\n%*s"
                             ,getLinhaFunc(functions), getColunaFunc(functions), getFunctionMsg(functions), getColunaFunc(functions), "^");
+                    exit(0);
+                }else if(strcmp(getFunctionType(functions),"void") != 0 && e == NULL){
+                    printf("error:semantic:%d:%d: return with no value, in function returning non-void\n%s\n%*s"
+                            ,getCmdLinha(listaComandos), getCmdColuna(listaComandos), getCmdText(listaComandos), getCmdColuna(listaComandos), "^");
                     exit(0);
                 }
             }

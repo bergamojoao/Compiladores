@@ -1,4 +1,4 @@
 void f(char* a)
 {
-    return 0;
+    return;
 }

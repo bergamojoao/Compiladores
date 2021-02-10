@@ -5,6 +5,9 @@
 
 typedef struct cmd{
     int cmdType;
+    int coluna;
+    int linha;
+    char texto[180];
     Expression exp;
     Expression exp2;
     Expression exp3;
@@ -31,6 +34,25 @@ Command createCommand(int cmdType, Expression exp, Command thenCmd, Command else
     command->elseCmd=elseCmd;
     command->commands=commands;
     command->next=next;
+    
+    return command;
+}
+
+Command createReturn(Expression exp, int linha, int coluna, char* text){
+
+    CommandImpl* command = malloc(sizeof(CommandImpl));
+
+    command->cmdType=RETURN_CMD;
+    command->exp=exp;
+    command->exp2=NULL;
+    command->exp3=NULL;
+    command->thenCmd=NULL;
+    command->elseCmd=NULL;
+    command->commands=NULL;
+    command->next=NULL;
+    command->coluna=coluna;
+    command->linha=linha;
+    strcpy(command->texto, text);
     
     return command;
 }
@@ -91,4 +113,19 @@ Command getCommands(Command c){
 Command getNextCommand(Command c){
     CommandImpl *cmd = c;
     return cmd->next;
+}
+
+int getCmdLinha(Command c){
+    CommandImpl *cmd = c;
+    return cmd->linha;
+}
+
+int getCmdColuna(Command c){
+    CommandImpl *cmd = c;
+    return cmd->coluna;
+}
+
+char* getCmdText(Command c){
+    CommandImpl *cmd = c;
+    return cmd->texto;
 }

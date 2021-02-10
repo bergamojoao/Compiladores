@@ -223,7 +223,7 @@ lista_de_comandos: DO bloco WHILE L_PAREN expressao R_PAREN SEMICOLON
 	| PRINTF L_PAREN STRING lista_de_comandos6 { $$ = $4; }
 	| SCANF L_PAREN STRING COMMA BITWISE_AND IDENTIFIER R_PAREN SEMICOLON { $$ = NULL; }
 	| EXIT L_PAREN expressao R_PAREN SEMICOLON { $$ = createCommand(EXPRESSAO, $1, NULL, NULL, NULL, NULL); }
-	| RETURN lista_de_comandos7 { strcpy(returnMsg, STR_BACKUP); $$ = $2; }
+	| RETURN lista_de_comandos7 { $$ = createReturn($2, getSymbolLinha($1), getSymbolColuna($1), STR_BACKUP); }
 	| expressao SEMICOLON { $$ = createCommand(EXPRESSAO, $1, NULL, NULL, NULL, NULL); }
 	| SEMICOLON { $$ = NULL; }
 	| bloco { $$ = $1; } ;
@@ -245,7 +245,7 @@ lista_de_comandos5: R_PAREN bloco { $$ = $2; };
 lista_de_comandos6: COMMA expressao R_PAREN SEMICOLON { $$ = createCommand(EXPRESSAO, $2, NULL, NULL, NULL, NULL); }
 	| R_PAREN SEMICOLON { $$ = NULL; } ;
 
-lista_de_comandos7: expressao SEMICOLON { $$ = createCommand(RETURN_CMD, $1, NULL, NULL, NULL, NULL); }
+lista_de_comandos7: expressao SEMICOLON { $$ = $1; }
 	| SEMICOLON { $$ = NULL; } ;
 
 expressao: expressao_de_atribuicao expressao1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
