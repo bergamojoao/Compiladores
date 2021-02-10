@@ -15,7 +15,11 @@ int semantico(Program p){
 
     Function functions = getFunctions(p);
     while (functions != NULL){
+
         Symbol s = getElemHash(getGlobalSymbolTable(p),getFunctionName(functions));
+
+        HashTable localSymbolTable = getFunctionSymbolTable(functions);
+
         if(s!=NULL){
             if(getSymbolSpec(s) == PROTOTIPO){
 
@@ -68,6 +72,24 @@ int semantico(Program p){
                 }else if(strcmp(getFunctionType(functions),"void") != 0 && e == NULL){
                     printf("error:semantic:%d:%d: return with no value, in function returning non-void\n%s\n%*s"
                             ,getCmdLinha(listaComandos), getCmdColuna(listaComandos), getCmdText(listaComandos), getCmdColuna(listaComandos), "^");
+                    exit(0);
+                }
+
+                if(e != NULL && getExpType(e) == EXP_STRING && (strcmp(getFunctionType(functions),"char") != 0 || getPonteiroFunc(functions) != 1) ){
+                    char type[20];
+                    strcpy(type,getFunctionType(functions));
+
+                    int k = 0;
+                    for(k=0; k<getPonteiroFunc(functions); k++) strcat(type, "*");
+
+                    printf("error:semantic:%d:%d: incompatible types when returning type ’char*’ but ’%s’ was expected\n%s\n%*s"
+                            ,getCmdLinha(listaComandos), getCmdColuna(listaComandos), type, getCmdText(listaComandos), getCmdColuna(listaComandos), "^");
+                    exit(0);
+                }
+
+                if(e != NULL && getExpType(e) == EXP_VARIAVEL && getElemHash(localSymbolTable, getExpVarName(e)) == NULL){
+                    printf("error:semantic:%d:%d: ’%s’ undeclared\n%s\n%*s"
+                            ,getExpLinha(e), getExpColuna(e), getExpVarName(e), getCmdText(listaComandos), getExpColuna(e), "^");
                     exit(0);
                 }
             }

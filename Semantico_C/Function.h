@@ -44,4 +44,8 @@ char* getReturnMsg(Function f);
 
 Command getFunctionCommandList(Function f);
 
+void setPonteiroFunc(Function f, int ponteiros);
+
+int getPonteiroFunc(Function f);
+
 #endif

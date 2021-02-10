@@ -25,4 +25,13 @@ Expression getLeftChild(Expression e);
 
 Expression getRightChild(Expression e);
 
+void setExpLinha(Expression e, int value);
+
+void setExpColuna(Expression e, int value);
+
+int getExpLinha(Expression e);
+
+int getExpColuna(Expression e);
+
+
 #endif

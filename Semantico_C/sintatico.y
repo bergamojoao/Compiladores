@@ -56,6 +56,8 @@ char funcaoMsg[180];
 
 char returnMsg[180];
 
+int ponteiros=0;
+
 %}
 
 %token VOID
@@ -145,9 +147,11 @@ declaracoes: NUMBER_SIGN DEFINE IDENTIFIER expressao {  Symbol s = createVar(CON
 	| declaracao_variaveis
 	| declaracao_prototipos ;
 
-funcao: tipo funcao1 { setFunctionType($2, getSymbolName($1)); setFunctionSymbolTable($2, symbolTable); symbolTable = globalSymbolTable; criaST=true; $$ = $2; } ;
+funcao: tipo funcao1 { setPonteiroFunc($2, ponteiros);
+					   ponteiros=0; setFunctionType($2, getSymbolName($1)); 
+					   setFunctionSymbolTable($2, symbolTable); symbolTable = globalSymbolTable; criaST=true; $$ = $2; } ;
 
-funcao1: MULTIPLY funcao1 { $$ = $2; }
+funcao1: MULTIPLY funcao1 { ponteiros++; $$ = $2; }
 	| IDENTIFIER parametros { strlen(STR_BACKUP)<3 ? strcpy(funcaoMsg, AUX) : strcpy(funcaoMsg, STR_BACKUP); } 
 							L_CURLY_BRACKET funcao2 { setListaParametrosFunc($5, listaPar);
 													  listaPar = NULL; 
@@ -359,6 +363,8 @@ expressao_pos_fixa4: COMMA expressao_pos_fixa3
 	| R_PAREN ;
 
 expressao_primaria: IDENTIFIER { Expression exp = createExpression(EXP_VARIAVEL, NULL, NULL);
+								 setExpLinha(exp, getSymbolLinha($1));
+								 setExpColuna(exp, getSymbolColuna($1));
 							   	 setExpVarName(exp, getSymbolName($1));
 								 $$ = exp;	
 							   }

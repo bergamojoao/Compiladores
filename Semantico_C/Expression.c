@@ -6,6 +6,8 @@
 typedef struct exp{
     int expType;
     char varName[150];
+    int linha;
+    int coluna;
     int value;
     struct exp* leftChild;
     struct exp* rightChild;
@@ -65,4 +67,24 @@ Expression getLeftChild(Expression e){
 Expression getRightChild(Expression e){
     ExpressionImpl *exp = e;
     return exp->rightChild;
+}
+
+void setExpLinha(Expression e, int value){
+    ExpressionImpl *exp = e;
+    exp->linha=value;
+}
+
+void setExpColuna(Expression e, int value){
+    ExpressionImpl *exp = e;
+    exp->coluna=value;
+}
+
+int getExpLinha(Expression e){
+    ExpressionImpl *exp = e;
+    return exp->linha;
+}
+
+int getExpColuna(Expression e){
+    ExpressionImpl *exp = e;
+    return exp->coluna;
 }

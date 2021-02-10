@@ -1,4 +1,4 @@
-void f(char* a)
+int* f(char* a)
 {
-    return;
+    return batata;
 }

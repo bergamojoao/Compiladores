@@ -25,6 +25,8 @@ typedef struct func{
 
     Lista parametros;
 
+    int ponteiro;
+
 }FunctionImpl;
 
 Function createFunction(Command commandList){
@@ -128,5 +130,15 @@ char* getReturnMsg(Function f){
 Command getFunctionCommandList(Function f){
     FunctionImpl* function = f;
     return function->commandList;
+}
+
+void setPonteiroFunc(Function f, int ponteiros){
+    FunctionImpl* function = f;
+    function->ponteiro = ponteiros;
+}
+
+int getPonteiroFunc(Function f){
+    FunctionImpl* function = f;
+    return function->ponteiro;
 }
 
