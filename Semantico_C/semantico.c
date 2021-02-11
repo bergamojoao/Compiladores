@@ -10,6 +10,8 @@
 
 int percorreExpressionInt(Expression exp, HashTable symbolTable, HashTable globalTable);
 
+void verificaExpressao(Expression e);
+
 int semantico(Program p){
     
 
@@ -92,6 +94,9 @@ int semantico(Program p){
                             ,getExpLinha(e), getExpColuna(e), getExpVarName(e), getCmdText(listaComandos), getExpColuna(e), "^");
                     exit(0);
                 }
+            }else if(getCmdType(listaComandos) == EXPRESSAO){
+                Expression e = getExp(listaComandos);
+                verificaExpressao(e);
             }
             listaComandos = getNextCommand(listaComandos);
         }
@@ -165,6 +170,26 @@ void verificaFuncao(HashTable symbolTable, Function f, char* msg){
         }
     }
 }   
+
+void verificaExpressao(Expression e){
+    if(e != NULL){
+        if(getExpType(e) == EXP_NUMBER){
+            Expression left = getLeftChild(e);
+            if(left != NULL && getExpType(left) == EXP_INC){
+                printf("error:semantic:%d:%d: lvalue required as increment operand\n%s\n%*s",
+                    getExpLinha(left), getExpColuna(left), getExpText(e), getExpColuna(left), "^");
+                exit(0);    
+            }
+        }else if(getExpType(e) == EXP_ASSIGN){
+            Expression left = getLeftChild(e);
+            if(getExpType(left) != EXP_VARIAVEL){
+                printf("error:semantic:%d:%d: lvalue required as left operand of assignment\n%s\n%*s",
+                    getExpLinha(e), getExpColuna(e), getExpText(e), getExpColuna(e), "^");
+                exit(0); 
+            }
+        }
+    }
+}
 
 
 int percorreExpressionInt(Expression exp, HashTable symbolTable, HashTable globalTable){

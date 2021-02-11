@@ -228,7 +228,7 @@ lista_de_comandos: DO bloco WHILE L_PAREN expressao R_PAREN SEMICOLON
 	| SCANF L_PAREN STRING COMMA BITWISE_AND IDENTIFIER R_PAREN SEMICOLON { $$ = NULL; }
 	| EXIT L_PAREN expressao R_PAREN SEMICOLON { $$ = createCommand(EXPRESSAO, $1, NULL, NULL, NULL, NULL); }
 	| RETURN lista_de_comandos7 { $$ = createReturn($2, getSymbolLinha($1), getSymbolColuna($1), STR_BACKUP); }
-	| expressao SEMICOLON { $$ = createCommand(EXPRESSAO, $1, NULL, NULL, NULL, NULL); }
+	| expressao SEMICOLON { setExpText($1, STR_BACKUP);  $$ = createCommand(EXPRESSAO, $1, NULL, NULL, NULL, NULL); }
 	| SEMICOLON { $$ = NULL; }
 	| bloco { $$ = $1; } ;
 
@@ -260,7 +260,12 @@ expressao1: COMMA expressao_de_atribuicao expressao1 { $$ = $2 == NULL ? $1 : cr
 expressao_de_atribuicao: expressao_condicional { $$ = $1; }
 	| expressao_unaria expressao_de_atribuicao1 { setLeftChild($2, $1); $$ = $2; } ;
 
-expressao_de_atribuicao1: ASSIGN expressao_de_atribuicao { $$ = createExpression(OPERADOR, NULL, $2); }
+expressao_de_atribuicao1: ASSIGN expressao_de_atribuicao { Expression exp = createExpression(EXP_ASSIGN, NULL, $2);
+															setExpLinha(exp, getSymbolLinha($1));
+															setExpColuna(exp, getSymbolColuna($1));
+															setExpVarName(exp, getSymbolName($1));
+															$$ = exp;	
+														}
 	| ADD_ASSIGN expressao_de_atribuicao { $$ = createExpression(OPERADOR, NULL, $2); }
 	| MINUS_ASSIGN expressao_de_atribuicao { $$ = createExpression(OPERADOR, NULL, $2); } ;
 
@@ -347,11 +352,21 @@ expressao_unaria: expressao_pos_fixa { $$ = $1; }
 
 
 expressao_pos_fixa: expressao_primaria { $$ = $1; }
-	| expressao_pos_fixa expressao_pos_fixa1 ;
+	| expressao_pos_fixa expressao_pos_fixa1 { setLeftChild($1, $2); $$ = $1; } ;
 
 expressao_pos_fixa1: L_SQUARE_BRACKET expressao R_SQUARE_BRACKET
-	| INC
-	| DEC
+	| INC { Expression exp = createExpression(EXP_INC, NULL, NULL);
+								 setExpLinha(exp, getSymbolLinha($1));
+								 setExpColuna(exp, getSymbolColuna($1));
+							   	 setExpVarName(exp, getSymbolName($1));
+								 $$ = exp;	
+		  }
+	| DEC { Expression exp = createExpression(EXP_DEC, NULL, NULL);
+								 setExpLinha(exp, getSymbolLinha($1));
+								 setExpColuna(exp, getSymbolColuna($1));
+							   	 setExpVarName(exp, getSymbolName($1));
+								 $$ = exp;	
+		  }
 	| L_PAREN expressao_pos_fixa2 ;
 
 expressao_pos_fixa2: R_PAREN

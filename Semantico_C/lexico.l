@@ -78,8 +78,14 @@ void save_token();
 "*"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(MULTIPLY);}
 "/"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(DIV);}
 "%"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(REMAINDER);}
-"++"       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(INC);}
-"--"       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(DEC);}
+"++"       {char* tokenName = (char*) malloc(strlen(yytext)+1);
+            strcpy(tokenName,yytext);
+            yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
+            strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(INC);}
+"--"       {char* tokenName = (char*) malloc(strlen(yytext)+1);
+            strcpy(tokenName,yytext);
+            yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
+            strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(DEC);}
 "&"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(BITWISE_AND);}
 "|"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(BITWISE_OR);}
 "~"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(BITWISE_NOT);}
@@ -95,7 +101,10 @@ void save_token();
 ">="       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(GREATER_EQUAL);}
 ">>"       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(R_SHIFT);}
 "<<"       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(L_SHIFT);}
-"="        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(ASSIGN);}
+"="        {char* tokenName = (char*) malloc(strlen(yytext)+1);
+            strcpy(tokenName,yytext);
+            yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
+            strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(ASSIGN);}
 "+="       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(ADD_ASSIGN);}
 "-="       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(MINUS_ASSIGN);}
 ";"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(SEMICOLON);}

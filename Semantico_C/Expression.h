@@ -3,7 +3,7 @@
 
 typedef void * Expression;
 
-enum ExpTypes {OPERANDO, OPERADOR, EXP_VARIAVEL, EXP_NUMBER, OPERADOR_PLUS, OPERADOR_SUB, OPERADOR_MULT, OPERADOR_DIV, EXP_STRING};
+enum ExpTypes {OPERANDO, OPERADOR, EXP_VARIAVEL, EXP_NUMBER, OPERADOR_PLUS, OPERADOR_SUB, OPERADOR_MULT, OPERADOR_DIV, EXP_STRING, EXP_INC, EXP_DEC, EXP_ASSIGN};
 
 Expression createExpression(int expType, Expression leftChild, Expression rightChild);
 
@@ -32,6 +32,10 @@ void setExpColuna(Expression e, int value);
 int getExpLinha(Expression e);
 
 int getExpColuna(Expression e);
+
+void setExpText(Expression e, char* varName);
+
+char* getExpText(Expression e);
 
 
 #endif

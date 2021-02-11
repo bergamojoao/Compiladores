@@ -6,6 +6,7 @@
 typedef struct exp{
     int expType;
     char varName[150];
+    char text[180];
     int linha;
     int coluna;
     int value;
@@ -87,4 +88,14 @@ int getExpLinha(Expression e){
 int getExpColuna(Expression e){
     ExpressionImpl *exp = e;
     return exp->coluna;
+}
+
+void setExpText(Expression e, char* varName){
+    ExpressionImpl *exp = e;
+    strcpy(exp->text,varName);
+}
+
+char* getExpText(Expression e){
+    ExpressionImpl *exp = e;
+    return exp->text;
 }

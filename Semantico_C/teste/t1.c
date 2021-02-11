@@ -1,4 +1,4 @@
-int* f(char* a)
+void f()
 {
-    return batata;
+    "666" = "SkyNet Online";
 }
