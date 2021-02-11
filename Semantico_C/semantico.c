@@ -13,6 +13,7 @@ int percorreExpressionInt(Expression exp, HashTable symbolTable, HashTable globa
 void verificaExpressao(Expression e);
 
 bool constante=false;
+bool array=false;
 char* texto;
 
 HashTable globalTableFixa, localTable;
@@ -146,6 +147,10 @@ void verificaVariaveisIguais(HashTable symbolTable, HashTable globalTable,Symbol
 
     Expression exp = getArraySize(symbol);
     if(exp != NULL){
+        array=true;
+        texto = str;
+        verificaExpressao(exp);
+        array = false;
         if(getExpType(exp) == EXP_NUMBER){
             if(getExpValue(exp) == 0){
                 sprintf(erro, "error:semantic:%d:%d: size of array '%s' is zero\n%s\n%*s"
@@ -201,8 +206,16 @@ void verificaExpressao(Expression e){
                 printf("error:semantic:%d:%d: '%s' initializer element is not constant\n%s\n%*s",
                         getExpLinha(e), getExpColuna(e), getExpVarName(e),texto, getExpColuna(e), "^");
                 exit(0);        
-            }
-            
+            }    
+        }else if(getExpType(e) == EXP_VARIAVEL && array){
+            Symbol var = getElemHash(globalTableFixa, getExpVarName(e));
+            if(var == NULL)
+                var = getElemHash(localTable, getExpVarName(e));
+            if(var != NULL && getSymbolSpec(var) != CONSTANTE){
+                printf("error:semantic:%d:%d: '%s' initializer element is not constant\n%s\n%*s"
+                    ,getExpLinha(e),getExpColuna(e), getExpVarName(e), texto, getExpColuna(e),"^");
+                exit(0);        
+            }    
         }
 
         Expression esq = getLeftChild(e);

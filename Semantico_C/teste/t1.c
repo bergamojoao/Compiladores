@@ -1,5 +1,4 @@
-void f(int a, char b);
-void f(int a, int b)
+void f()
 {
     int i[0];
     return;

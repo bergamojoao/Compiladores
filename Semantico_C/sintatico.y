@@ -130,7 +130,7 @@ char erro[250] = "";
 %%
 
 S: { AST = createProgram(); symbolTable = getGlobalSymbolTable(AST); globalSymbolTable = symbolTable; }
-	programa { setFunctionList(AST, $2); semantico(AST); if(strlen(erro)>1){printf("erro%s",erro);exit(0);} printf("SUCCESSFUL COMPILATION."); return 0;} ;
+	programa { setFunctionList(AST, $2); semantico(AST); if(strlen(erro)>1){printf("%s",erro);exit(0);} printf("SUCCESSFUL COMPILATION."); return 0;} ;
 	
 programa: declaracoes programa1 { $$ = $2; }
 	| funcao programa1  { setNextFunction($1, $2); $$ = $1; };
