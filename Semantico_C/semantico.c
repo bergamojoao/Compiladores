@@ -118,25 +118,23 @@ int semantico(Program p){
 }
 
 
-void verificaVariaveisIguais(HashTable symbolTable, HashTable globalTable,Symbol symbol, char* str){
+void verificaVariaveisIguais(HashTable symbolTable, HashTable globalTable,Symbol symbol, char* str, char* erro){
     Symbol existente = getElemHash(symbolTable,getSymbolName(symbol));
     globalTableFixa = globalTable;
     localTable = symbolTable;
     if(existente != NULL){
         if(strcmp(getSymbolType(symbol),getSymbolType(existente)) == 0){
-            printf("error:semantic:%d:%d: variable '%s' already declared, previous declaration in line %d column %d\n%s\n%*s"
+            sprintf(erro, "error:semantic:%d:%d: variable '%s' already declared, previous declaration in line %d column %d\n%s\n%*s"
                         ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), getSymbolLinha(existente), getSymbolColuna(existente), str, getSymbolColuna(symbol),"^");
         }else{
-            printf("error:semantic:%d:%d: redefinition of '%s' previous defined in line %d column %d\n%s\n%*s"
+            sprintf(erro,"error:semantic:%d:%d: redefinition of '%s' previous defined in line %d column %d\n%s\n%*s"
                         ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), getSymbolLinha(existente), getSymbolColuna(existente), str, getSymbolColuna(symbol),"^");            
         }
-        exit(0);
     }
 
     if(getSymbolSpec(symbol) != PROTOTIPO && strcmp(getSymbolType(symbol),"void") == 0){
-        printf("error:semantic:%d:%d: variable '%s' declared void\n%s\n%*s"
-                    ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");
-        exit(0);           
+        sprintf(erro, "error:semantic:%d:%d: variable '%s' declared void\n%s\n%*s"
+                    ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");         
     }
 
     if(getSymbolSpec(symbol) == CONSTANTE){
@@ -150,22 +148,18 @@ void verificaVariaveisIguais(HashTable symbolTable, HashTable globalTable,Symbol
     if(exp != NULL){
         if(getExpType(exp) == EXP_NUMBER){
             if(getExpValue(exp) == 0){
-                printf("error:semantic:%d:%d: size of array '%s' is zero\n%s\n%*s"
-                    ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");
-                exit(0);    
+                sprintf(erro, "error:semantic:%d:%d: size of array '%s' is zero\n%s\n%*s"
+                    ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");   
             }else if(getExpValue(exp) < 0){
-                printf("error:semantic:%d:%d: size of array '%s' is negative\n%s\n%*s"
+                sprintf(erro, "error:semantic:%d:%d: size of array '%s' is negative\n%s\n%*s"
                     ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");
-                exit(0);
             }
         }else if(percorreExpressionInt(exp,symbolTable, globalTable)<0){
-            printf("error:semantic:%d:%d: size of array '%s' is negative\n%s\n%*s"
+            sprintf(erro, "error:semantic:%d:%d: size of array '%s' is negative\n%s\n%*s"
                     ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");
-            exit(0);
         }else if(percorreExpressionInt(exp,symbolTable, globalTable)==0){
-                printf("error:semantic:%d:%d: size of array '%s' is zero\n%s\n%*s"
+                sprintf(erro, "error:semantic:%d:%d: size of array '%s' is zero\n%s\n%*s"
                     ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");
-                exit(0); 
         }
     }
 

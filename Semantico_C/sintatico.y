@@ -58,6 +58,8 @@ char returnMsg[180];
 
 int ponteiros=0;
 
+char erro[250] = "";
+
 %}
 
 %token VOID
@@ -128,7 +130,7 @@ int ponteiros=0;
 %%
 
 S: { AST = createProgram(); symbolTable = getGlobalSymbolTable(AST); globalSymbolTable = symbolTable; }
-	programa { setFunctionList(AST, $2); semantico(AST); printf("SUCCESSFUL COMPILATION."); return 0;} ;
+	programa { setFunctionList(AST, $2); semantico(AST); if(strlen(erro)>1){printf("erro%s",erro);exit(0);} printf("SUCCESSFUL COMPILATION."); return 0;} ;
 	
 programa: declaracoes programa1 { $$ = $2; }
 	| funcao programa1  { setNextFunction($1, $2); $$ = $1; };
@@ -141,8 +143,8 @@ declaracoes: NUMBER_SIGN DEFINE IDENTIFIER expressao {  Symbol s = createVar(CON
 														setSymbolLinha(s, getSymbolLinha($3));
 														setSymbolColuna(s, getSymbolColuna($3));
 														setExpConstante(s, $4);
-														verificaVariaveisIguais(symbolTable, globalSymbolTable, s, STR_BACKUP);
-														insertHashTable(symbolTable, s);
+														verificaVariaveisIguais(symbolTable, globalSymbolTable, s, STR_BACKUP, erro);
+														if(strlen(erro)<1) insertHashTable(symbolTable, s);
 									   				}
 	| declaracao_variaveis
 	| declaracao_prototipos ;
@@ -170,8 +172,8 @@ declaracao_variaveis1: MULTIPLY declaracao_variaveis1
 										 setSymbolColuna($2, getSymbolColuna($1));
 										 setArraySize($2, arraySize);
 										 arraySize=NULL;
-										 verificaVariaveisIguais(symbolTable, globalSymbolTable, $2, STR_BACKUP);
-										 insertHashTable(symbolTable, $2);
+										 verificaVariaveisIguais(symbolTable, globalSymbolTable, $2, STR_BACKUP, erro);
+										 if(strlen(erro)<1) insertHashTable(symbolTable, $2);
 									   } ;
 
 declaracao_variaveis2:L_SQUARE_BRACKET expressao R_SQUARE_BRACKET declaracao_variaveis2 { arraySize = $2;  $$ = $4;}
@@ -183,8 +185,8 @@ declaracao_variaveis3: COMMA declaracao_variaveis1 { if(criaST){symbolTable = cr
 
 declaracao_prototipos: tipo declaracao_prototipos1 {
 											setSymbolType($2, getSymbolName($1));
-											verificaVariaveisIguais(symbolTable, globalSymbolTable, $2, STR_BACKUP);
-											insertHashTable(symbolTable, $2);
+											verificaVariaveisIguais(symbolTable, globalSymbolTable, $2, STR_BACKUP, erro);
+											if(strlen(erro)<1)insertHashTable(symbolTable, $2);
 };
 
 declaracao_prototipos1: MULTIPLY declaracao_prototipos1
