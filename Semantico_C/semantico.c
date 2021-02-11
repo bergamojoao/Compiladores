@@ -12,8 +12,12 @@ int percorreExpressionInt(Expression exp, HashTable symbolTable, HashTable globa
 
 void verificaExpressao(Expression e);
 
+bool constante=false;
+char* texto;
+
+HashTable globalTableFixa, localTable;
+
 int semantico(Program p){
-    
 
     Function functions = getFunctions(p);
     while (functions != NULL){
@@ -116,7 +120,8 @@ int semantico(Program p){
 
 void verificaVariaveisIguais(HashTable symbolTable, HashTable globalTable,Symbol symbol, char* str){
     Symbol existente = getElemHash(symbolTable,getSymbolName(symbol));
-
+    globalTableFixa = globalTable;
+    localTable = symbolTable;
     if(existente != NULL){
         if(strcmp(getSymbolType(symbol),getSymbolType(existente)) == 0){
             printf("error:semantic:%d:%d: variable '%s' already declared, previous declaration in line %d column %d\n%s\n%*s"
@@ -132,6 +137,13 @@ void verificaVariaveisIguais(HashTable symbolTable, HashTable globalTable,Symbol
         printf("error:semantic:%d:%d: variable '%s' declared void\n%s\n%*s"
                     ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");
         exit(0);           
+    }
+
+    if(getSymbolSpec(symbol) == CONSTANTE){
+        constante = true;
+        texto = str;
+        verificaExpressao(getExpConstante(symbol));
+        constante =false;
     }
 
     Expression exp = getArraySize(symbol);
@@ -187,7 +199,22 @@ void verificaExpressao(Expression e){
                     getExpLinha(e), getExpColuna(e), getExpText(e), getExpColuna(e), "^");
                 exit(0); 
             }
+        }else if(getExpType(e) == EXP_VARIAVEL && constante){
+            Symbol var = getElemHash(globalTableFixa, getExpVarName(e));
+            if(var == NULL)
+                var = getElemHash(localTable, getExpVarName(e));
+            if(var != NULL && getSymbolSpec(var) != CONSTANTE){
+                printf("error:semantic:%d:%d: '%s' initializer element is not constant\n%s\n%*s",
+                        getExpLinha(e), getExpColuna(e), getExpVarName(e),texto, getExpColuna(e), "^");
+                exit(0);        
+            }
+            
         }
+
+        Expression esq = getLeftChild(e);
+        verificaExpressao(esq);
+        Expression dir = getRightChild(e);
+        verificaExpressao(dir);
     }
 }
 
@@ -195,6 +222,7 @@ void verificaExpressao(Expression e){
 int percorreExpressionInt(Expression exp, HashTable symbolTable, HashTable globalTable){
     if(exp != NULL){
         if(getExpType(exp) == EXP_VARIAVEL){
+
             Symbol s = getElemHash(symbolTable, getExpVarName(exp));
             if(s ==  NULL)
                 s = getElemHash(globalTable, getExpVarName(exp));

@@ -136,7 +136,7 @@ programa: declaracoes programa1 { $$ = $2; }
 programa1: programa { $$ = $1; }
 	| { $$ = NULL; } ;
 
-declaracoes: NUMBER_SIGN DEFINE IDENTIFIER expressao {  Symbol s = createVar(CONSTANTE, "INT");
+declaracoes: NUMBER_SIGN DEFINE IDENTIFIER expressao {  Symbol s = createVar(CONSTANTE, "int");
 														setSymbolName(s, getSymbolName($3));
 														setSymbolLinha(s, getSymbolLinha($3));
 														setSymbolColuna(s, getSymbolColuna($3));

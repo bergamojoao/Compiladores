@@ -1,4 +1,2 @@
-void f()
-{
-    "a"++;
-}
+int i;
+#define constante i+1
