@@ -173,7 +173,7 @@ void verificaFuncao(HashTable symbolTable, Function f, char* msg){
 
 void verificaExpressao(Expression e){
     if(e != NULL){
-        if(getExpType(e) == EXP_NUMBER){
+        if(getExpType(e) != EXP_VARIAVEL){
             Expression left = getLeftChild(e);
             if(left != NULL && getExpType(left) == EXP_INC){
                 printf("error:semantic:%d:%d: lvalue required as increment operand\n%s\n%*s",
