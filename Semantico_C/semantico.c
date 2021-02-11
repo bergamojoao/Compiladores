@@ -191,7 +191,8 @@ void verificaExpressao(Expression e){
                     getExpLinha(left), getExpColuna(left), getExpText(e), getExpColuna(left), "^");
                 exit(0);    
             }
-        }else if(getExpType(e) == EXP_ASSIGN){
+        }
+        if(getExpType(e) == EXP_ASSIGN){
             Expression left = getLeftChild(e);
             if(getExpType(left) != EXP_VARIAVEL){
                 printf("error:semantic:%d:%d: lvalue required as left operand of assignment\n%s\n%*s",

@@ -1,5 +1,4 @@
 void f()
 {
-    int i[0];
-    return;
+    666 = "SkyNet Online";
 }
