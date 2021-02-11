@@ -199,7 +199,8 @@ void verificaExpressao(Expression e){
                     getExpLinha(e), getExpColuna(e), getExpText(e), getExpColuna(e), "^");
                 exit(0); 
             }
-        }else if(getExpType(e) == EXP_VARIAVEL && constante){
+        }
+        if(getExpType(e) == EXP_VARIAVEL && constante){
             Symbol var = getElemHash(globalTableFixa, getExpVarName(e));
             if(var == NULL)
                 var = getElemHash(localTable, getExpVarName(e));
@@ -208,7 +209,8 @@ void verificaExpressao(Expression e){
                         getExpLinha(e), getExpColuna(e), getExpVarName(e),texto, getExpColuna(e), "^");
                 exit(0);        
             }    
-        }else if(getExpType(e) == EXP_VARIAVEL && array){
+        }
+        if(getExpType(e) == EXP_VARIAVEL && array){
             Symbol var = getElemHash(globalTableFixa, getExpVarName(e));
             if(var == NULL)
                 var = getElemHash(localTable, getExpVarName(e));
