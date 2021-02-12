@@ -1,4 +1,6 @@
+void foo(int i,int j);
+
 void f()
 {
-    666 = "SkyNet Online";
+    foo(3);
 }

@@ -76,7 +76,10 @@ void save_token();
 "+"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(PLUS);}
 "-"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(MINUS);}
 "*"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(MULTIPLY);}
-"/"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(DIV);}
+"/"        {char* tokenName = (char*) malloc(strlen(yytext)+1);
+            strcpy(tokenName,yytext);
+            yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
+            strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(DIV);}
 "%"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(REMAINDER);}
 "++"       {char* tokenName = (char*) malloc(strlen(yytext)+1);
             strcpy(tokenName,yytext);
@@ -99,8 +102,14 @@ void save_token();
 ">"	       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(GREATER_THAN);}
 "<="       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(LESS_EQUAL);}
 ">="       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(GREATER_EQUAL);}
-">>"       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(R_SHIFT);}
-"<<"       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(L_SHIFT);}
+">>"       {char* tokenName = (char*) malloc(strlen(yytext)+1);
+            strcpy(tokenName,yytext);
+            yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
+            strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(R_SHIFT);}
+"<<"       {char* tokenName = (char*) malloc(strlen(yytext)+1);
+            strcpy(tokenName,yytext);
+            yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
+            strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(L_SHIFT);}
 "="        {char* tokenName = (char*) malloc(strlen(yytext)+1);
             strcpy(tokenName,yytext);
             yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
@@ -140,6 +149,9 @@ void save_token();
                     }
 
 \"([^\\\"]|\\.)*\"	{
+                     char* tokenName = (char*) malloc(strlen(yytext)+1);
+                     strcpy(tokenName,yytext);
+                     yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
                      strcat(v, yytext);save_token(); str = malloc(strlen(yytext)*sizeof(char)); strcpy(str, yytext); i = 0;
 			         while(str[i] != '\0'){str[i] = str[i+1];i++;} str[i-2] = '\0';
 			         caracteres+=strlen(yytext);tokens++;return(STRING);

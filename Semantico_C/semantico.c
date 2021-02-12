@@ -20,12 +20,16 @@ HashTable globalTableFixa, localTable;
 
 int semantico(Program p){
 
+    globalTableFixa = getGlobalSymbolTable(p);
+
     Function functions = getFunctions(p);
     while (functions != NULL){
 
         Symbol s = getElemHash(getGlobalSymbolTable(p),getFunctionName(functions));
 
         HashTable localSymbolTable = getFunctionSymbolTable(functions);
+
+        localTable = getFunctionSymbolTable(functions);
 
         if(s!=NULL){
             if(getSymbolSpec(s) == PROTOTIPO){
@@ -63,6 +67,9 @@ int semantico(Program p){
                 }
                 
             }
+        }else{
+            Symbol func = createSymbol(getFunctionName(functions), getFunctionType(functions), FUNCAO, NULL, getLinhaFunc(functions), getColunaFunc(functions));
+            insertHashTable(globalTableFixa, func);
         }
 
         Command listaComandos = getFunctionCommandList(functions);
@@ -194,10 +201,36 @@ void verificaExpressao(Expression e){
         }
         if(getExpType(e) == EXP_ASSIGN){
             Expression left = getLeftChild(e);
+            if(getExpType(left) == EXP_STRING){
+                printf("error:semantic:%d:%d: assignment of read-only location %s\n%s\n%*s",
+                    getExpLinha(e), getExpColuna(e), getExpVarName(left),getExpText(e), getExpColuna(e), "^");
+                exit(0); 
+            }
             if(getExpType(left) != EXP_VARIAVEL){
                 printf("error:semantic:%d:%d: lvalue required as left operand of assignment\n%s\n%*s",
                     getExpLinha(e), getExpColuna(e), getExpText(e), getExpColuna(e), "^");
                 exit(0); 
+            }
+
+            Expression right = getRightChild(e);
+            if(getExpType(right) == EXP_VARIAVEL){
+                Expression func = getLeftChild(right);
+                if(func != NULL && getExpType(func) == EXP_FUNC){
+
+                    Symbol var = getElemHash(globalTableFixa, getExpVarName(left));
+                    if(var == NULL)
+                        var = getElemHash(localTable, getExpVarName(left));
+                    Symbol func = getElemHash(globalTableFixa, getExpVarName(right));
+                    if(func == NULL)
+                        func = getElemHash(localTable, getExpVarName(right));
+
+                    if(strcmp(getSymbolType(func),"void") == 0){
+                        printf("error:semantic:%d:%d: void value not ignored as it ought to be\n%s\n%*s",
+                            getExpLinha(e), getExpColuna(e), getExpText(e), getExpColuna(e), "^");
+                        exit(0); 
+                    }    
+                    
+                }
             }
         }
         if(getExpType(e) == EXP_VARIAVEL && constante){
@@ -210,6 +243,11 @@ void verificaExpressao(Expression e){
                 exit(0);        
             }    
         }
+        if(getExpType(e) == EXP_STRING && constante){
+            printf("error:semantic:%d:%d: string type is not compatible with define\n%s\n%*s",
+                    getExpLinha(e), getExpColuna(e),texto, getExpColuna(e), "^");
+            exit(0); 
+        }
         if(getExpType(e) == EXP_VARIAVEL && array){
             Symbol var = getElemHash(globalTableFixa, getExpVarName(e));
             if(var == NULL)
@@ -219,6 +257,40 @@ void verificaExpressao(Expression e){
                     ,getExpLinha(e),getExpColuna(e), getExpVarName(e), texto, getExpColuna(e),"^");
                 exit(0);        
             }    
+        }
+        if(getExpType(e) == EXP_LSHIFT){
+            Expression left = getLeftChild(e);
+            int vL = percorreExpressionInt(left, localTable, globalTableFixa);
+            Expression right = getRightChild(e);
+            int vR = percorreExpressionInt(right, localTable, globalTableFixa);
+            if(vR<0){
+                printf("error:semantic:%d:%d: left shift count is negative\n%s\n%*s"
+                    ,getExpLinha(e),getExpColuna(e), getExpText(e), getExpColuna(e),"^");
+                exit(0);  
+            }
+
+        }
+        if(constante){
+            int value = percorreExpressionInt(e,localTable, globalTableFixa);
+        }
+
+        if(getExpType(e) == EXP_VARIAVEL){
+            Expression func = getLeftChild(e);
+            if(func != NULL && getExpType(func) == EXP_FUNC){
+
+                Symbol var = getElemHash(globalTableFixa, getExpVarName(e));
+                if(var == NULL)
+                    var = getElemHash(localTable, getExpVarName(e));
+
+                if(getSymbolSpec(var) == PROTOTIPO){
+                    if(getListaSize(getListaParametros(var))>getListaSize(getExpParametros(func))){
+                        printf("error:semantic:%d:%d: too few arguments to function '%s'\n%s\n%*s"
+                            ,getExpLinha(e),getExpColuna(e), getExpVarName(e), getExpText(e), getExpColuna(e),"^");
+                        exit(0); 
+                    }
+                }
+                
+            }
         }
 
         Expression esq = getLeftChild(e);
@@ -242,7 +314,7 @@ int percorreExpressionInt(Expression exp, HashTable symbolTable, HashTable globa
         else if(getExpType(exp) == EXP_NUMBER){
             return getExpValue(exp);
         }
-
+        int a,b;
         Expression esq = getLeftChild(exp);
         Expression dir = getRightChild(exp);
         if(esq != NULL){
@@ -251,7 +323,14 @@ int percorreExpressionInt(Expression exp, HashTable symbolTable, HashTable globa
                     case OPERADOR_MULT:
                         return percorreExpressionInt(esq, symbolTable, globalTable) * percorreExpressionInt(dir, symbolTable, globalTable);
                     case OPERADOR_DIV:
-                        return percorreExpressionInt(esq, symbolTable, globalTable) * percorreExpressionInt(dir, symbolTable, globalTable);
+                        a = percorreExpressionInt(esq, symbolTable, globalTable);
+                        b = percorreExpressionInt(dir, symbolTable, globalTable);
+                        if(b == 0){
+                            printf("error:semantic:%d:%d: division by zero\n%s\n%*s"
+                                ,getExpLinha(exp),getExpColuna(exp), getExpText(exp), getExpColuna(exp),"^");
+                            exit(0); 
+                        }
+                        return  a/b ;
                     case OPERADOR_PLUS:
                         return percorreExpressionInt(esq, symbolTable, globalTable) + percorreExpressionInt(dir, symbolTable, globalTable);
                     case OPERADOR_SUB:

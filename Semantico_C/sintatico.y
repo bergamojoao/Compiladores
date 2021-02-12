@@ -44,7 +44,7 @@ Program AST;
 HashTable symbolTable, globalSymbolTable;
 bool criaST = true;
 char tipoVar[10];
-Expression arraySize;
+Expression arraySize, parFuncs;
 
 int OPERACAO;
 
@@ -59,6 +59,8 @@ char returnMsg[180];
 int ponteiros=0;
 
 char erro[250] = "";
+
+int shiftType, linhaShift, colunaShift;
 
 %}
 
@@ -315,10 +317,24 @@ expressao_relacional1: LESS_THAN expressao_shift expressao_relacional1 { $$ = $3
 	| GREATER_EQUAL expressao_shift expressao_relacional1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
 	| { $$ = NULL; } ;
 
-expressao_shift: expressao_aditiva expressao_shift1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
+expressao_shift: expressao_aditiva expressao_shift1 {if($2 == NULL) $$ = $1; else {
+																	Expression exp = createExpression(shiftType, $1, $2);
+																	setExpLinha(exp, linhaShift);
+																	setExpColuna(exp, colunaShift);
+																	setExpText(exp, STR_BACKUP);
+																	$$ = exp;
+ 													} } ;
 
-expressao_shift1: L_SHIFT expressao_aditiva expressao_shift1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
-	| R_SHIFT expressao_aditiva expressao_shift1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
+expressao_shift1: L_SHIFT expressao_aditiva expressao_shift1 { shiftType = EXP_LSHIFT; 
+															   linhaShift = getSymbolLinha($1);
+															   colunaShift = getSymbolColuna($1);
+																if($3 == NULL) $$ = $2; else {
+																	Expression exp = createExpression(EXP_LSHIFT, $2, $3);
+																	setExpLinha(exp, linhaShift);
+																	setExpColuna(exp, colunaShift);
+																	$$ = exp;
+ 																} }
+	| R_SHIFT expressao_aditiva expressao_shift1 { shiftType = EXP_RSHIFT; $$ = $3 == NULL ? $2 : createExpression(EXP_RSHIFT, $2, $3); }
 	| { $$ = NULL; } ;
 
 expressao_aditiva: expressao_multiplicativa expressao_aditiva1 { $$ = $2 == NULL ? $1 : createExpression(OPERACAO, $1, $2); } ;
@@ -327,10 +343,24 @@ expressao_aditiva1: MINUS expressao_multiplicativa expressao_aditiva1 { OPERACAO
 	| PLUS expressao_multiplicativa expressao_aditiva1 { OPERACAO = OPERADOR_PLUS; $$ = $3 == NULL ? $2 : createExpression(OPERADOR_PLUS, $2, $3); }
 	| { $$ = NULL; } ;
 
-expressao_multiplicativa: expressao_cast expressao_multiplicativa1 { $$ = $2 == NULL ? $1 : createExpression(OPERACAO, $1, $2); } ;
+expressao_multiplicativa: expressao_cast expressao_multiplicativa1 { if($2 == NULL) $$ = $1; else{ 
+																		Expression exp = createExpression(OPERACAO, $1, $2); 
+																		setExpColuna(exp, colunaShift);
+																		setExpLinha(exp, linhaShift);
+																		setExpText(exp, STR_BACKUP);
+																		$$ = exp;
+																	} } ;
 
 expressao_multiplicativa1: MULTIPLY expressao_cast expressao_multiplicativa1 { OPERACAO = OPERADOR_MULT; $$ = $3 == NULL ? $2 : createExpression(OPERADOR_MULT, $2, $3); }
-	| DIV expressao_cast expressao_multiplicativa1 { OPERACAO = OPERADOR_DIV; $$ = $3 == NULL ? $2 : createExpression(OPERADOR_DIV, $2, $3); }
+	| DIV expressao_cast expressao_multiplicativa1 { OPERACAO = OPERADOR_DIV;
+													colunaShift = getSymbolColuna($1);
+													linhaShift = getSymbolLinha($1); 
+													if($3 == NULL) $$ = $2; else { 
+														Expression exp = createExpression(OPERADOR_DIV, $2, $3); 
+														setExpColuna(exp, colunaShift);
+														setExpLinha(exp, linhaShift);
+														$$ = exp;
+													} }
 	| REMAINDER expressao_cast expressao_multiplicativa1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
 	| { $$ = NULL; } ;
 
@@ -369,15 +399,15 @@ expressao_pos_fixa1: L_SQUARE_BRACKET expressao R_SQUARE_BRACKET
 							   	 setExpVarName(exp, getSymbolName($1));
 								 $$ = exp;	
 		  }
-	| L_PAREN expressao_pos_fixa2 ;
+	| L_PAREN expressao_pos_fixa2 { $$ = $2; } ;
 
-expressao_pos_fixa2: R_PAREN
-	| expressao_pos_fixa3 ;
+expressao_pos_fixa2: R_PAREN { Expression exp = createExpression(EXP_FUNC, NULL, NULL); $$ = exp;}
+	| expressao_pos_fixa3 { setExpParametros(parFuncs, listaPar); $$ = parFuncs; } ;
 
-expressao_pos_fixa3: expressao_de_atribuicao expressao_pos_fixa4 ;
+expressao_pos_fixa3: expressao_de_atribuicao expressao_pos_fixa4 { listaPar=inserir(listaPar, $1); } ;
 
 expressao_pos_fixa4: COMMA expressao_pos_fixa3
-	| R_PAREN ;
+	| R_PAREN { Expression exp = createExpression(EXP_FUNC, NULL, NULL); parFuncs = exp; } ;
 
 expressao_primaria: IDENTIFIER { Expression exp = createExpression(EXP_VARIAVEL, NULL, NULL);
 								 setExpLinha(exp, getSymbolLinha($1));
@@ -387,7 +417,12 @@ expressao_primaria: IDENTIFIER { Expression exp = createExpression(EXP_VARIAVEL,
 							   }
 	| numero { $$ = $1; }
 	| CHARACTER { $$ = createExpression(OPERANDO, NULL, NULL);}
-	| STRING { $$ = createExpression(EXP_STRING, NULL, NULL); }
+	| STRING { Expression exp = createExpression(EXP_STRING, NULL, NULL);
+				setExpLinha(exp, getSymbolLinha($1));
+				setExpColuna(exp, getSymbolColuna($1));
+				setExpVarName(exp, getSymbolName($1));
+				$$ = exp;	
+			}
 	| L_PAREN expressao R_PAREN { $$ = $2; }
 ;
 

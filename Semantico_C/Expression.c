@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include"Expression.h"
+#include"ListaDinamica.h"
 
 typedef struct exp{
     int expType;
@@ -10,6 +11,7 @@ typedef struct exp{
     int linha;
     int coluna;
     int value;
+    Lista parametros;
     struct exp* leftChild;
     struct exp* rightChild;
 }ExpressionImpl;
@@ -21,6 +23,7 @@ Expression createExpression(int expType, Expression leftChild, Expression rightC
     expression->expType=expType;
     expression->leftChild=leftChild;
     expression->rightChild=rightChild;
+    expression->parametros=NULL;
     
     return expression;
 }
@@ -28,6 +31,11 @@ Expression createExpression(int expType, Expression leftChild, Expression rightC
 int getExpType(Expression e){
     ExpressionImpl *exp = e;
     return exp->expType;
+}
+
+void setExpType(Expression e, int type){
+    ExpressionImpl *exp = e;
+    exp->expType = type;
 }
 
 void setLeftChild(Expression e, Expression leftChild){
@@ -98,4 +106,14 @@ void setExpText(Expression e, char* varName){
 char* getExpText(Expression e){
     ExpressionImpl *exp = e;
     return exp->text;
+}
+
+void setExpParametros(Expression e, Lista parametros){
+    ExpressionImpl *exp = e;
+    exp->parametros,parametros;
+}
+
+Lista getExpParametros(Expression e){
+    ExpressionImpl *exp = e;
+    return exp->parametros;
 }
