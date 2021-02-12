@@ -110,7 +110,7 @@ char* getExpText(Expression e){
 
 void setExpParametros(Expression e, Lista parametros){
     ExpressionImpl *exp = e;
-    exp->parametros,parametros;
+    exp->parametros = parametros;
 }
 
 Lista getExpParametros(Expression e){
