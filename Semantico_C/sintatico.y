@@ -386,8 +386,16 @@ expressao_unaria: expressao_pos_fixa { $$ = $1; }
 								   setExpColuna(exp, getSymbolColuna($1));
 							   	   setExpVarName(exp, getSymbolName($1));
 								   $$ = exp;	}
-	| MULTIPLY expressao_cast
-	| PLUS expressao_cast
+	| MULTIPLY expressao_cast { Expression exp = createExpression(POINTER_EXP, $2, NULL);
+								   setExpLinha(exp, getSymbolLinha($1));
+								   setExpColuna(exp, getSymbolColuna($1));
+							   	   setExpVarName(exp, getSymbolName($1));
+								   $$ = exp;	}
+	| PLUS expressao_cast { Expression exp = createExpression(PLUS_EXP, $2, NULL);
+								   setExpLinha(exp, getSymbolLinha($1));
+								   setExpColuna(exp, getSymbolColuna($1));
+							   	   setExpVarName(exp, getSymbolName($1));
+								   $$ = exp;	}
 	| MINUS expressao_cast
 	| BITWISE_NOT expressao_cast
 	| NOT expressao_cast ;
@@ -396,7 +404,12 @@ expressao_unaria: expressao_pos_fixa { $$ = $1; }
 expressao_pos_fixa: expressao_primaria { $$ = $1; }
 	| expressao_pos_fixa expressao_pos_fixa1 { setLeftChild($1, $2); $$ = $1; } ;
 
-expressao_pos_fixa1: L_SQUARE_BRACKET expressao R_SQUARE_BRACKET
+expressao_pos_fixa1: L_SQUARE_BRACKET expressao R_SQUARE_BRACKET { Expression exp = createExpression(ARRAY_EXP, $2, NULL);
+								 setExpLinha(exp, getSymbolLinha($1));
+								 setExpColuna(exp, getSymbolColuna($1));
+							   	 setExpVarName(exp, getSymbolName($1));
+								 $$ = exp;	
+		  }
 	| INC { Expression exp = createExpression(EXP_INC, NULL, NULL);
 								 setExpLinha(exp, getSymbolLinha($1));
 								 setExpColuna(exp, getSymbolColuna($1));

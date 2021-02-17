@@ -1,5 +1,8 @@
 void f()
 {
-    int* i = &666;
+    int* p;
+    int i;
+    
+    i << p;
     return;
 }

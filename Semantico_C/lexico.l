@@ -73,9 +73,15 @@ void save_token();
 "else"     {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(ELSE);}
 "typedef"  {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(TYPEDEF);}
 "struct"   {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(STRUCT);}
-"+"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(PLUS);}
+"+"        {char* tokenName = (char*) malloc(strlen(yytext)+1);
+            strcpy(tokenName,yytext);
+            yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
+            strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(PLUS);}
 "-"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(MINUS);}
-"*"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(MULTIPLY);}
+"*"        {char* tokenName = (char*) malloc(strlen(yytext)+1);
+            strcpy(tokenName,yytext);
+            yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
+            strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(MULTIPLY);}
 "/"        {char* tokenName = (char*) malloc(strlen(yytext)+1);
             strcpy(tokenName,yytext);
             yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
@@ -126,7 +132,10 @@ void save_token();
 ")"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(R_PAREN);}
 "{"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(L_CURLY_BRACKET);}
 "}"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(R_CURLY_BRACKET);}
-"["        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(L_SQUARE_BRACKET);}
+"["        {char* tokenName = (char*) malloc(strlen(yytext)+1);
+            strcpy(tokenName,yytext);
+            yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
+            strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(L_SQUARE_BRACKET);}
 "]"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(R_SQUARE_BRACKET);}
 "?"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(TERNARY_CONDITIONAL);}
 "#"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(NUMBER_SIGN);}

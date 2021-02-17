@@ -211,6 +211,28 @@ void verificaExpressao(Expression e){
                 exit(0);    
             }
         }
+        if(getExpType(e) == PLUS_EXP){
+            Expression left = getLeftChild(e);
+            Symbol var = getElemHash(globalTableFixa, getExpVarName(left));
+            if(var == NULL)
+                var = getElemHash(localTable, getExpVarName(left));
+            if(left != NULL && getExpType(left) == EXP_VARIAVEL && getSymbolPonteiro(var) != 0){
+                printf("error:semantic:%d:%d: wrong type argument to unary plus\n%s\n%*s",
+                    getExpLinha(e), getExpColuna(e), getExpText(e), getExpColuna(e), "^");
+                exit(0);    
+            }
+        }
+        if(getExpType(e) == POINTER_EXP){
+            Expression left = getLeftChild(e);
+            Symbol var = getElemHash(globalTableFixa, getExpVarName(left));
+            if(var == NULL)
+                var = getElemHash(localTable, getExpVarName(left));
+            if(left != NULL && getExpType(left) == EXP_VARIAVEL && getSymbolPonteiro(var) == 0){
+                printf("error:semantic:%d:%d: invalid type argument of unary '*' (have '%s')\n%s\n%*s",
+                    getExpLinha(e), getExpColuna(e), getSymbolType(var), getExpText(e), getExpColuna(e), "^");
+                exit(0);    
+            }
+        }
         if(getExpType(e) == EXP_ASSIGN){
             Expression left = getLeftChild(e);
             if(getExpType(left) == EXP_STRING){
@@ -295,6 +317,21 @@ void verificaExpressao(Expression e){
         }
 
         if(getExpType(e) == EXP_VARIAVEL){
+            Expression left = getLeftChild(e);
+            if(left != NULL && getExpType(left) == ARRAY_EXP){
+                Expression sub = getLeftChild(left);
+                if(getExpType(sub) == EXP_VARIAVEL){
+                    Symbol var = getElemHash(globalTableFixa, getExpVarName(sub));
+                    if(var == NULL)
+                        var = getElemHash(localTable, getExpVarName(sub));
+
+                    if(getSymbolPonteiro(var) != 0 || strcmp(getSymbolType(var),"void") == 0){
+                        printf("error:semantic:%d:%d: array subscript is not an integer\n%s\n%*s"
+                            ,getExpLinha(left),getExpColuna(left), getExpText(e), getExpColuna(left),"^");
+                        exit(0); 
+                    }
+                }
+            }
             Expression func = getLeftChild(e);
             if(func != NULL && getExpType(func) == EXP_FUNC){
 
