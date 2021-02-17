@@ -14,7 +14,10 @@ typedef struct{
     int coluna;
     Expression arraySize;
     Expression constante;
+    Expression assign;
     Lista parametros;
+
+    int ponteiro;
 }SymbolImpl;
 
 Symbol createSymbol(char* name, char* type, int symbolSpec, Expression arraySize, int linha, int coluna){
@@ -29,7 +32,8 @@ Symbol createSymbol(char* name, char* type, int symbolSpec, Expression arraySize
     symbol->coluna=coluna;
     symbol->constante=NULL;
     symbol->parametros=NULL;
-
+    symbol->assign=NULL;
+    symbol->ponteiro=0;
     return symbol;
 }
 
@@ -42,7 +46,8 @@ Symbol createVar(int symbolSpec, char* type){
     symbol->arraySize=NULL;
     symbol->constante=NULL;
     symbol->parametros=NULL;
-    
+    symbol->assign=NULL;
+    symbol->ponteiro=0;
     return symbol;
 }
 
@@ -119,4 +124,24 @@ int getSymbolSpec(Symbol s){
 void setSymbolType(Symbol s, char* type){
     SymbolImpl* symbol=s;
     strcpy(symbol->type,type);
+}
+
+int getSymbolPonteiro(Symbol s){
+    SymbolImpl* symbol=s;
+    return symbol->ponteiro;
+}
+
+void setSymbolPonteiro(Symbol s, int ponteiro){
+    SymbolImpl* symbol=s;
+    symbol->ponteiro = ponteiro;
+}
+
+void setExpAssign(Symbol s, Expression assign){
+    SymbolImpl* symbol=s;
+    symbol->assign = assign;
+}
+
+Expression getExpAssign(Symbol s){
+    SymbolImpl* symbol=s;
+    return symbol->assign;
 }

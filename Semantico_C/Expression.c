@@ -12,6 +12,7 @@ typedef struct exp{
     int coluna;
     int value;
     Lista parametros;
+    int ponteiro;
     struct exp* leftChild;
     struct exp* rightChild;
 }ExpressionImpl;
@@ -24,7 +25,7 @@ Expression createExpression(int expType, Expression leftChild, Expression rightC
     expression->leftChild=leftChild;
     expression->rightChild=rightChild;
     expression->parametros=NULL;
-    
+    expression->ponteiro=0;
     return expression;
 }
 
@@ -116,4 +117,14 @@ void setExpParametros(Expression e, Lista parametros){
 Lista getExpParametros(Expression e){
     ExpressionImpl *exp = e;
     return exp->parametros;
+}
+
+int getExpPonteiro(Expression e){
+    ExpressionImpl *exp = e;
+    return exp->ponteiro;
+}
+
+void setExpPonteiro(Expression e, int ponteiro){
+    ExpressionImpl *exp = e;
+    exp->ponteiro = ponteiro;
 }

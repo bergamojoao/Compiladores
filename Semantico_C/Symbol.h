@@ -41,4 +41,12 @@ int getSymbolSpec(Symbol s);
 
 void setSymbolType(Symbol s, char* type);
 
+int getSymbolPonteiro(Symbol s);
+
+void setSymbolPonteiro(Symbol s, int ponteiro);
+
+void setExpAssign(Symbol s, Expression assign);
+
+Expression getExpAssign(Symbol s);
+
 #endif

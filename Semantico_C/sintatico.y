@@ -62,6 +62,8 @@ char erro[250] = "";
 
 int shiftType, linhaShift, colunaShift;
 
+Expression assign = NULL;
+
 %}
 
 %token VOID
@@ -166,20 +168,24 @@ funcao1: MULTIPLY funcao1 { ponteiros++; $$ = $2; }
 funcao2: declaracao_variaveis funcao2 { $$ = $2; }
 	| comandos R_CURLY_BRACKET { Function f = createFunction($1); setReturnMsg(f, returnMsg); $$ = f; };
 
-declaracao_variaveis: tipo declaracao_variaveis1 ;
+declaracao_variaveis: tipo declaracao_variaveis1 { setSymbolPonteiro($2, ponteiros);
+												   ponteiros = 0;} ;
 
-declaracao_variaveis1: MULTIPLY declaracao_variaveis1
+declaracao_variaveis1: MULTIPLY declaracao_variaveis1 { ponteiros++; $$ = $2; }
 	| IDENTIFIER declaracao_variaveis2 { setSymbolName($2, getSymbolName($1));
 										 setSymbolLinha($2, getSymbolLinha($1));
 										 setSymbolColuna($2, getSymbolColuna($1));
 										 setArraySize($2, arraySize);
+										 setExpAssign($2, assign);
+										 assign=NULL;
 										 arraySize=NULL;
 										 verificaVariaveisIguais(symbolTable, globalSymbolTable, $2, STR_BACKUP, erro);
 										 if(strlen(erro)<1) insertHashTable(symbolTable, $2);
+										 $$ = $2;
 									   } ;
 
 declaracao_variaveis2:L_SQUARE_BRACKET expressao R_SQUARE_BRACKET declaracao_variaveis2 { arraySize = $2;  $$ = $4;}
-	| ASSIGN expressao_de_atribuicao declaracao_variaveis3 { $$ = $3; }
+	| ASSIGN expressao_de_atribuicao declaracao_variaveis3 { assign = $2; $$ = $3; }
 	| declaracao_variaveis3 { $$ = $1; };
 
 declaracao_variaveis3: COMMA declaracao_variaveis1 { if(criaST){symbolTable = criaHashTable(108, getSymbolName);criaST=false;} $$ = createVar(VARIAVEL, tipoVar); }
@@ -204,9 +210,9 @@ parametros: L_PAREN parametros1 ;
 parametros1: R_PAREN
 	| parametros2 ;
 
-parametros2: tipo parametros3 { setSymbolType($2, getSymbolName($1)); listaPar = inserir(listaPar, $2); } ;
+parametros2: tipo parametros3 { setSymbolType($2, getSymbolName($1)); setSymbolPonteiro($2, ponteiros); ponteiros = 0; listaPar = inserir(listaPar, $2); } ;
 
-parametros3: MULTIPLY parametros3
+parametros3: MULTIPLY parametros3 { ponteiros++; }
 	| IDENTIFIER parametros4 { $$ = $1; };
 
 parametros4: L_SQUARE_BRACKET expressao R_SQUARE_BRACKET parametros4 { arraySize = $2;  $$ = $4;}
@@ -375,7 +381,11 @@ expressao_cast1: MULTIPLY expressao_cast1
 expressao_unaria: expressao_pos_fixa { $$ = $1; }
 	| INC expressao_unaria
 	| DEC expressao_unaria
-	| BITWISE_AND expressao_cast
+	| BITWISE_AND expressao_cast { Expression exp = createExpression(OPERADOR_BITWISE, $2, NULL);
+								   setExpLinha(exp, getSymbolLinha($1));
+								   setExpColuna(exp, getSymbolColuna($1));
+							   	   setExpVarName(exp, getSymbolName($1));
+								   $$ = exp;	}
 	| MULTIPLY expressao_cast
 	| PLUS expressao_cast
 	| MINUS expressao_cast

@@ -5,7 +5,7 @@
 typedef void * Expression;
 
 enum ExpTypes {OPERANDO, OPERADOR, EXP_VARIAVEL, EXP_NUMBER, OPERADOR_PLUS, OPERADOR_SUB, OPERADOR_MULT, OPERADOR_DIV, EXP_STRING, EXP_INC, EXP_DEC, EXP_ASSIGN,
-    EXP_LSHIFT, EXP_RSHIFT, EXP_FUNC};
+    EXP_LSHIFT, EXP_RSHIFT, EXP_FUNC, OPERADOR_BITWISE};
 
 Expression createExpression(int expType, Expression leftChild, Expression rightChild);
 
@@ -44,5 +44,9 @@ char* getExpText(Expression e);
 void setExpParametros(Expression e, Lista parametros);
 
 Lista getExpParametros(Expression e);
+
+int getExpPonteiro(Expression e);
+
+void setExpPonteiro(Expression e, int ponteiro);
 
 #endif

@@ -152,6 +152,18 @@ void verificaVariaveisIguais(HashTable symbolTable, HashTable globalTable,Symbol
         constante =false;
     }
 
+    Expression assign = getExpAssign(symbol);
+    if(assign != NULL){
+        if(getExpType(assign) == OPERADOR_BITWISE){
+            Expression sub = getLeftChild(assign);
+            if(getExpType(sub) != EXP_VARIAVEL){
+                printf("error:semantic:%d:%d: lvalue required as unary '&' operand\n%s\n%*s",
+                        getExpLinha(assign), getExpColuna(assign), str, getExpColuna(assign), "^");
+                exit(0); 
+            }
+        }
+    }
+
     Expression exp = getArraySize(symbol);
     if(exp != NULL){
         array=true;
@@ -232,6 +244,14 @@ void verificaExpressao(Expression e){
                     
                 }
             }
+            if(getExpType(right) == OPERADOR_BITWISE){
+                Expression sub = getLeftChild(right);
+                if(getExpType(sub) != EXP_VARIAVEL){
+                    printf("error:semantic:%d:%d: lvalue required as unary '&' operand\n%s\n%*s",
+                            getExpLinha(right), getExpColuna(right), getExpText(e), getExpColuna(right), "^");
+                    exit(0); 
+                }
+            }
         }
         if(getExpType(e) == EXP_VARIAVEL && constante){
             Symbol var = getElemHash(globalTableFixa, getExpVarName(e));
@@ -283,10 +303,57 @@ void verificaExpressao(Expression e){
                     var = getElemHash(localTable, getExpVarName(e));
 
                 if(getSymbolSpec(var) == PROTOTIPO){
-                    if(getListaSize(getListaParametros(var))>getListaSize(getExpParametros(func))){
+                    Lista parametrosVar = getListaParametros(var);
+                    Lista parametrosFunc = getExpParametros(func);
+                    int sizeVar = getListaSize(parametrosVar), sizeFunc = getListaSize(parametrosFunc);
+                    if(sizeVar>sizeFunc){
                         printf("error:semantic:%d:%d: too few arguments to function '%s'\n%s\n%*s"
                             ,getExpLinha(e),getExpColuna(e), getExpVarName(e), getExpText(e), getExpColuna(e),"^");
                         exit(0); 
+                    }else if(sizeVar<sizeFunc){
+                        printf("error:semantic:%d:%d: too many arguments to function '%s'\n%s\n%*s"
+                            ,getExpLinha(e),getExpColuna(e), getExpVarName(e), getExpText(e), getExpColuna(e),"^");
+                        exit(0); 
+                    }else{
+                        int k=sizeFunc;
+                        while (parametrosVar != NULL && parametrosFunc != NULL){
+                            Symbol pVar = get(parametrosVar);
+                            Expression pExp = get(parametrosFunc);
+
+                            Symbol pFunc;
+
+                            int bitwise = 0;
+                            if(getExpType(pExp)== OPERADOR_BITWISE){
+                                bitwise++;
+                                pExp = getLeftChild(pExp);
+                            }
+
+                            if(getExpType(pExp) == EXP_VARIAVEL){
+                                pFunc = getElemHash(globalTableFixa, getExpVarName(pExp));
+                                if(pFunc == NULL)
+                                    pFunc = getElemHash(localTable, getExpVarName(pExp));
+                                
+                                char type1[20];
+                                strcpy(type1, getSymbolType(pFunc));
+                                int n = 0;
+                                for(n=0; n<getSymbolPonteiro(pFunc)+bitwise; n++) strcat(type1, "*");
+
+                                char type2[20];
+                                strcpy(type2, getSymbolType(pVar));
+                                for(n=0; n<getSymbolPonteiro(pVar); n++) strcat(type2, "*");
+
+                                if((getSymbolType(pVar) != getSymbolType(pFunc)) || (getSymbolPonteiro(pVar) != getSymbolPonteiro(pFunc)+bitwise) ){
+                                    printf("error:semantic:%d:%d: incompatible type for argument '%d' of '%s' expected '%s' but argument is of type '%s'\n%s\n%*s"
+                                        ,getExpLinha(e),getExpColuna(e), k,getExpVarName(e), type2, type1, getExpText(e), getExpColuna(e),"^");
+                                    exit(0); 
+                                }
+                            }
+
+                            k--;
+                            parametrosVar = getProx(parametrosVar);
+                            parametrosFunc = getProx(parametrosFunc);
+                        }
+                        
                     }
                 }
                 

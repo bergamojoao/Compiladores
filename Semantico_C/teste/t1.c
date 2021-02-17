@@ -1,6 +1,5 @@
-void foo(int i,int j);
-
 void f()
 {
-    foo(3,10);
+    int* i = &666;
+    return;
 }
