@@ -128,6 +128,7 @@ Expression assign = NULL;
 %token CHARACTER
 %token STRING
 %token IDENTIFIER
+%token BRANCO
 
 %start S
 
@@ -238,7 +239,7 @@ lista_de_comandos: DO bloco WHILE L_PAREN expressao R_PAREN SEMICOLON
 	| SCANF L_PAREN STRING COMMA BITWISE_AND IDENTIFIER R_PAREN SEMICOLON { $$ = NULL; }
 	| EXIT L_PAREN expressao R_PAREN SEMICOLON { $$ = createCommand(EXPRESSAO, $1, NULL, NULL, NULL, NULL); }
 	| RETURN lista_de_comandos7 { $$ = createReturn($2, getSymbolLinha($1), getSymbolColuna($1), STR_BACKUP); }
-	| expressao SEMICOLON { setExpText($1, STR_BACKUP);  $$ = createCommand(EXPRESSAO, $1, NULL, NULL, NULL, NULL); }
+	| expressao SEMICOLON BRANCO { setExpText($1, STR_BACKUP);  $$ = createCommand(EXPRESSAO, $1, NULL, NULL, NULL, NULL); }
 	| SEMICOLON { $$ = NULL; }
 	| bloco { $$ = $1; } ;
 

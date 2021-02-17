@@ -125,7 +125,7 @@ void save_token();
             strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(ASSIGN);}
 "+="       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(ADD_ASSIGN);}
 "-="       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(MINUS_ASSIGN);}
-";"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(SEMICOLON);}
+";"[" "]*  {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(SEMICOLON);}
 ","        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(COMMA);}
 ":"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(COLON);}
 "("        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(L_PAREN);}
@@ -175,7 +175,7 @@ void save_token();
                          save_token();caracteres+=strlen(yytext);tokens++;return(IDENTIFIER);
                         }
 
-" "		        { strcat(v, yytext);save_token();caracteres+= strlen(yytext); }
+" " 	        { strcat(v, yytext);save_token();caracteres+= strlen(yytext);}
 "\t"            { strcat(v, yytext);save_token();caracteres+= strlen(yytext); }   
 "//"(.)*"\n"	{ strcat(v, yytext);save_token();linha++; caracteres=1; yylineno++;}
 "\n"		    { if(sintatico_aux == 1 && lexico_aux == 0){lexico_aux=1;strcpy(v2,v);} strcpy(v,"");save_token();linha++; caracteres=1; yylineno++;}
