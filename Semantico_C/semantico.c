@@ -265,6 +265,25 @@ void verificaExpressao(Expression e){
                     }    
                     
                 }
+                Symbol var1 = getElemHash(globalTableFixa, getExpVarName(left));
+                if(var1 == NULL)
+                    var1 = getElemHash(localTable, getExpVarName(left));
+                Symbol var2 = getElemHash(globalTableFixa, getExpVarName(right));
+                if(var2 == NULL)
+                    var2 = getElemHash(localTable, getExpVarName(right));
+
+                if(strcmp(getSymbolName(var1),getSymbolName(var2)) != 0 || getSymbolPonteiro(var1) != getSymbolPonteiro(var2)){
+                    char type1[20];
+                    strcpy(type1, getSymbolType(var1));
+                    int n;
+                    for(n=0; n<getSymbolPonteiro(var1); n++) strcat(type1, "*");
+                    char type2[20];
+                    strcpy(type2, getSymbolType(var2));
+                    for(n=0; n<getSymbolPonteiro(var2); n++) strcat(type2, "*");
+                    printf("error:semantic:%d:%d: incompatible types when assigning to type '%s' from type '%s'\n%s\n%*s"
+                        ,getExpLinha(e),getExpColuna(e), type1, type2, getExpText(e), getExpColuna(e),"^");
+                    exit(0);   
+                }
             }
             if(getExpType(right) == OPERADOR_BITWISE){
                 Expression sub = getLeftChild(right);
@@ -274,6 +293,31 @@ void verificaExpressao(Expression e){
                     exit(0); 
                 }
             }
+        }
+        if(getExpType(e) == OPERADOR_PLUS || getExpType(e) == OPERADOR_SUB){
+            Expression left = getLeftChild(e);
+            Expression right = getRightChild(e);
+            if(getExpType(left) == EXP_VARIAVEL && getExpType(right) == EXP_VARIAVEL){
+                Symbol var1 = getElemHash(globalTableFixa, getExpVarName(left));
+                if(var1 == NULL)
+                    var1 = getElemHash(localTable, getExpVarName(left));
+                Symbol var2 = getElemHash(globalTableFixa, getExpVarName(right));
+                if(var2 == NULL)
+                    var2 = getElemHash(localTable, getExpVarName(right));
+                if(getSymbolPonteiro(var1) != 0 || getSymbolPonteiro(var2) != 0){
+                    char type1[20];
+                    strcpy(type1, getSymbolType(var1));
+                    int n;
+                    for(n=0; n<getSymbolPonteiro(var1); n++) strcat(type1, "*");
+                    char type2[20];
+                    strcpy(type2, getSymbolType(var2));
+                    for(n=0; n<getSymbolPonteiro(var2); n++) strcat(type2, "*");   
+                    printf("error:semantic:%d:%d: invalid operands to binary '%c' (have '%s' and '%s')\n%s\n%*s",
+                            getExpLinha(e), getExpColuna(e),getExpType(e) == OPERADOR_PLUS ? '+' : '-', type1, type2,getExpText(e), getExpColuna(e), "^");
+                    exit(0); 
+                }
+            }
+
         }
         if(getExpType(e) == EXP_VARIAVEL && constante){
             Symbol var = getElemHash(globalTableFixa, getExpVarName(e));
@@ -302,8 +346,22 @@ void verificaExpressao(Expression e){
         }
         if(getExpType(e) == EXP_LSHIFT){
             Expression left = getLeftChild(e);
-            int vL = percorreExpressionInt(left, localTable, globalTableFixa);
             Expression right = getRightChild(e);
+            if(getExpType(right) == EXP_VARIAVEL){
+                Symbol var = getElemHash(globalTableFixa, getExpVarName(right));
+                if(var == NULL)
+                    var = getElemHash(localTable, getExpVarName(right));
+                if(strcmp(getSymbolName(var),"int") != 0 || getSymbolPonteiro(var) != 0){
+                    char type[20];
+                    strcpy(type, getSymbolType(var));
+                    int n;
+                    for(n=0; n<getSymbolPonteiro(var); n++) strcat(type, "*");
+                    printf("error:semantic:%d:%d: cannot convert from '%s' to int\n%s\n%*s"
+                        ,getExpLinha(e),getExpColuna(e), type, getExpText(e), getExpColuna(e),"^");
+                    exit(0);   
+                }
+            }
+            int vL = percorreExpressionInt(left, localTable, globalTableFixa);
             int vR = percorreExpressionInt(right, localTable, globalTableFixa);
             if(vR<0){
                 printf("error:semantic:%d:%d: left shift count is negative\n%s\n%*s"

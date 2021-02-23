@@ -77,7 +77,10 @@ void save_token();
             strcpy(tokenName,yytext);
             yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
             strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(PLUS);}
-"-"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(MINUS);}
+"-"        {char* tokenName = (char*) malloc(strlen(yytext)+1);
+            strcpy(tokenName,yytext);
+            yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
+            strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(MINUS);}
 "*"        {char* tokenName = (char*) malloc(strlen(yytext)+1);
             strcpy(tokenName,yytext);
             yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);

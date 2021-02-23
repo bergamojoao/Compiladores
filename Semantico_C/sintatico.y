@@ -60,7 +60,7 @@ int ponteiros=0;
 
 char erro[250] = "";
 
-int shiftType, linhaShift, colunaShift;
+int shiftType, linhaShift, colunaShift, indexP=0, ponts[20];
 
 Expression assign = NULL;
 
@@ -133,7 +133,7 @@ Expression assign = NULL;
 
 %%
 
-S: { AST = createProgram(); symbolTable = getGlobalSymbolTable(AST); globalSymbolTable = symbolTable; }
+S: { AST = createProgram(); symbolTable = getGlobalSymbolTable(AST); globalSymbolTable = symbolTable; ponts[0]=0; }
 	programa { setFunctionList(AST, $2); semantico(AST); if(strlen(erro)>1){printf("%s",erro);exit(0);} printf("SUCCESSFUL COMPILATION."); return 0;} ;
 	
 programa: declaracoes programa1 { $$ = $2; }
@@ -168,10 +168,9 @@ funcao1: MULTIPLY funcao1 { ponteiros++; $$ = $2; }
 funcao2: declaracao_variaveis funcao2 { $$ = $2; }
 	| comandos R_CURLY_BRACKET { Function f = createFunction($1); setReturnMsg(f, returnMsg); $$ = f; };
 
-declaracao_variaveis: tipo declaracao_variaveis1 { setSymbolPonteiro($2, ponteiros);
-												   ponteiros = 0;} ;
+declaracao_variaveis: tipo declaracao_variaveis1 ;
 
-declaracao_variaveis1: MULTIPLY declaracao_variaveis1 { ponteiros++; $$ = $2; }
+declaracao_variaveis1: MULTIPLY declaracao_variaveis1 { setSymbolPonteiro($2, getSymbolPonteiro($2)+1); $$ = $2; }
 	| IDENTIFIER declaracao_variaveis2 { setSymbolName($2, getSymbolName($1));
 										 setSymbolLinha($2, getSymbolLinha($1));
 										 setSymbolColuna($2, getSymbolColuna($1));
@@ -189,7 +188,7 @@ declaracao_variaveis2:L_SQUARE_BRACKET expressao R_SQUARE_BRACKET declaracao_var
 	| declaracao_variaveis3 { $$ = $1; };
 
 declaracao_variaveis3: COMMA declaracao_variaveis1 { if(criaST){symbolTable = criaHashTable(108, getSymbolName);criaST=false;} $$ = createVar(VARIAVEL, tipoVar); }
-	| SEMICOLON  { if(criaST){symbolTable = criaHashTable(108, getSymbolName);criaST=false;} $$ = createVar(VARIAVEL, tipoVar); };
+	| SEMICOLON  { if(criaST){symbolTable = criaHashTable(108, getSymbolName);criaST=false;} $$ = createVar(VARIAVEL, tipoVar);};
 
 declaracao_prototipos: tipo declaracao_prototipos1 {
 											setSymbolType($2, getSymbolName($1));
@@ -343,10 +342,35 @@ expressao_shift1: L_SHIFT expressao_aditiva expressao_shift1 { shiftType = EXP_L
 	| R_SHIFT expressao_aditiva expressao_shift1 { shiftType = EXP_RSHIFT; $$ = $3 == NULL ? $2 : createExpression(EXP_RSHIFT, $2, $3); }
 	| { $$ = NULL; } ;
 
-expressao_aditiva: expressao_multiplicativa expressao_aditiva1 { $$ = $2 == NULL ? $1 : createExpression(OPERACAO, $1, $2); } ;
+expressao_aditiva: expressao_multiplicativa expressao_aditiva1 { if($2 == NULL) $$ = $1; else { 
+																	Expression exp = createExpression(OPERACAO, $1, $2);
+																	setExpColuna(exp, colunaShift);
+																	setExpLinha(exp, linhaShift);
+																	setExpText(exp, STR_BACKUP);
+																	$$ = exp;
+																 } 
+																} ;
 
-expressao_aditiva1: MINUS expressao_multiplicativa expressao_aditiva1 { OPERACAO = OPERADOR_SUB; $$ = $3 == NULL ? $2 : createExpression(OPERADOR_SUB, $2, $3); }
-	| PLUS expressao_multiplicativa expressao_aditiva1 { OPERACAO = OPERADOR_PLUS; $$ = $3 == NULL ? $2 : createExpression(OPERADOR_PLUS, $2, $3); }
+expressao_aditiva1: MINUS expressao_multiplicativa expressao_aditiva1 { OPERACAO = OPERADOR_SUB;
+																		colunaShift = getSymbolColuna($1);
+																		linhaShift = getSymbolLinha($1); 
+																		if($3 == NULL) $$ = $2; else { 
+																			Expression exp = createExpression(OPERADOR_SUB, $2, $3); 
+																			setExpColuna(exp, colunaShift);
+																			setExpLinha(exp, linhaShift);
+																			setExpText(exp, STR_BACKUP);
+																			$$ = exp;
+																		}  }
+	| PLUS expressao_multiplicativa expressao_aditiva1 { OPERACAO = OPERADOR_PLUS; 
+														colunaShift = getSymbolColuna($1);
+														linhaShift = getSymbolLinha($1); 
+														if($3 == NULL) $$ = $2; else { 
+															Expression exp = createExpression(OPERADOR_PLUS, $2, $3); 
+															setExpColuna(exp, colunaShift);
+															setExpLinha(exp, linhaShift);
+															setExpText(exp, STR_BACKUP);
+															$$ = exp;
+														} }
 	| { $$ = NULL; } ;
 
 expressao_multiplicativa: expressao_cast expressao_multiplicativa1 { if($2 == NULL) $$ = $1; else{ 
