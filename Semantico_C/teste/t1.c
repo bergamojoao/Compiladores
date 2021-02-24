@@ -1,6 +1,6 @@
 void f()
 {
-    int *i,*j;
-    i - j;
-    return;
+    int* p,i;
+
+    i = p < i;
 }

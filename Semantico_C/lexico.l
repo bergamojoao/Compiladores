@@ -110,10 +110,22 @@ void save_token();
 "||"       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(LOGICAL_OR);}
 "=="       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(EQUAL);}
 "!="       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(NOT_EQUAL);}
-"<"  	   {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(LESS_THAN);}
-">"	       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(GREATER_THAN);}
-"<="       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(LESS_EQUAL);}
-">="       {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(GREATER_EQUAL);}
+"<"  	   {char* tokenName = (char*) malloc(strlen(yytext)+1);
+            strcpy(tokenName,yytext);
+            yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
+            strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(LESS_THAN);}
+">"	       {char* tokenName = (char*) malloc(strlen(yytext)+1);
+            strcpy(tokenName,yytext);
+            yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
+            strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(GREATER_THAN);}
+"<="       {char* tokenName = (char*) malloc(strlen(yytext)+1);
+            strcpy(tokenName,yytext);
+            yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
+            strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(LESS_EQUAL);}
+">="       {char* tokenName = (char*) malloc(strlen(yytext)+1);
+            strcpy(tokenName,yytext);
+            yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);
+            strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(GREATER_EQUAL);}
 ">>"       {char* tokenName = (char*) malloc(strlen(yytext)+1);
             strcpy(tokenName,yytext);
             yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);

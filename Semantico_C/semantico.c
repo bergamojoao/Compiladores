@@ -344,7 +344,7 @@ void verificaExpressao(Expression e){
                 exit(0);        
             }    
         }
-        if(getExpType(e) == EXP_LSHIFT){
+        if(getExpType(e) == EXP_LSHIFT || getExpType(e) == EXP_RSHIFT){
             Expression left = getLeftChild(e);
             Expression right = getRightChild(e);
             if(getExpType(right) == EXP_VARIAVEL){
@@ -363,12 +363,54 @@ void verificaExpressao(Expression e){
             }
             int vL = percorreExpressionInt(left, localTable, globalTableFixa);
             int vR = percorreExpressionInt(right, localTable, globalTableFixa);
+            if(vR>4){
+                printf("warning:%d:%d: %s shift count >= width of type\n%s\n%*s\n"
+                    ,getExpLinha(e),getExpColuna(e), getExpType(e) == EXP_LSHIFT ? "left" : "right", getExpText(e), getExpColuna(e),"^");
+            }
             if(vR<0){
-                printf("error:semantic:%d:%d: left shift count is negative\n%s\n%*s"
-                    ,getExpLinha(e),getExpColuna(e), getExpText(e), getExpColuna(e),"^");
+                printf("error:semantic:%d:%d: %s shift count is negative\n%s\n%*s"
+                    ,getExpLinha(e),getExpColuna(e), getExpType(e) == EXP_LSHIFT ? "left" : "right",getExpText(e), getExpColuna(e),"^");
                 exit(0);  
             }
 
+        }
+        if(getExpType(e) == CMP_LESST || getExpType(e) == CMP_LESSEQ || getExpType(e) == CMP_GREATERT || getExpType(e) == CMP_GREATEREQ){
+            Expression left = getLeftChild(e);
+            Expression right = getRightChild(e);
+            if(getExpType(left) == EXP_VARIAVEL && getExpType(right) == EXP_VARIAVEL){
+                Symbol var1 = getElemHash(globalTableFixa, getExpVarName(left));
+                if(var1 == NULL)
+                    var1 = getElemHash(localTable, getExpVarName(left));
+                Symbol var2 = getElemHash(globalTableFixa, getExpVarName(right));
+                if(var2 == NULL)
+                    var2 = getElemHash(localTable, getExpVarName(right));
+                if(getSymbolPonteiro(var1) != 0 || getSymbolPonteiro(var2) != 0){
+                    char type1[20];
+                    strcpy(type1, getSymbolType(var1));
+                    int n;
+                    for(n=0; n<getSymbolPonteiro(var1); n++) strcat(type1, "*");
+                    char type2[20];
+                    strcpy(type2, getSymbolType(var2));
+                    for(n=0; n<getSymbolPonteiro(var2); n++) strcat(type2, "*");
+                    char op[3];
+                    switch (getExpType(e)){
+                    case CMP_LESST:
+                        strcpy(op,"<");
+                        break;
+                    case CMP_LESSEQ:
+                        strcpy(op,"<=");
+                        break;
+                    case CMP_GREATERT:
+                        strcpy(op,">");
+                        break;
+                    case CMP_GREATEREQ:
+                        strcpy(op,">=");
+                        break;
+                    }  
+                    printf("warning:%d:%d: comparison between '%s' and '%s' operator '%s'\n%s\n%*s\n",
+                            getExpLinha(e), getExpColuna(e),type1, type2, op, getExpText(e), getExpColuna(e), "^");
+                }
+            }
         }
         if(constante){
             int value = percorreExpressionInt(e,localTable, globalTableFixa);

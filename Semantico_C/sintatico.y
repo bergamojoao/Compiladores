@@ -314,32 +314,84 @@ expressao_igualdade1: EQUAL expressao_relacional expressao_igualdade1 { $$ = $3 
 	| NOT_EQUAL expressao_relacional expressao_igualdade1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
 	| { $$ = NULL; } ;
 
-expressao_relacional: expressao_shift expressao_relacional1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
+expressao_relacional: expressao_shift expressao_relacional1 {if($2 == NULL) $$ = $1; else {
+																	Expression exp = createExpression(shiftType, $1, $2);
+																	setExpLinha(exp, linhaShift);
+																	setExpColuna(exp, colunaShift);
+																	setExpText(exp, STR_BACKUP);
+																	$$ = exp;
+ 															} } ;
 
-expressao_relacional1: LESS_THAN expressao_shift expressao_relacional1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
-	| LESS_EQUAL expressao_shift expressao_relacional1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
-	| GREATER_THAN expressao_shift expressao_relacional1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
-	| GREATER_EQUAL expressao_shift expressao_relacional1 { $$ = $3 == NULL ? $2 : createExpression(OPERADOR, $2, $3); }
+expressao_relacional1: LESS_THAN expressao_shift expressao_relacional1 { shiftType = CMP_LESST;
+															    linhaShift = getSymbolLinha($1);
+															    colunaShift = getSymbolColuna($1);
+																if($3 == NULL)$$ = $2; else {
+																	Expression exp = createExpression(CMP_LESST, $2, $3);
+																	setExpLinha(exp, linhaShift);
+																	setExpColuna(exp, colunaShift);
+																	setExpText(exp, STR_BACKUP);
+																	$$ = exp;
+ 																} }
+	| LESS_EQUAL expressao_shift expressao_relacional1 { shiftType = CMP_LESSEQ;
+														linhaShift = getSymbolLinha($1);
+														colunaShift = getSymbolColuna($1);
+														if($3 == NULL)$$ = $2; else {
+															Expression exp = createExpression(CMP_LESSEQ, $2, $3);
+															setExpLinha(exp, linhaShift);
+															setExpColuna(exp, colunaShift);
+															setExpText(exp, STR_BACKUP);
+															$$ = exp;
+														} }
+	| GREATER_THAN expressao_shift expressao_relacional1 { shiftType = CMP_GREATERT;
+														linhaShift = getSymbolLinha($1);
+														colunaShift = getSymbolColuna($1);
+														if($3 == NULL)$$ = $2; else {
+															Expression exp = createExpression(CMP_GREATERT, $2, $3);
+															setExpLinha(exp, linhaShift);
+															setExpColuna(exp, colunaShift);
+															setExpText(exp, STR_BACKUP);
+															$$ = exp;
+														} }
+	| GREATER_EQUAL expressao_shift expressao_relacional1 { shiftType = CMP_GREATEREQ;
+														linhaShift = getSymbolLinha($1);
+														colunaShift = getSymbolColuna($1);
+														if($3 == NULL)$$ = $2; else {
+															Expression exp = createExpression(CMP_GREATEREQ, $2, $3);
+															setExpLinha(exp, linhaShift);
+															setExpColuna(exp, colunaShift);
+															setExpText(exp, STR_BACKUP);
+															$$ = exp;
+														} }
 	| { $$ = NULL; } ;
 
 expressao_shift: expressao_aditiva expressao_shift1 {if($2 == NULL) $$ = $1; else {
 																	Expression exp = createExpression(shiftType, $1, $2);
 																	setExpLinha(exp, linhaShift);
 																	setExpColuna(exp, colunaShift);
-																	setExpText(exp, STR_BACKUP);
+																	strlen(STR_BACKUP)<3? setExpText(exp, AUX) : setExpText(exp, STR_BACKUP);
 																	$$ = exp;
  													} } ;
 
-expressao_shift1: L_SHIFT expressao_aditiva expressao_shift1 { shiftType = EXP_LSHIFT; 
+expressao_shift1: L_SHIFT expressao_aditiva expressao_shift1 { shiftType = EXP_LSHIFT;
 															   linhaShift = getSymbolLinha($1);
 															   colunaShift = getSymbolColuna($1);
-																if($3 == NULL) $$ = $2; else {
+																if($3 == NULL)$$ = $2; else {
 																	Expression exp = createExpression(EXP_LSHIFT, $2, $3);
 																	setExpLinha(exp, linhaShift);
 																	setExpColuna(exp, colunaShift);
+																	strlen(STR_BACKUP)<3? setExpText(exp, AUX) : setExpText(exp, STR_BACKUP);
 																	$$ = exp;
  																} }
-	| R_SHIFT expressao_aditiva expressao_shift1 { shiftType = EXP_RSHIFT; $$ = $3 == NULL ? $2 : createExpression(EXP_RSHIFT, $2, $3); }
+	| R_SHIFT expressao_aditiva expressao_shift1 {  shiftType = EXP_RSHIFT;
+													linhaShift = getSymbolLinha($1);
+													colunaShift = getSymbolColuna($1);
+													if($3 == NULL) $$ = $2; else {
+														Expression exp = createExpression(EXP_RSHIFT, $2, $3);
+														setExpLinha(exp, linhaShift);
+														setExpColuna(exp, colunaShift);
+														strlen(STR_BACKUP)<3? setExpText(exp, AUX) : setExpText(exp, STR_BACKUP);
+														$$ = exp;
+													} }
 	| { $$ = NULL; } ;
 
 expressao_aditiva: expressao_multiplicativa expressao_aditiva1 { if($2 == NULL) $$ = $1; else { 
