@@ -1,6 +1,6 @@
+#define v1 -1
+
 void f()
 {
-    int* p,i;
-
-    i = p < i;
+    i << v1;
 }

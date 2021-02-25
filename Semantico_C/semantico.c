@@ -14,9 +14,17 @@ void verificaExpressao(Expression e);
 
 bool constante=false;
 bool array=false;
+bool showText=false;
 char* texto;
 
 HashTable globalTableFixa, localTable;
+
+void verificarAssign(Expression e, char* str){
+    showText=true;
+    texto=str;
+    verificaExpressao(e);
+    showText=false;
+}
 
 int semantico(Program p){
 
@@ -178,12 +186,15 @@ void verificaVariaveisIguais(HashTable symbolTable, HashTable globalTable,Symbol
                 sprintf(erro, "error:semantic:%d:%d: size of array '%s' is negative\n%s\n%*s"
                     ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");
             }
-        }else if(percorreExpressionInt(exp,symbolTable, globalTable)<0){
-            sprintf(erro, "error:semantic:%d:%d: size of array '%s' is negative\n%s\n%*s"
-                    ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");
-        }else if(percorreExpressionInt(exp,symbolTable, globalTable)==0){
+        }else{
+            setExpValue(exp, percorreExpressionInt(exp,symbolTable, globalTable));
+            if(getExpValue(exp) == 0){
                 sprintf(erro, "error:semantic:%d:%d: size of array '%s' is zero\n%s\n%*s"
+                    ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");   
+            }else if(getExpValue(exp) < 0){
+                sprintf(erro, "error:semantic:%d:%d: size of array '%s' is negative\n%s\n%*s"
                     ,getSymbolLinha(symbol),getSymbolColuna(symbol), getSymbolName(symbol), str, getSymbolColuna(symbol),"^");
+            }
         }
     }
 
@@ -377,21 +388,43 @@ void verificaExpressao(Expression e){
         if(getExpType(e) == CMP_LESST || getExpType(e) == CMP_LESSEQ || getExpType(e) == CMP_GREATERT || getExpType(e) == CMP_GREATEREQ){
             Expression left = getLeftChild(e);
             Expression right = getRightChild(e);
+            Symbol var1=NULL, var2=NULL;
+            int bitwiseLeft = 0, bitwiseRight = 0;
+            if(getExpType(left) == OPERADOR_BITWISE){
+                left = getLeftChild(left);
+                bitwiseLeft=1;
+            }
+            if(getExpType(right) == OPERADOR_BITWISE){
+                right = getLeftChild(right);
+                bitwiseRight=1;
+            }
+            if(getExpType(left) == EXP_STRING){
+                var1 = createSymbol("aa","char",VARIAVEL,NULL,0,0);
+                setSymbolPonteiro(var1,1);
+                setExpType(left,EXP_VARIAVEL);
+            }
+            if(getExpType(right) == EXP_STRING){
+                var2 = createSymbol("aa","char",VARIAVEL,NULL,0,0);
+                setSymbolPonteiro(var2,1);
+                setExpType(right,EXP_VARIAVEL);
+            }
             if(getExpType(left) == EXP_VARIAVEL && getExpType(right) == EXP_VARIAVEL){
-                Symbol var1 = getElemHash(globalTableFixa, getExpVarName(left));
+                if(var1 == NULL)
+                    var1 = getElemHash(globalTableFixa, getExpVarName(left));
                 if(var1 == NULL)
                     var1 = getElemHash(localTable, getExpVarName(left));
-                Symbol var2 = getElemHash(globalTableFixa, getExpVarName(right));
+                if(var2 == NULL)
+                    var2 = getElemHash(globalTableFixa, getExpVarName(right));
                 if(var2 == NULL)
                     var2 = getElemHash(localTable, getExpVarName(right));
-                if(getSymbolPonteiro(var1) != 0 || getSymbolPonteiro(var2) != 0){
+                if(getSymbolPonteiro(var1)+bitwiseLeft != 0 || getSymbolPonteiro(var2)+bitwiseRight != 0){
                     char type1[20];
                     strcpy(type1, getSymbolType(var1));
                     int n;
-                    for(n=0; n<getSymbolPonteiro(var1); n++) strcat(type1, "*");
+                    for(n=0; n<getSymbolPonteiro(var1)+bitwiseLeft; n++) strcat(type1, "*");
                     char type2[20];
                     strcpy(type2, getSymbolType(var2));
-                    for(n=0; n<getSymbolPonteiro(var2); n++) strcat(type2, "*");
+                    for(n=0; n<getSymbolPonteiro(var2)+bitwiseRight; n++) strcat(type2, "*");
                     char op[3];
                     switch (getExpType(e)){
                     case CMP_LESST:
@@ -406,9 +439,15 @@ void verificaExpressao(Expression e){
                     case CMP_GREATEREQ:
                         strcpy(op,">=");
                         break;
-                    }  
-                    printf("warning:%d:%d: comparison between '%s' and '%s' operator '%s'\n%s\n%*s\n",
-                            getExpLinha(e), getExpColuna(e),type1, type2, op, getExpText(e), getExpColuna(e), "^");
+                    }
+                    if(strcmp(getSymbolType(var1), getSymbolType(var2)) != 0){
+                        printf("error:semantic:%d:%d: comparison between '%s' and '%s' operator '%s'\n%s\n%*s\n",
+                                getExpLinha(e), getExpColuna(e),type1, type2, op, showText?texto:getExpText(e), getExpColuna(e), "^");
+                        exit(0);
+                    }else{
+                        printf("warning:%d:%d: comparison between '%s' and '%s' operator '%s'\n%s\n%*s\n",
+                                getExpLinha(e), getExpColuna(e),type1, type2, op, showText?texto:getExpText(e), getExpColuna(e), "^");
+                    }
                 }
             }
         }
@@ -427,9 +466,14 @@ void verificaExpressao(Expression e){
 
                     if(getSymbolPonteiro(var) != 0 || strcmp(getSymbolType(var),"void") == 0){
                         printf("error:semantic:%d:%d: array subscript is not an integer\n%s\n%*s"
-                            ,getExpLinha(left),getExpColuna(left), getExpText(e), getExpColuna(left),"^");
+                            ,getExpLinha(left),getExpColuna(left), showText?texto:getExpText(left), getExpColuna(left),"^");
                         exit(0); 
                     }
+                }
+                int valor = percorreExpressionInt(sub, localTable, globalTableFixa);
+                if(valor>getExpValue(sub)){
+                    printf("warning:%d:%d: array index out of bounds\n%s\n%*s\n",
+                                getExpLinha(left), getExpColuna(left), showText?texto:getExpText(left), getExpColuna(left), "^");
                 }
             }
             Expression func = getLeftChild(e);

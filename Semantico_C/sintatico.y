@@ -175,11 +175,12 @@ declaracao_variaveis1: MULTIPLY declaracao_variaveis1 { setSymbolPonteiro($2, ge
 										 setSymbolLinha($2, getSymbolLinha($1));
 										 setSymbolColuna($2, getSymbolColuna($1));
 										 setArraySize($2, arraySize);
-										 setExpAssign($2, assign);
-										 assign=NULL;
 										 arraySize=NULL;
 										 verificaVariaveisIguais(symbolTable, globalSymbolTable, $2, STR_BACKUP, erro);
 										 if(strlen(erro)<1) insertHashTable(symbolTable, $2);
+										 verificarAssign(assign, STR_BACKUP);
+										 setExpAssign($2, assign);
+										 assign=NULL;
 										 $$ = $2;
 									   } ;
 
@@ -484,6 +485,7 @@ expressao_pos_fixa1: L_SQUARE_BRACKET expressao R_SQUARE_BRACKET { Expression ex
 								 setExpLinha(exp, getSymbolLinha($1));
 								 setExpColuna(exp, getSymbolColuna($1));
 							   	 setExpVarName(exp, getSymbolName($1));
+								 setExpText(exp, STR_BACKUP);
 								 $$ = exp;	
 		  }
 	| INC { Expression exp = createExpression(EXP_INC, NULL, NULL);

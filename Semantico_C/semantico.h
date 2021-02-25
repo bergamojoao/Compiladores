@@ -9,4 +9,8 @@ void verificaVariaveisIguais(HashTable symbolTable, HashTable globalTable,Symbol
 
 void verificaFuncao(HashTable symbolTable, Function f, char* msg);
 
+void verificaExpressao(Expression e);
+
+void verificarAssign(Expression e, char* str);
+
 #endif
