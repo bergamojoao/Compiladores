@@ -228,10 +228,15 @@ comandos: lista_de_comandos comandos1 { setNextCommand($1, $2); $$ = $1; } ;
 comandos1: comandos { $$ = $1; }
 	| { $$ = NULL; } ;
 
-bloco: L_CURLY_BRACKET comandos R_CURLY_BRACKET { $$ = $2; } ;
+bloco: L_CURLY_BRACKET comandos R_CURLY_BRACKET {$$ = $2; };
+
+bloco1: comandos R_CURLY_BRACKET {$$ = $2; };
 
 lista_de_comandos: DO bloco WHILE L_PAREN expressao R_PAREN SEMICOLON
-	| IF L_PAREN expressao R_PAREN bloco lista_de_comandos1 { $$ = createCommand(IF_CMD, $3, $5, $6, NULL, NULL); }
+	| IF L_PAREN expressao R_PAREN { setExpText($3, STR_BACKUP);} 
+							L_CURLY_BRACKET { if(strlen(STR_BACKUP)>strlen(getExpText($3))) setExpText($3, STR_BACKUP); } 
+								bloco1 { if(strlen(STR_BACKUP)>strlen(getExpText($3))) setExpText($3, STR_BACKUP); } 
+									lista_de_comandos1 { $$ = createCommand(IF_CMD, $3, $5, $6, NULL, NULL); }
 	| WHILE L_PAREN expressao R_PAREN bloco { $$ = createCommand(WHILE_CMD, $3, NULL, NULL, $5, NULL); }
 	| FOR L_PAREN lista_de_comandos2 { $$ = $3; }
 	| PRINTF L_PAREN STRING lista_de_comandos6 { $$ = $4; }
@@ -479,7 +484,7 @@ expressao_unaria: expressao_pos_fixa { $$ = $1; }
 
 
 expressao_pos_fixa: expressao_primaria { $$ = $1; }
-	| expressao_pos_fixa expressao_pos_fixa1 { setLeftChild($1, $2); $$ = $1; } ;
+	| expressao_pos_fixa expressao_pos_fixa1 { if(getExpType($2) == ARRAY_EXP){setExpPonteiro($1,getExpPonteiro($1)+1);} setLeftChild($1, $2); $$ = $1; } ;
 
 expressao_pos_fixa1: L_SQUARE_BRACKET expressao R_SQUARE_BRACKET { Expression exp = createExpression(ARRAY_EXP, $2, NULL);
 								 setExpLinha(exp, getSymbolLinha($1));

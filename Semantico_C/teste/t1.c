@@ -1,6 +1,6 @@
-#define v1 -1
-
 void f()
 {
-    i << v1;
+    int i;
+    i = f();
+    return;
 }

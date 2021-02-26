@@ -114,7 +114,24 @@ int semantico(Program p){
                             ,getExpLinha(e), getExpColuna(e), getExpVarName(e), getCmdText(listaComandos), getExpColuna(e), "^");
                     exit(0);
                 }
-            }else if(getCmdType(listaComandos) == EXPRESSAO){
+            }else if(getCmdType(listaComandos) == IF_CMD){
+                Expression e = getExp(listaComandos);
+                if(getExpType(e) == EXP_VARIAVEL){
+                    Expression func1 = getLeftChild(e);
+                    if(func1 != NULL && getExpType(func1) == EXP_FUNC){
+                        Symbol func = getElemHash(globalTableFixa, getExpVarName(e));
+                        if(func == NULL)
+                            func = getElemHash(localTable, getExpVarName(e));
+
+                        if(strcmp(getSymbolType(func),"void") == 0){
+                            printf("error:semantic:%d:%d: void value not ignored as it ought to be\n%s\n%*s",
+                                getExpLinha(e), getExpColuna(e), getExpText(e), getExpColuna(e), "^");
+                            exit(0); 
+                        }
+                    }
+                }
+            }
+            else if(getCmdType(listaComandos) == EXPRESSAO){
                 Expression e = getExp(listaComandos);
                 verificaExpressao(e);
             }
@@ -245,6 +262,7 @@ void verificaExpressao(Expression e){
             }
         }
         if(getExpType(e) == EXP_ASSIGN){
+            
             Expression left = getLeftChild(e);
             if(getExpType(left) == EXP_STRING){
                 printf("error:semantic:%d:%d: assignment of read-only location %s\n%s\n%*s",
@@ -259,6 +277,15 @@ void verificaExpressao(Expression e){
 
             Expression right = getRightChild(e);
             if(getExpType(right) == EXP_VARIAVEL){
+                Expression left1 = getLeftChild(right);
+                if(left1 != NULL && getExpType(left1) == ARRAY_EXP){
+                    Expression sub = getLeftChild(left1);
+                    if(getExpPonteiro(right)>1){
+                        printf("error:semantic:%d:%d: subscripted value is neither array nor pointer\n%s\n%*s"
+                                ,getExpLinha(left1),getExpColuna(left1), getExpText(e), getExpColuna(left1),"^");
+                        exit(0); 
+                    }
+                }
                 Expression func = getLeftChild(right);
                 if(func != NULL && getExpType(func) == EXP_FUNC){
 
@@ -268,6 +295,12 @@ void verificaExpressao(Expression e){
                     Symbol func = getElemHash(globalTableFixa, getExpVarName(right));
                     if(func == NULL)
                         func = getElemHash(localTable, getExpVarName(right));
+                    
+                    if(getSymbolSpec(func) != PROTOTIPO && getSymbolSpec(func) != FUNCAO){
+                        printf("error:semantic:%d:%d: called object '%s' is not a function or function pointer\n%s\n%*s"
+                                ,getExpLinha(right),getExpColuna(right), getSymbolName(func), getExpText(e), getExpColuna(right),"^");
+                        exit(0); 
+                    }
 
                     if(strcmp(getSymbolType(func),"void") == 0){
                         printf("error:semantic:%d:%d: void value not ignored as it ought to be\n%s\n%*s",
@@ -283,7 +316,7 @@ void verificaExpressao(Expression e){
                 if(var2 == NULL)
                     var2 = getElemHash(localTable, getExpVarName(right));
 
-                if(strcmp(getSymbolName(var1),getSymbolName(var2)) != 0 || getSymbolPonteiro(var1) != getSymbolPonteiro(var2)){
+                if(getSymbolPonteiro(var1) != getSymbolPonteiro(var2)){
                     char type1[20];
                     strcpy(type1, getSymbolType(var1));
                     int n;
@@ -441,7 +474,7 @@ void verificaExpressao(Expression e){
                         break;
                     }
                     if(strcmp(getSymbolType(var1), getSymbolType(var2)) != 0){
-                        printf("error:semantic:%d:%d: comparison between '%s' and '%s' operator '%s'\n%s\n%*s\n",
+                        printf("error:semantic:%d:%d: comparison between '%s' and '%s' operator '%s'\n%s\n%*s",
                                 getExpLinha(e), getExpColuna(e),type1, type2, op, showText?texto:getExpText(e), getExpColuna(e), "^");
                         exit(0);
                     }else{
@@ -459,6 +492,11 @@ void verificaExpressao(Expression e){
             Expression left = getLeftChild(e);
             if(left != NULL && getExpType(left) == ARRAY_EXP){
                 Expression sub = getLeftChild(left);
+                if(getExpPonteiro(e)>1){
+                    printf("error:semantic:%d:%d: subscripted value is neither array nor pointer\n%s\n%*s"
+                            ,getExpLinha(left),getExpColuna(left),  showText?texto:getExpText(e), getExpColuna(left),"^");
+                    exit(0); 
+                }
                 if(getExpType(sub) == EXP_VARIAVEL){
                     Symbol var = getElemHash(globalTableFixa, getExpVarName(sub));
                     if(var == NULL)
@@ -466,7 +504,7 @@ void verificaExpressao(Expression e){
 
                     if(getSymbolPonteiro(var) != 0 || strcmp(getSymbolType(var),"void") == 0){
                         printf("error:semantic:%d:%d: array subscript is not an integer\n%s\n%*s"
-                            ,getExpLinha(left),getExpColuna(left), showText?texto:getExpText(left), getExpColuna(left),"^");
+                            ,getExpLinha(left),getExpColuna(left),  showText?texto:getExpText(e), getExpColuna(left),"^");
                         exit(0); 
                     }
                 }
