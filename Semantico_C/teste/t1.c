@@ -1,7 +1,7 @@
-void foo(int i,int j);
-
-void f()
+int f()
 {
     char c;
-    foo(3,&c);
+    int i;
+    int v[10];
+    int* p;
 }

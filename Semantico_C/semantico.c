@@ -231,6 +231,44 @@ void verificaFuncao(HashTable symbolTable, Function f, char* msg){
 
 void verificaExpressao(Expression e){
     if(e != NULL){
+        if(getExpType(e) == TERN){
+            Expression right = getRightChild(e);
+            Expression a = getLeftChild(right);
+            Expression b = getRightChild(right);
+            int pontA = 0;
+            int pontB = 0;
+            if(getExpType(a) == OPERADOR_BITWISE){
+                a = getLeftChild(a);
+                pontA++;
+            }
+            if(getExpType(b) == OPERADOR_BITWISE){
+                b = getLeftChild(b);
+                pontB++;
+            }
+            if(getExpType(a) == EXP_VARIAVEL && getExpType(b) == EXP_VARIAVEL){
+                Symbol var1=NULL, var2=NULL;
+                if(var1 == NULL)
+                    var1 = getElemHash(globalTableFixa, getExpVarName(a));
+                if(var1 == NULL)
+                    var1 = getElemHash(localTable, getExpVarName(a));
+                if(var2 == NULL)
+                    var2 = getElemHash(globalTableFixa, getExpVarName(b));
+                if(var2 == NULL)
+                    var2 = getElemHash(localTable, getExpVarName(b));
+                char type1[20];
+                strcpy(type1, getSymbolType(var1));
+                int n;
+                for(n=0; n<getSymbolPonteiro(var1)+pontA; n++) strcat(type1, "*");
+                char type2[20];
+                strcpy(type2, getSymbolType(var2));
+                for(n=0; n<getSymbolPonteiro(var2)+pontB; n++) strcat(type2, "*");
+                if(getSymbolPonteiro(var1)+pontA != getSymbolPonteiro(var2)+pontB || strcmp(getSymbolType(var1),getSymbolType(var2)) != 0){
+                    printf("warning:%d:%d: '%s'/'%s' type mismatch in conditional expression\n%s\n%*s\n"
+                        ,getExpLinha(right),getExpColuna(right), type1, type2, showText?texto:getExpText(right), getExpColuna(right),"^");
+                }
+            }
+
+        }
         if(getExpType(e) != EXP_VARIAVEL){
             Expression left = getLeftChild(e);
             if(left != NULL && getExpType(left) == EXP_INC){

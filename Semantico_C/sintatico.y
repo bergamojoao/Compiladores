@@ -279,14 +279,21 @@ expressao_de_atribuicao1: ASSIGN expressao_de_atribuicao { Expression exp = crea
 															setExpLinha(exp, getSymbolLinha($1));
 															setExpColuna(exp, getSymbolColuna($1));
 															setExpVarName(exp, getSymbolName($1));
+															setExpText(exp, STR_BACKUP);
 															$$ = exp;	
 														}
 	| ADD_ASSIGN expressao_de_atribuicao { $$ = createExpression(OPERADOR, NULL, $2); }
 	| MINUS_ASSIGN expressao_de_atribuicao { $$ = createExpression(OPERADOR, NULL, $2); } ;
 
-expressao_condicional: expressao_or_logico ternario { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
+expressao_condicional: expressao_or_logico ternario { $$ = $2 == NULL ? $1 : createExpression(TERN, $1, $2); } ;
 
-ternario: TERNARY_CONDITIONAL expressao COLON expressao_condicional { $$ = createExpression(OPERADOR, $2, $4); }
+ternario: TERNARY_CONDITIONAL expressao COLON expressao_condicional { 	Expression exp = createExpression(RET_TERN, $2, $4);
+																		setExpLinha(exp, getSymbolLinha($3));
+																		setExpColuna(exp, getSymbolColuna($3));
+																		setExpVarName(exp, getSymbolName($3));
+																		setExpText(exp, STR_BACKUP);
+																		$$ = exp;	
+ 																	}
 	| { $$ = NULL; } ;
 
 expressao_or_logico: expressao_and_logico expressao_or_logico1 { $$ = $2 == NULL ? $1 : createExpression(OPERADOR, $1, $2); } ;
@@ -454,10 +461,15 @@ expressao_multiplicativa1: MULTIPLY expressao_cast expressao_multiplicativa1 { O
 
 
 expressao_cast: expressao_unaria { $$ = $1; }
-	| L_PAREN tipo expressao_cast1 ;
+	| L_PAREN tipo expressao_cast1 { setExpVarName($3, getSymbolName($1));
+									setExpColuna($3, getSymbolColuna($1));
+									setExpLinha($3, getSymbolLinha($1));
+									setExpText($3, STR_BACKUP);
+									$$ = $3;
+								};
 
-expressao_cast1: MULTIPLY expressao_cast1
-	| R_PAREN expressao_cast ;
+expressao_cast1: MULTIPLY expressao_cast1 { $$ = createExpression(CAST, $2, NULL);}
+	| R_PAREN expressao_cast { $$ = createExpression(CAST, $2, NULL);};
 
 
 expressao_unaria: expressao_pos_fixa { $$ = $1; }
