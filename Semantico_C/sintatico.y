@@ -176,10 +176,10 @@ declaracao_variaveis1: MULTIPLY declaracao_variaveis1 { setSymbolPonteiro($2, ge
 										 setSymbolColuna($2, getSymbolColuna($1));
 										 setArraySize($2, arraySize);
 										 arraySize=NULL;
+										 setExpAssign($2, assign);
 										 verificaVariaveisIguais(symbolTable, globalSymbolTable, $2, STR_BACKUP, erro);
 										 if(strlen(erro)<1) insertHashTable(symbolTable, $2);
 										 verificarAssign(assign, STR_BACKUP);
-										 setExpAssign($2, assign);
 										 assign=NULL;
 										 $$ = $2;
 									   } ;

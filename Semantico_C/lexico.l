@@ -146,7 +146,7 @@ void save_token();
 "("        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(L_PAREN);}
 ")"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(R_PAREN);}
 "{"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(L_CURLY_BRACKET);}
-"}"        {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(R_CURLY_BRACKET);}
+"}"[" "]*  {strcat(v, yytext);save_token();caracteres+=strlen(yytext);tokens++;return(R_CURLY_BRACKET);}
 "["        {char* tokenName = (char*) malloc(strlen(yytext)+1);
             strcpy(tokenName,yytext);
             yylval=createSymbol(tokenName, "", VARIAVEL, NULL, linha, caracteres);

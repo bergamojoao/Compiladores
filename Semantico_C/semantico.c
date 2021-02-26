@@ -276,10 +276,17 @@ void verificaExpressao(Expression e){
             }
 
             Expression right = getRightChild(e);
+            if(getExpType(right) == OPERADOR_BITWISE){
+                Expression sub = getLeftChild(right);
+                if(getExpType(sub) != EXP_VARIAVEL){
+                    printf("error:semantic:%d:%d: lvalue required as unary '&' operand\n%s\n%*s",
+                            getExpLinha(right), getExpColuna(right), getExpText(e), getExpColuna(right), "^");
+                    exit(0); 
+                }
+            }
             if(getExpType(right) == EXP_VARIAVEL){
                 Expression left1 = getLeftChild(right);
                 if(left1 != NULL && getExpType(left1) == ARRAY_EXP){
-                    Expression sub = getLeftChild(left1);
                     if(getExpPonteiro(right)>1){
                         printf("error:semantic:%d:%d: subscripted value is neither array nor pointer\n%s\n%*s"
                                 ,getExpLinha(left1),getExpColuna(left1), getExpText(e), getExpColuna(left1),"^");
@@ -327,14 +334,6 @@ void verificaExpressao(Expression e){
                     printf("error:semantic:%d:%d: incompatible types when assigning to type '%s' from type '%s'\n%s\n%*s"
                         ,getExpLinha(e),getExpColuna(e), type1, type2, getExpText(e), getExpColuna(e),"^");
                     exit(0);   
-                }
-            }
-            if(getExpType(right) == OPERADOR_BITWISE){
-                Expression sub = getLeftChild(right);
-                if(getExpType(sub) != EXP_VARIAVEL){
-                    printf("error:semantic:%d:%d: lvalue required as unary '&' operand\n%s\n%*s",
-                            getExpLinha(right), getExpColuna(right), getExpText(e), getExpColuna(right), "^");
-                    exit(0); 
                 }
             }
         }

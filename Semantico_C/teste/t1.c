@@ -1,6 +1,7 @@
+void foo(int i,int j);
+
 void f()
 {
-    int i;
-    i = f();
-    return;
+    char c;
+    foo(3,&c);
 }
