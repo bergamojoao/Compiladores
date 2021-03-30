@@ -4,6 +4,8 @@
 #include<stdlib.h>
 #include<stdbool.h>
 #include"ListaDinamica.h"
+#include"Grafo.h"
+#include"Vertice.h"
 
 #define size_str 100000
 
@@ -11,6 +13,10 @@ extern int yylex();
 extern void yyrestart(FILE *f);
 extern char* yytext;
 void yyerror(char *s);
+
+Grafo grafo;
+Lista vertices;
+Lista adjacentes;
 
 
 %}
@@ -28,14 +34,15 @@ void yyerror(char *s);
 
 %%
 
-S: GRAFO INTEGER DOIS_PONTOS EOL K EQUALS INTEGER EOL chamada_grafos {/*cria grafo*/ };
+S: GRAFO INTEGER DOIS_PONTOS EOL K EQUALS INTEGER EOL chamada_grafos {grafo = criaGrafo($2, $7, vertices); };
 
-chamada_grafos: INTEGER FLECHA chamada_grafos1 { /*cria vertice*/}
+chamada_grafos: INTEGER FLECHA chamada_grafos1 { Vertice v = criaVertice($1,adjacentes); adjacentes=NULL; vertices=inserir(vertices, v); }
 	| ;
 
 chamada_grafos1: 
-	| INTEGER chamada_grafos1 { /* cria adjacentes */}
+	| INTEGER chamada_grafos1 { Vertice adjacente = criaVertice($1, NULL); adjacentes = inserir(adjacentes, adjacente); }
 	| EOL chamada_grafos ;
+	
 %%
 
 void yyerror(char *s){

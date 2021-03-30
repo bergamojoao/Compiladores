@@ -33,6 +33,6 @@ typedef void * InfoAdj;
 /**
  * Cria um grafo contendo n vértices e nenhuma aresta.
 */
-Grafo criaGrafo(int size, int id);
+Grafo criaGrafo(int id, int size, Lista vertices);
 
 #endif

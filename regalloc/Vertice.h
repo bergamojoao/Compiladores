@@ -13,7 +13,7 @@ typedef void * Vertice;
 /**
  *  Retorna uma estrutura do tipo "Vertice" contendo as informações especificadas.
 */
-Vertice criaVertice(int id);
+Vertice criaVertice(int id, Lista adjacentes);
 
 
 #endif

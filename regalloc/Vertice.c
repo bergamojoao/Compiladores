@@ -12,10 +12,10 @@ typedef struct{
 }VerticeImpl;
 
 ////// FUNCOES VERTICE //////
-Vertice criaVertice(int id){
+Vertice criaVertice(int id, Lista adjacentes){
     VerticeImpl* v = (VerticeImpl*)malloc(sizeof(VerticeImpl));
     v->id=id;
-    v->adjacentes=NULL;
+    v->adjacentes=adjacentes;
     return v;
 }
 

@@ -13,10 +13,10 @@ typedef struct{
 
 
 ////// FUNCOES GRAFO //////
-Grafo criaGrafo(int size, int id){
+Grafo criaGrafo(int id, int size, Lista vertices){
     GrafoImpl* g = malloc(sizeof(GrafoImpl));
     g->id=id;
     g->size=size;
-    g->vertices=NULL;
+    g->vertices=vertices;
     return g;
 }
