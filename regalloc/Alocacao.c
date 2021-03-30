@@ -10,7 +10,9 @@
 void alocacao(Grafo g){
     int K = getGrafoSize(g);
     int kAnt = K;
-    bool* resultados = malloc(sizeof(bool)*K-2);
+    bool* resultados = malloc(sizeof(bool)*K-1);
+    int z;
+    for(z=0;z<K-1;z++) resultados[z] = false;
     int graphId = getGrafoId(g);
     bool* cores = malloc(sizeof(bool)*K);
 
