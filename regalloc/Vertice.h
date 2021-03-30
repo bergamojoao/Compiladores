@@ -15,5 +15,16 @@ typedef void * Vertice;
 */
 Vertice criaVertice(int id, Lista adjacentes);
 
+int getVerticeId(Vertice v);
+
+Lista getVerticeAdjacentes(Vertice v);
+
+int getVerticeQtdAdjacentes(Vertice v);
+
+void setVerticeQtdAdjacentes(Vertice v, int qtd);
+
+int getVerticeCor(Vertice v);
+
+void setVerticeCor(Vertice v, int cor);
 
 #endif

@@ -20,3 +20,29 @@ Grafo criaGrafo(int id, int size, Lista vertices){
     g->vertices=vertices;
     return g;
 }
+
+int getGrafoId(Grafo g){
+    GrafoImpl *grafo = g;
+    return grafo->id;
+}
+
+int getGrafoSize(Grafo g){
+    GrafoImpl *grafo = g;
+    return grafo->size;
+}
+
+Lista getGrafoVertices(Grafo g){
+    GrafoImpl *grafo = g;
+    Lista copiaVertices = NULL;
+    Lista vertices = grafo->vertices;
+    while (vertices != NULL){
+        Vertice v = get(vertices);
+        setVerticeCor(v, -1);
+        setVerticeQtdAdjacentes(v, getListaSize(getVerticeAdjacentes(v)));
+        copiaVertices = inserir(copiaVertices, v);
+        vertices = getProx(vertices);
+    }
+
+    return copiaVertices;
+}
+

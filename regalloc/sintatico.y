@@ -6,6 +6,7 @@
 #include"ListaDinamica.h"
 #include"Grafo.h"
 #include"Vertice.h"
+#include"Alocacao.h"
 
 #define size_str 100000
 
@@ -42,7 +43,7 @@ chamada_grafos: INTEGER FLECHA chamada_grafos1 { Vertice v = criaVertice($1,adja
 chamada_grafos1: 
 	| INTEGER chamada_grafos1 { Vertice adjacente = criaVertice($1, NULL); adjacentes = inserir(adjacentes, adjacente); }
 	| EOL chamada_grafos ;
-	
+
 %%
 
 void yyerror(char *s){
@@ -53,5 +54,6 @@ void yyerror(char *s){
 int main(int argc, char **argv){
 	char str_espaco[size_str];
 	int indice = 0;
-	yyparse();	
+	yyparse();
+	alocacao(grafo);
 }
